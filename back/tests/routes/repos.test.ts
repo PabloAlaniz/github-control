@@ -5,7 +5,7 @@ import { mockEnv } from '../helpers';
 const mockQuery = vi.fn();
 const mockQueryOne = vi.fn();
 const mockTransaction = vi.fn();
-const mockDbFn = Object.assign(vi.fn(), { transaction: mockTransaction });
+const mockDbFn = Object.assign(vi.fn(), { transaction: mockTransaction, query: vi.fn() });
 const mockGetDb = vi.fn(() => mockDbFn);
 vi.mock('@back/infrastructure/storage/sql/neon', () => ({
   query: (...args: any[]) => mockQuery(...args),
