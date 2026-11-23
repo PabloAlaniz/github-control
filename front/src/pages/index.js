@@ -4,3 +4,4 @@ export { LoginPage } from './LoginPage';
 export { MetricsPage } from './MetricsPage';
 export { RepoMetricsPage } from './RepoMetricsPage';
 export { DependenciesPage } from './DependenciesPage';
+export { AlertsPage } from './AlertsPage';

@@ -46,6 +46,15 @@ export const MIGRATIONS: Migration[] = [
       ...createIndexes('service_checks'),
     ],
   },
+  {
+    version: 5,
+    name: 'alerts_alert_channels',
+    statements: (dialect) => [
+      createTable('alerts', dialect),
+      createTable('alert_channels', dialect),
+      ...createIndexes('alerts'),
+    ],
+  },
 ];
 
 const BOOKKEEPING = `

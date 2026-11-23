@@ -25,6 +25,8 @@ import { signalsRoutes } from './routes/signals';
 import { dependenciesRoutes } from './routes/dependencies';
 import { branchesRoutes } from './routes/branches';
 import { configRoutes } from './routes/config';
+import { alertsRoutes } from './routes/alerts';
+import { sendDueDigests } from './services/alert.service';
 import { runScheduledChecks } from './services/service-check.service';
 import { apiKeyAuth } from './middleware/auth';
 import { demoGuard } from './middleware/demo';
@@ -123,6 +125,7 @@ app.route('/api/repo-apps', repoAppsRoutes);
 app.route('/api/sync', syncRoutes);
 app.route('/api/settings', settingsRoutes);
 app.route('/api/traffic', trafficRoutes);
+app.route('/api/alerts', alertsRoutes);
 app.route('/api', backupRoutes);
 
 // Stats endpoint
@@ -202,13 +205,19 @@ app.get('*', async (c) => {
 
 /**
  * Cloudflare Cron Trigger (see [triggers] in wrangler.toml): checks the active
- * services and records the result in the uptime history. The Node server runs
+ * services, records the result in the uptime history, updates the alerts and
+ * sends the digests that are due. The Node server runs
  * the same checks on its own timer.
  */
 async function scheduled(
   _event: unknown, env: HttpEnv['Bindings'], ctx: { waitUntil(promise: Promise<unknown>): void },
 ) {
-  ctx.waitUntil(runScheduledChecks({ config: env, storage: createStorage(env) }));
+  const context = { config: env, storage: createStorage(env) };
+  // The checks re-evaluate the alerts themselves; digests go out once the alerts are current.
+  ctx.waitUntil(runScheduledChecks(context).then(async (summary) => {
+    await sendDueDigests(context);
+    return summary;
+  }));
 }
 
 // The Worker exports the Hono app (fetch) plus the cron handler.

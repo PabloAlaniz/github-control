@@ -21,13 +21,20 @@ import { CLIENT_IP_HEADER } from '../routes/auth';
 import { createStorage } from '../infrastructure/storage';
 import { getSyncStatus, isSyncDue, startFullSync } from '../services/full-sync.service';
 import { runScheduledChecks } from '../services/service-check.service';
+import { evaluateAlerts, sendDueDigests } from '../services/alert.service';
 import { sqliteAvailable } from '../infrastructure/storage/sql/sqlite-client';
 
 const DEFAULT_SYNC_INTERVAL_HOURS = 24;
 /** How often the server checks whether a sync is due. */
 const SYNC_CHECK_MINUTES = 10;
-/** How often the server health-checks the registered services (uptime history). */
-const SERVICE_CHECK_MINUTES = 15;
+/** How often the server health-checks the registered services, unless SERVICE_CHECK_MINUTES says otherwise. */
+const DEFAULT_SERVICE_CHECK_MINUTES = 15;
+
+/** Minutes between service checks: a whole number from 1 minute to a day. */
+export function serviceCheckMinutes(raw: string | undefined): number {
+  const value = Number(raw?.trim() || DEFAULT_SERVICE_CHECK_MINUTES);
+  return Number.isInteger(value) && value >= 1 && value <= 1440 ? value : DEFAULT_SERVICE_CHECK_MINUTES;
+}
 
 export interface ServerOptions {
   env: Record<string, string | undefined>;
@@ -59,10 +66,12 @@ function createDemoApp(options: ServerOptions, mode: 'true' | 'readonly', log: (
   const config = demoConfig(mode, resetMinutes);
   const storage = createStorage(config);
 
-  let ready = loadDemoData(storage, file);
+  // The alerts are derived from the dataset by the real rules; a demo has no channels to tell.
+  const load = () => loadDemoData(storage, file).then(() => evaluateAlerts({ config, storage }, { notify: false }));
+  let ready: Promise<unknown> = load();
   if (resetMinutes > 0) {
     setInterval(() => {
-      ready = loadDemoData(storage, file).catch((error) => log(`Demo reset failed: ${error.message}`));
+      ready = load().catch((error) => log(`Demo reset failed: ${error.message}`));
     }, resetMinutes * 60_000).unref();
   }
   log(`Demo mode (${mode === 'readonly' ? 'read-only' : 'editable'}): fictional data in memory, `
@@ -114,7 +123,9 @@ function createConfiguredApp(options: ServerOptions, log: (message: string) => v
   const checkServices = async () => {
     if (!options.autoSync || !config) return;
     try {
-      await runScheduledChecks({ config, storage: createStorage(config) });
+      const ctx = { config, storage: createStorage(config) };
+      await runScheduledChecks(ctx);
+      await sendDueDigests(ctx);
     } catch (error: any) {
       log(`Service checks failed: ${error.message}`);
     }
@@ -146,7 +157,8 @@ function createConfiguredApp(options: ServerOptions, log: (message: string) => v
   if (options.autoSync) {
     void syncIfDue('schedule');
     setInterval(() => void syncIfDue('schedule'), SYNC_CHECK_MINUTES * 60_000).unref();
-    setInterval(() => void checkServices(), SERVICE_CHECK_MINUTES * 60_000).unref();
+    const checkMinutes = serviceCheckMinutes(mergeValues(env, loadConfigFile(dataDir)).SERVICE_CHECK_MINUTES);
+    setInterval(() => void checkServices(), checkMinutes * 60_000).unref();
   }
 
   return withFrontend(options, (request) => (config ? app.fetch(request, config) : setupApp!.fetch(request)));

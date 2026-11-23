@@ -2,7 +2,7 @@ import { existsSync, mkdtempSync, readdirSync, rmSync, writeFileSync } from 'nod
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { afterAll, afterEach, describe, expect, it, vi } from 'vitest';
-import { createServerApp } from '@back/node/server-app';
+import { createServerApp, serviceCheckMinutes } from '@back/node/server-app';
 import { demoMode, demoResetMinutes } from '@back/node/demo';
 import { demoAllows } from '@back/middleware/demo';
 
@@ -40,6 +40,18 @@ describe('demo mode: environment', () => {
     expect(demoResetMinutes({ DEMO_RESET_MINUTES: '10' })).toBe(10);
     expect(demoResetMinutes({ DEMO_RESET_MINUTES: '0' })).toBe(0);
     expect(demoResetMinutes({ DEMO_RESET_MINUTES: 'soon' })).toBe(60);
+  });
+});
+
+describe('service check interval', () => {
+  it('is 15 minutes unless a whole number of minutes up to a day is configured', () => {
+    expect(serviceCheckMinutes(undefined)).toBe(15);
+    expect(serviceCheckMinutes('5')).toBe(5);
+    expect(serviceCheckMinutes(' 1 ')).toBe(1);
+    expect(serviceCheckMinutes('0')).toBe(15);
+    expect(serviceCheckMinutes('2.5')).toBe(15);
+    expect(serviceCheckMinutes('5000')).toBe(15);
+    expect(serviceCheckMinutes('often')).toBe(15);
   });
 });
 
@@ -110,6 +122,19 @@ describe('demo mode: server', () => {
 
     const uptime = await (await send('GET', '/api/services/uptime')).json();
     expect(uptime.services.storefront.checks).toBeGreaterThan(100);
+  });
+
+  it('derives its alerts from the dataset, with no channel to tell', async () => {
+    const { send } = start({ DEMO: 'true' });
+
+    const { alerts, open } = await (await send('GET', '/api/alerts')).json();
+    expect(open).toBeGreaterThan(2);
+    expect(alerts.map((alert: any) => alert.key)).toContain('ci_failing:acme/billing-worker');
+    expect((await (await send('GET', '/api/alerts/channels')).json()).channels).toEqual([]);
+
+    // A channel would make the server call a URL of the visitor's choosing.
+    const refused = await send('POST', '/api/alerts/channels', { name: 'x', type: 'webhook', config: { url: 'https://example.com' } });
+    expect(refused.status).toBe(403);
   });
 
   it('accepts local edits and refuses what needs GitHub', async () => {

@@ -23,7 +23,7 @@ flowchart LR
 ```
 back/src/
   config.ts                 AppConfig: settings, whatever their source
-  domain/                   Pure rules: repo views, activity vocabulary, service derivation, repo settings baseline
+  domain/                   Pure rules: repo views, activity vocabulary, service derivation, repo settings baseline, alert rules
   application/
     ports/storage.ts        What the app needs from persistence (interfaces only)
     context.ts              AppContext = { config, storage }
@@ -44,7 +44,7 @@ back/src/
 
 ## Storage
 
-`application/ports/storage.ts` defines fourteen stores (repos, groups, meta, health, apps, coverage, metrics, services, activity, traffic, savedViews, signals, serviceChecks, admin) grouped in `Storage`.
+`application/ports/storage.ts` defines sixteen stores (repos, groups, meta, health, apps, coverage, metrics, services, activity, traffic, savedViews, signals, serviceChecks, alerts, alertChannels, admin) grouped in `Storage`.
 
 | Adapter | Location | Used by drivers |
 |---|---|---|
@@ -147,6 +147,12 @@ Two routes act on GitHub from what a signal showed: `routes/branches.ts` (delete
 ### Service checks
 
 `services/service-check.service.ts` probes a service, updates its latest status and appends the result to the `service_checks` collection. The same function serves the manual check, the Node timer and the Worker's `scheduled` handler. `GET /api/services/uptime` turns that history into uptime, mean latency, incidents (transitions into "down") and a per-day series.
+
+### Alerts
+
+`domain/alerts.ts` is the rule book: a pure function from the stored state (repos, services, signals) to the conditions that hold right now, each with a stable key such as `ci_failing:acme/api`. `services/alert.service.ts` compares them with the open records of the `alerts` collection and opens, updates or resolves accordingly, so there is no event to miss: whatever changed the data, the next evaluation sees the result. It runs at the end of a full sync and of every round of service checks, one evaluation at a time per storage.
+
+What changed is sent to the `alert_channels` that asked for that kind. A channel type (`lib/alerts/channels.ts`) is a function from a message to one HTTP request, which is why the same code delivers from Node and from the Worker; adding a type is adding an entry to `CHANNEL_TYPES`. Destinations are secrets: the API returns them masked, and an edit that leaves a secret empty keeps the stored one. Digests are sent by the same scheduler that runs the service checks.
 
 ## Authentication
 

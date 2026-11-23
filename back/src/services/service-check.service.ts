@@ -1,5 +1,6 @@
 import type { AppContext } from '../application/context';
 import type { IncidentRow, UptimeDayRow } from '../application/ports/storage';
+import { evaluateAlertsQuietly } from './alert.service';
 
 export interface CheckResult {
   status: 'healthy' | 'degraded' | 'down';
@@ -60,6 +61,8 @@ export async function checkAllServices(ctx: AppContext) {
     summary.down++;
     return { slug: 'unknown', status: 'down', error: r.reason?.message };
   });
+  // A service that went down or came back is an alert opening or closing.
+  await evaluateAlertsQuietly(ctx);
   return { ...summary, results: details };
 }
 

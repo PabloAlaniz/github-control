@@ -1,7 +1,7 @@
 import { Button } from '../../atoms/Button';
 import { Text } from '../../atoms/Text';
 import { BackupMenu } from '../BackupMenu';
-import { RefreshCw, Activity, LogOut, Plus, BarChart3, Command, Package, DownloadCloud, Settings, Sun, Moon, Monitor } from 'lucide-react';
+import { RefreshCw, Activity, LogOut, Plus, BarChart3, Command, Package, DownloadCloud, Settings, Sun, Moon, Monitor, Bell } from 'lucide-react';
 import { useTheme } from '../../../hooks/useTheme';
 
 const SUBTITLES = {
@@ -54,6 +54,8 @@ export function HomeHeader({
     onActivity,
     onMetrics,
     onDependencies,
+    onAlerts,
+    alertCount,
     onSettings,
     onLogout,
     onImportSuccess,
@@ -124,11 +126,27 @@ export function HomeHeader({
                         <span className="hidden sm:inline">Deps</span>
                     </Button>
                 )}
+                {onAlerts && (
+                    <Button
+                        onClick={onAlerts}
+                        variant="ghost"
+                        className="relative px-2.5"
+                        title={alertCount ? `${alertCount} open alert${alertCount === 1 ? '' : 's'}` : 'Alerts'}
+                        aria-label={alertCount ? `Alerts: ${alertCount} open` : 'Alerts'}
+                    >
+                        <Bell size={16} />
+                        {alertCount > 0 && (
+                            <span className="absolute -right-0.5 -top-0.5 min-w-[1.1rem] rounded-full bg-red-600 px-1 text-center text-[10px] font-semibold leading-[1.1rem] text-white">
+                                {alertCount > 99 ? '99+' : alertCount}
+                            </span>
+                        )}
+                    </Button>
+                )}
                 <BackupMenu onImportSuccess={onImportSuccess} />
                 {onSettings && (
-                    <Button onClick={onSettings} variant="ghost" className="gap-2" aria-label="Settings">
+                    <Button onClick={onSettings} variant="ghost" className="gap-2" aria-label="Settings" title="Settings">
                         <Settings size={16} />
-                        <span className="hidden lg:inline">Settings</span>
+                        <span className="hidden 2xl:inline">Settings</span>
                     </Button>
                 )}
                 <ThemeToggle />

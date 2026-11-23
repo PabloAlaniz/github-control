@@ -31,6 +31,9 @@ export const ACTIONS = {
   SERVICE_HEALTH_CHECK: 'service.health_check',
   BRANCH_DELETE: 'repo.branch_delete',
   CONFIG_APPLY: 'repo.config_apply',
+  ALERT_CHANNEL_CREATE: 'alert_channel.create',
+  ALERT_CHANNEL_UPDATE: 'alert_channel.update',
+  ALERT_CHANNEL_DELETE: 'alert_channel.delete',
 };
 
 // ── Log activity ────────────────────────────────────

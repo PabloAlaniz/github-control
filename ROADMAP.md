@@ -21,6 +21,7 @@ Where GitHub Control is heading. Nothing here is a promise; priorities follow wh
 - Uptime history for services, checked on a schedule
 - Demo mode: one variable starts the app on a fictional dataset, editable or read-only
 - Dark theme, following the system or chosen by hand
+- Alerts for failing CI, services down, serious security alerts, stale repos and low health, sent to Slack, Discord, Telegram, ntfy or a webhook, with daily or weekly digests
 
 ## Next
 
@@ -30,7 +31,7 @@ Where GitHub Control is heading. Nothing here is a promise; priorities follow wh
 ## Later
 
 - **Cross-repo inbox**: open pull requests and issues across all repos in one actionable list.
-- **Alerts**: notify (Slack, webhook) when CI breaks, a service goes down or a repo goes stale.
+- **Alerts by email**, and rules of your own.
 - **AI cost attribution**: track AI coding assistant usage per repo.
 - **Search across repos.**
 - GitHub App / OAuth sign-in, multiple users.
@@ -43,5 +44,6 @@ Where GitHub Control is heading. Nothing here is a promise; priorities follow wh
 - On Cloudflare Workers the full sync must be run by an external script.
 - The dependency inventory reads direct dependencies declared in npm, PyPI, Go and Cargo manifests; it does not read lockfiles. End-of-life dates for Node and Python are a table in the code that has to be updated by hand.
 - Signals look at one page of results: the latest 100 workflow runs, 100 branches and 100 alerts per source.
-- Uptime is computed from checks every 15 minutes, so a shorter outage can go unnoticed.
+- Uptime is computed from periodic checks (every 15 minutes unless `SERVICE_CHECK_MINUTES` says otherwise), so an outage shorter than the interval can go unnoticed.
+- Alerts are evaluated after a sync or a round of service checks, not when something changes on GitHub: a broken build is noticed at the next sync. A failed delivery to a channel is recorded but not retried.
 - The standalone sync scripts under `back/scripts/` support PostgreSQL only.

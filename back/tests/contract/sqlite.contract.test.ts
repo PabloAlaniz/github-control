@@ -33,7 +33,7 @@ describe('sqlite adapter specifics', () => {
   it('keeps data in a single file across restarts', async () => {
     const path = join(dir, 'nested', 'app.db');
     const first = createSqliteClient(path);
-    expect(await migrate(first)).toEqual([1, 2, 3, 4]);
+    expect(await migrate(first)).toEqual([1, 2, 3, 4, 5]);
     const storage = createSqlStorage(first);
     await storage.repos.refreshFromGitHub([ghRepo('a', { topics: ['x'] })]);
     await storage.meta.patchRepoMeta('acme/a', { blockers: ['b1'], production_urls: { api: 'https://a.example.com' } });

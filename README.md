@@ -35,7 +35,8 @@ Open http://localhost:13337. From a clone, without Docker: `DEMO=true npm start`
 - **Traffic history**: GitHub only keeps 14 days of views, clones, referrers and popular paths; every sync saves them, so your history keeps growing.
 - **History**: a daily snapshot per repo (LOC, files, stars, issues, health) with charts and date-to-date comparison.
 - **Monorepo aware**: detects apps inside a repo and tracks each one's health and coverage.
-- **Services**: the deployed URLs behind your repos, health-checked every 15 minutes, with uptime, latency and incident history.
+- **Services**: the deployed URLs behind your repos, health-checked every 15 minutes (configurable), with uptime, latency and incident history.
+- **Alerts**: know when CI breaks, a service goes down, a serious security alert appears, a repo you care about goes stale or a health score drops, in Slack, Discord, Telegram, ntfy or any webhook, with an optional daily or weekly digest.
 - **Coverage from CI**: a workflow step reports coverage per repo or per app.
 - **AI summaries** (optional): a structured summary of a repo's README using the Claude API.
 - **API for agents and CI**: everything in the UI is available over HTTP with an API key, plus an activity log of who changed what.
@@ -146,6 +147,9 @@ Every setting can also be given as an environment variable. Variables win over t
 | `AUTH_USERNAME`, `AUTH_PASSWORD` | Sign-in credentials | asked by the wizard (stored hashed) |
 | `JWT_SECRET`, `API_KEY` | Session signing secret and API key | generated and saved |
 | `SYNC_INTERVAL_HOURS` | Hours between automatic full syncs; `0` disables | `24` |
+| `SERVICE_CHECK_MINUTES` | Minutes between service health checks (1 to 1440) | `15` |
+| `ALERT_STALE_DAYS` | Days without commits before a high or medium priority repo raises an alert; `0` turns it off | `90` |
+| `ALERT_HEALTH_BELOW` | Health score under which a repo raises an alert; `0` turns it off | `40` |
 | `PUBLIC_BADGES` | `true` serves public SVG badges for public repos | off |
 | `REPO_BASELINE` | JSON object `{ "setting": true/false }`: the repo settings every repo is expected to have | a small default set |
 | `ANTHROPIC_API_KEY` | Enables AI summaries | off |
@@ -199,6 +203,34 @@ Almost everything is read-only. Two actions write to GitHub, both only when you 
 - **Branch cleanup** deletes the branches you select. The server re-checks each one first and never deletes the default branch, a protected branch, or a branch that moved since it was listed.
 - **Applying the settings baseline** changes only the settings that differ. Review the baseline in **Settings** before applying it in bulk.
 
+## Alerts
+
+![Open alerts and the channels they are sent to](docs/alerts.png)
+
+After every sync and every round of service checks, GitHub Control compares what it knows with the alerts that are open. An alert opens when one of these starts to hold, and is resolved when it stops:
+
+| Alert | Opens when |
+|---|---|
+| CI failing | the latest workflow run on the default branch failed |
+| Service down | a service's health check found it down |
+| Security alerts | a repo has open alerts of critical or high severity; it speaks again when there are more |
+| Repo went stale | a repo with high or medium priority has had no commits for `ALERT_STALE_DAYS` days (default 90) |
+| Low health score | a repo's health score is under `ALERT_HEALTH_BELOW` (default 40) |
+
+Archived and paused repos never raise alerts. Open and recently resolved alerts are listed on the **Alerts** page (the bell in the header) whether or not anything is sent anywhere.
+
+To be told, add a **channel** on that page: Slack, Discord, Telegram, ntfy or a generic webhook that receives JSON. Each channel chooses which kinds of alert it gets, and can also get a daily or weekly digest of what is open. A channel hears when an alert opens or gets worse, and when CI or a service recovers. What was already wrong when you add a channel is not sent: only what changes from then on.
+
+```json
+{ "source": "github-control", "event": "opened", "kind": "ci_failing", "entity": "acme/api",
+  "title": "CI is failing on acme/api", "url": "https://github.com/acme/api/actions/runs/1",
+  "level": 0, "detail": { "branch": "main" }, "at": "2026-01-01T00:00:00.000Z", "text": "..." }
+```
+
+`event` is `opened`, `worsened`, `resolved`, `digest` or `test`.
+
+Service checks run every 15 minutes; set `SERVICE_CHECK_MINUTES` to check more often (an outage shorter than the interval can go unnoticed). On Cloudflare Workers the interval is the Cron Trigger in `back/wrangler.toml`, which also drives alerts and digests.
+
 ## Badges
 
 With `PUBLIC_BADGES=true`, the server exposes SVG badges you can embed in a README. They need no authentication, so they only exist for **public** repositories; a private repo answers like one that does not exist.
@@ -231,6 +263,7 @@ curl -X POST -H "Authorization: Bearer $API_KEY" http://localhost:13337/api/sync
 | Traffic | `GET /api/traffic/summary`, `/api/traffic/repo/:owner/:repo`, `POST /api/traffic/repo/:owner/:repo/sync` |
 | Signals | `GET /api/repos/:owner/:repo/signals`, `POST .../signals/sync?kinds=`, `POST .../branches/delete`, `POST .../config/apply` |
 | Dependencies | `GET /api/dependencies` |
+| Alerts | `GET /api/alerts?status={open,resolved,all}`, `POST /api/alerts/evaluate`, `GET/POST /api/alerts/channels`, `PUT/DELETE /api/alerts/channels/:id`, `POST /api/alerts/channels/:id/test` |
 | Saved views | `GET/POST /api/saved-views`, `DELETE /api/saved-views/:id` |
 | Services & apps | `/api/services`, `GET /api/services/uptime`, `/api/repo-apps` |
 | Activity | `GET /api/activity`, `/api/activity/stats/by-actor`, `/api/activity/stats/by-day` |
@@ -270,6 +303,7 @@ npm run test:all     # frontend and backend tests
 
 - Sign-in passwords set through the wizard are stored hashed (PBKDF2-SHA256). Repeated failed sign-ins are rate limited per client.
 - `config.json` holds your GitHub token in plain text with owner-only permissions. Protect the data directory like any other secret.
+- Alert channel destinations (webhook URLs, bot tokens) are kept in the storage. The API and the UI only show their last characters, but they are in the database and in `storage export` files: treat both as secrets.
 - An unconfigured instance can be claimed by whoever reaches it first, which is why setup requires the code printed in the server log. Finish setup before exposing the server.
 - Put a TLS-terminating reverse proxy in front of the server for anything beyond localhost.
 

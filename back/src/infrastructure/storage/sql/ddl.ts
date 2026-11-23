@@ -23,6 +23,8 @@ const UNIQUE_KEYS: Record<CollectionName, string[][]> = {
   saved_views: [['name']],
   repo_signals: [['full_name', 'kind']],
   service_checks: [],
+  alerts: [],
+  alert_channels: [],
 };
 
 const HAS_UPDATED_AT: CollectionName[] = ['repos', 'groups', 'services', 'repo_apps'];
@@ -34,6 +36,7 @@ const INDEXES: [CollectionName, string][] = [
   ['services', 'source_repo_full_name'], ['repo_apps', 'repo_full_name'],
   ['repo_groups', 'group_id'],
   ['service_checks', 'service_slug'], ['service_checks', 'checked_at'],
+  ['alerts', 'status'], ['alerts', 'opened_at'],
 ];
 
 /** `CREATE INDEX IF NOT EXISTS` for the indexed columns of one table (for migrations after the baseline). */

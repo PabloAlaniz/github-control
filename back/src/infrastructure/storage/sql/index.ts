@@ -22,6 +22,8 @@ import * as traffic from './traffic.repository';
 import * as savedViews from './saved-view.repository';
 import * as signals from './signal.repository';
 import * as serviceChecks from './service-check.repository';
+import * as alerts from './alert.repository';
+import * as alertChannels from './alert-channel.repository';
 
 /** Drops the leading client parameter from every function of a module. */
 type Bound<M> = {
@@ -53,6 +55,8 @@ export function createSqlStorage(db: SqlClient): Storage {
     savedViews: bind(savedViews, db),
     signals: bind(signals, db),
     serviceChecks: bind(serviceChecks, db),
+    alerts: bind(alerts, db),
+    alertChannels: bind(alertChannels, db),
     admin: bind(admin, db),
   };
 }

@@ -40,6 +40,12 @@ export type AppConfig = {
   REPO_BASELINE?: string;
   /** Hours between automatic full syncs on the Node server. '0' disables. Default 24. */
   SYNC_INTERVAL_HOURS?: string;
+  /** Minutes between scheduled service checks on the Node server. Default 15. */
+  SERVICE_CHECK_MINUTES?: string;
+  /** Days without commits after which a high or medium priority repo raises an alert. '0' turns it off. Default 90. */
+  ALERT_STALE_DAYS?: string;
+  /** Health score under which a repo raises an alert. '0' turns it off. Default 40. */
+  ALERT_HEALTH_BELOW?: string;
   /** Set by the Node server's demo mode: 'true' (local edits allowed) or 'readonly'. See node/demo.ts. */
   DEMO?: 'true' | 'readonly';
   /** Minutes between reloads of the demo dataset ('0' never reloads). */

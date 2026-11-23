@@ -279,6 +279,41 @@ export const SERVICE_CHECK_DEFAULTS: Defaults = {
   checked_at: NOW,
 };
 
+/**
+ * A condition that needs attention (CI failing, service down, ...). One record per
+ * occurrence: when the condition goes away the record is resolved, and a new one is
+ * opened if it comes back.
+ */
+export const ALERT_DEFAULTS: Defaults = {
+  id: null,
+  key: null,
+  kind: null,
+  entity: null,
+  title: null,
+  detail: {},
+  url: null,
+  level: 0,
+  status: 'open',
+  opened_at: NOW,
+  resolved_at: null,
+};
+
+/** Where alerts are sent (a webhook, a chat). `config` holds the destination and is a secret. */
+export const ALERT_CHANNEL_DEFAULTS: Defaults = {
+  id: null,
+  name: null,
+  type: null,
+  config: {},
+  kinds: [],
+  is_enabled: true,
+  digest: 'off',
+  last_sent_at: null,
+  last_error: null,
+  last_digest_at: null,
+  created_at: NOW,
+  updated_at: NOW,
+};
+
 export const COLLECTIONS = {
   repos: REPO_DEFAULTS,
   groups: GROUP_DEFAULTS,
@@ -293,6 +328,8 @@ export const COLLECTIONS = {
   saved_views: SAVED_VIEW_DEFAULTS,
   repo_signals: REPO_SIGNAL_DEFAULTS,
   service_checks: SERVICE_CHECK_DEFAULTS,
+  alerts: ALERT_DEFAULTS,
+  alert_channels: ALERT_CHANNEL_DEFAULTS,
 } as const;
 
 export type CollectionName = keyof typeof COLLECTIONS;
