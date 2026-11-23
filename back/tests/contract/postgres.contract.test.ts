@@ -27,17 +27,15 @@ vi.mock('@back/infrastructure/storage/sql/neon', () => {
     queryOne: async (config: unknown, sql: string, params: unknown[] = []) =>
       (await query(config, sql, params))[0] || null,
     // Mirrors the Neon client: statements are built first, then run in one transaction.
-    getDb: () => Object.assign(
-      (sql: string, params: unknown[] = []) => ({ sql, params }),
-      {
+    getDb: () => ({
+        query: (sql: string, params: unknown[] = []) => ({ sql, params }),
         transaction: (statements: { sql: string; params: unknown[] }[]) =>
           pg.db.transaction(async (tx: any) => {
             const results = [];
             for (const { sql, params } of statements) results.push((await tx.query(sql, params)).rows);
             return results;
           }),
-      },
-    ),
+    }),
   };
 });
 

@@ -16,7 +16,7 @@ export async function query<T = Row>(
   params: unknown[] = []
 ): Promise<T[]> {
   const db = getDb(env);
-  return db(sql, params) as Promise<T[]>;
+  return db.query(sql, params) as Promise<T[]>;
 }
 
 // Helper for single row
