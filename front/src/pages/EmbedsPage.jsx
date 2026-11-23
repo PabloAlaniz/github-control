@@ -96,7 +96,9 @@ export function EmbedsPage() {
 
     const selected = repos.includes(repo) ? repo : repos[0] ?? '';
     const base = origin();
-    const themeQuery = theme === 'auto' ? '' : `theme=${theme}`;
+    // Everything that goes into a URL is encoded, whatever the form holds.
+    const themeQuery = theme === 'auto' ? '' : `theme=${encodeURIComponent(theme)}`;
+    const repoPath = selected.split('/').map(encodeURIComponent).join('/');
     const summaryUrl = useMemo(() => {
         const params = [title.trim() && `title=${encodeURIComponent(title.trim())}`, themeQuery].filter(Boolean).join('&');
         return `${base}/api/badges/summary.svg${params ? `?${params}` : ''}`;
@@ -104,8 +106,8 @@ export function EmbedsPage() {
 
     if (error) return <ErrorState variant="page" message={error} onRetry={load} />;
 
-    const repoUrl = `https://github.com/${selected}`;
-    const cardUrl = `${base}/api/badges/${selected}/card.svg${themeQuery ? `?${themeQuery}` : ''}`;
+    const repoUrl = `https://github.com/${repoPath}`;
+    const cardUrl = `${base}/api/badges/${repoPath}/card.svg${themeQuery ? `?${themeQuery}` : ''}`;
 
     return (
         <DashboardLayout
@@ -198,7 +200,7 @@ export function EmbedsPage() {
                                         <div className="-mx-4"><Snippet title="Repo card" code={markdown(selected, cardUrl, repoUrl)} /></div>
                                     </div>
                                     {info.metrics.map((metric) => {
-                                        const url = `${base}/api/badges/${selected}/${metric}.svg`;
+                                        const url = `${base}/api/badges/${repoPath}/${encodeURIComponent(metric)}.svg`;
                                         return (
                                             <Snippet
                                                 key={metric}
