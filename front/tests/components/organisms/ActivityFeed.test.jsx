@@ -50,10 +50,10 @@ describe('ActivityFeed', () => {
                     json: () => Promise.resolve(mockActivities)
                 });
             }
-            if (url.includes('/api/activity/by-actor')) {
+            if (url.includes('/api/activity/stats/by-actor')) {
                 return Promise.resolve({
                     ok: true,
-                    json: () => Promise.resolve(mockStats)
+                    json: () => Promise.resolve({ actors: mockStats })
                 });
             }
         });
@@ -90,10 +90,10 @@ describe('ActivityFeed', () => {
                     json: () => Promise.resolve([])
                 });
             }
-            if (url.includes('/api/activity/by-actor')) {
+            if (url.includes('/api/activity/stats/by-actor')) {
                 return Promise.resolve({
                     ok: true,
-                    json: () => Promise.resolve([])
+                    json: () => Promise.resolve({ actors: [] })
                 });
             }
         });
@@ -155,10 +155,10 @@ describe('ActivityFeed', () => {
                     json: () => Promise.resolve(mockActivities)
                 });
             }
-            if (url.includes('/api/activity/by-actor')) {
+            if (url.includes('/api/activity/stats/by-actor')) {
                 return Promise.resolve({
                     ok: true,
-                    json: () => Promise.resolve(mockStats)
+                    json: () => Promise.resolve({ actors: mockStats })
                 });
             }
         });
@@ -185,10 +185,10 @@ describe('ActivityFeed', () => {
                     json: () => Promise.resolve(mockActivities)
                 });
             }
-            if (url.includes('/api/activity/by-actor')) {
+            if (url.includes('/api/activity/stats/by-actor')) {
                 return Promise.resolve({
                     ok: true,
-                    json: () => Promise.resolve(mockStats)
+                    json: () => Promise.resolve({ actors: mockStats })
                 });
             }
         });
@@ -218,10 +218,10 @@ describe('ActivityFeed', () => {
                     json: () => Promise.resolve(mockActivities)
                 });
             }
-            if (url.includes('/api/activity/by-actor')) {
+            if (url.includes('/api/activity/stats/by-actor')) {
                 return Promise.resolve({
                     ok: true,
-                    json: () => Promise.resolve([])
+                    json: () => Promise.resolve({ actors: [] })
                 });
             }
         });
@@ -265,10 +265,10 @@ describe('ActivityFeed', () => {
                     json: () => Promise.resolve(mockActivities)
                 });
             }
-            if (url.includes('/api/activity/by-actor')) {
+            if (url.includes('/api/activity/stats/by-actor')) {
                 return Promise.resolve({
                     ok: true,
-                    json: () => Promise.resolve(mockStats)
+                    json: () => Promise.resolve({ actors: mockStats })
                 });
             }
         });
@@ -344,7 +344,7 @@ describe('ActivityFeed', () => {
                     json: () => Promise.resolve(mockActivities)
                 });
             }
-            if (url.includes('/api/activity/by-actor')) {
+            if (url.includes('/api/activity/stats/by-actor')) {
                 return Promise.resolve({
                     ok: true,
                     json: () => Promise.resolve(manyStats)

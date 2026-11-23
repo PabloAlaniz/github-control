@@ -46,16 +46,16 @@ const mockDailyStats = [
 
 function mockApiFetchWithData() {
     api.apiFetch.mockImplementation((url) => {
-        if (url === '/api/activity/by-actor') {
+        if (url === '/api/activity/stats/by-actor') {
             return Promise.resolve({
                 ok: true,
-                json: () => Promise.resolve(mockActorStats),
+                json: () => Promise.resolve({ actors: mockActorStats }),
             });
         }
-        if (url.startsWith('/api/activity/by-day')) {
+        if (url.startsWith('/api/activity/stats/by-day')) {
             return Promise.resolve({
                 ok: true,
-                json: () => Promise.resolve(mockDailyStats),
+                json: () => Promise.resolve({ days: mockDailyStats }),
             });
         }
         return Promise.resolve({ ok: false });
