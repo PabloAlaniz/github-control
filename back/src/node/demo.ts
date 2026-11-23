@@ -41,6 +41,7 @@ export function demoConfig(mode: DemoMode, resetMinutes: number): AppConfig {
     API_KEY: randomSecret(),
     JWT_SECRET: randomSecret(),
     SYNC_INTERVAL_HOURS: '0',
+    VIEWER_LOGIN: 'alice',
     DEMO: mode,
     DEMO_RESET_MINUTES: String(resetMinutes),
   };

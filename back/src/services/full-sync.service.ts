@@ -42,7 +42,7 @@ export interface SyncOptions {
 const MAX_REPORTED_ERRORS = 20;
 
 /** Runs `worker` over `items`, at most `limit` at a time. */
-async function mapLimit<T>(items: T[], limit: number, worker: (item: T) => Promise<void>): Promise<void> {
+export async function mapLimit<T>(items: T[], limit: number, worker: (item: T) => Promise<void>): Promise<void> {
   let next = 0;
   const lanes = Array.from({ length: Math.max(1, Math.min(limit, items.length)) }, async () => {
     while (next < items.length) await worker(items[next++]);

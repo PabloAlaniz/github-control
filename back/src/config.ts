@@ -46,6 +46,8 @@ export type AppConfig = {
   ALERT_STALE_DAYS?: string;
   /** Health score under which a repo raises an alert. '0' turns it off. Default 40. */
   ALERT_HEALTH_BELOW?: string;
+  /** Who "me" is in the inbox, instead of asking GitHub. Set by demo mode. */
+  VIEWER_LOGIN?: string;
   /** Set by the Node server's demo mode: 'true' (local edits allowed) or 'readonly'. See node/demo.ts. */
   DEMO?: 'true' | 'readonly';
   /** Minutes between reloads of the demo dataset ('0' never reloads). */

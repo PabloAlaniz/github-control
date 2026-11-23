@@ -114,7 +114,7 @@ describe('demo mode: server', () => {
     const { send } = start({ DEMO: 'true' });
 
     const { signals } = await (await send('GET', '/api/repos/acme/billing-worker/signals')).json();
-    expect(Object.keys(signals).sort()).toEqual(['branches', 'ci', 'config', 'dependencies', 'release', 'security', 'standards']);
+    expect(Object.keys(signals).sort()).toEqual(['branches', 'ci', 'config', 'dependencies', 'inbox', 'release', 'security', 'standards']);
 
     const inventory = await (await send('GET', '/api/dependencies')).json();
     expect(inventory.packages.length).toBeGreaterThan(10);
@@ -135,6 +135,19 @@ describe('demo mode: server', () => {
     // A channel would make the server call a URL of the visitor's choosing.
     const refused = await send('POST', '/api/alerts/channels', { name: 'x', type: 'webhook', config: { url: 'https://example.com' } });
     expect(refused.status).toBe(403);
+  });
+
+  it('has an inbox seen as its fictional viewer, which cannot be refreshed or merged', async () => {
+    const { send } = start({ DEMO: 'true' });
+
+    const inbox = await (await send('GET', '/api/inbox')).json();
+    expect(inbox.viewer).toBe('alice');
+    expect(inbox.items.length).toBeGreaterThan(20);
+    expect(inbox.items.some((item: any) => item.requestedReviewers.includes('alice'))).toBe(true);
+    expect(inbox.items.some((item: any) => item.authorIsBot && item.type === 'pr')).toBe(true);
+
+    expect((await send('POST', '/api/inbox/refresh')).status).toBe(403);
+    expect((await send('POST', '/api/inbox/merge', { pulls: [] })).status).toBe(403);
   });
 
   it('accepts local edits and refuses what needs GitHub', async () => {

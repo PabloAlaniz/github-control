@@ -21687,6 +21687,185 @@
    },
    {
     "id": 8,
+    "full_name": "acme/storefront-web",
+    "kind": "inbox",
+    "data": {
+     "available": true,
+     "prs": 5,
+     "issues": 2,
+     "items": [
+      {
+       "type": "pr",
+       "number": 200,
+       "title": "New cart flow: quantity stepper and saved items",
+       "url": "https://github.com/acme/storefront-web/pull/200",
+       "author": "bob",
+       "authorIsBot": false,
+       "labels": [
+        {
+         "name": "feature",
+         "color": "a2eeef"
+        }
+       ],
+       "assignees": [],
+       "requestedReviewers": [
+        "alice"
+       ],
+       "draft": false,
+       "comments": 6,
+       "createdAt": "2026-11-18T03:00:00.000Z",
+       "updatedAt": "2026-11-20T03:00:00.000Z",
+       "headRef": "new-cart-flow-quantity-stepper-and-saved",
+       "headSha": "dbbaa29ce113e758d8f3f0a641611d89fd63ab04"
+      },
+      {
+       "type": "issue",
+       "number": 238,
+       "title": "Checkout button is hidden behind the cookie banner on mobile",
+       "url": "https://github.com/acme/storefront-web/issues/238",
+       "author": "dana",
+       "authorIsBot": false,
+       "labels": [
+        {
+         "name": "bug",
+         "color": "d73a4a"
+        },
+        {
+         "name": "mobile",
+         "color": "c5def5"
+        }
+       ],
+       "assignees": [
+        "alice"
+       ],
+       "requestedReviewers": [],
+       "draft": false,
+       "comments": 4,
+       "createdAt": "2026-11-09T11:00:00.000Z",
+       "updatedAt": "2026-11-19T11:00:00.000Z",
+       "headRef": null,
+       "headSha": null
+      },
+      {
+       "type": "pr",
+       "number": 218,
+       "title": "Bump next from 15.3.0 to 15.3.4",
+       "url": "https://github.com/acme/storefront-web/pull/218",
+       "author": "dependabot[bot]",
+       "authorIsBot": true,
+       "labels": [
+        {
+         "name": "dependencies",
+         "color": "0366d6"
+        }
+       ],
+       "assignees": [],
+       "requestedReviewers": [],
+       "draft": false,
+       "comments": 0,
+       "createdAt": "2026-11-12T10:00:00.000Z",
+       "updatedAt": "2026-11-19T10:00:00.000Z",
+       "headRef": "dependabot/next-15.3.4",
+       "headSha": "688693cb8415e00ce92fb0f6f3d57fba6d9448e2"
+      },
+      {
+       "type": "pr",
+       "number": 229,
+       "title": "Bump eslint from 9.28.0 to 9.31.0",
+       "url": "https://github.com/acme/storefront-web/pull/229",
+       "author": "dependabot[bot]",
+       "authorIsBot": true,
+       "labels": [
+        {
+         "name": "dependencies",
+         "color": "0366d6"
+        }
+       ],
+       "assignees": [],
+       "requestedReviewers": [],
+       "draft": false,
+       "comments": 0,
+       "createdAt": "2026-11-15T10:00:00.000Z",
+       "updatedAt": "2026-11-19T10:00:00.000Z",
+       "headRef": "dependabot/eslint-9.31.0",
+       "headSha": "42f7021b4e738fb9ad6b7a87b29be1a3b5fb6690"
+      },
+      {
+       "type": "pr",
+       "number": 223,
+       "title": "Bump @tanstack/react-query from 5.80.0 to 5.84.1",
+       "url": "https://github.com/acme/storefront-web/pull/223",
+       "author": "dependabot[bot]",
+       "authorIsBot": true,
+       "labels": [
+        {
+         "name": "dependencies",
+         "color": "0366d6"
+        }
+       ],
+       "assignees": [],
+       "requestedReviewers": [],
+       "draft": false,
+       "comments": 0,
+       "createdAt": "2026-11-15T22:00:00.000Z",
+       "updatedAt": "2026-11-18T22:00:00.000Z",
+       "headRef": "dependabot/@tanstack/react-query-5.84.1",
+       "headSha": "5f8e8bfca8a32d9c9610a12258be0ad2a3956a69"
+      },
+      {
+       "type": "pr",
+       "number": 207,
+       "title": "Fix hydration mismatch on the product page",
+       "url": "https://github.com/acme/storefront-web/pull/207",
+       "author": "carol",
+       "authorIsBot": false,
+       "labels": [
+        {
+         "name": "bug",
+         "color": "d73a4a"
+        }
+       ],
+       "assignees": [],
+       "requestedReviewers": [
+        "alice",
+        "bob"
+       ],
+       "draft": false,
+       "comments": 2,
+       "createdAt": "2026-11-06T18:00:00.000Z",
+       "updatedAt": "2026-11-17T18:00:00.000Z",
+       "headRef": "fix-hydration-mismatch-on-the-product-pa",
+       "headSha": "93329b70a85cec1ef0740d76fe9161d3656b090d"
+      },
+      {
+       "type": "issue",
+       "number": 243,
+       "title": "Add structured data for product pages",
+       "url": "https://github.com/acme/storefront-web/issues/243",
+       "author": "bob",
+       "authorIsBot": false,
+       "labels": [
+        {
+         "name": "seo",
+         "color": "fef2c0"
+        }
+       ],
+       "assignees": [],
+       "requestedReviewers": [],
+       "draft": false,
+       "comments": 0,
+       "createdAt": "2026-11-03T03:00:00.000Z",
+       "updatedAt": "2026-11-08T03:00:00.000Z",
+       "headRef": null,
+       "headSha": null
+      }
+     ],
+     "truncated": false
+    },
+    "checked_at": "2026-11-20T10:00:00.000Z"
+   },
+   {
+    "id": 9,
     "full_name": "acme/checkout-api",
     "kind": "standards",
     "data": {
@@ -21747,7 +21926,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 9,
+    "id": 10,
     "full_name": "acme/checkout-api",
     "kind": "dependencies",
     "data": {
@@ -21797,7 +21976,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 10,
+    "id": 11,
     "full_name": "acme/checkout-api",
     "kind": "security",
     "data": {
@@ -21833,7 +22012,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 11,
+    "id": 12,
     "full_name": "acme/checkout-api",
     "kind": "release",
     "data": {
@@ -21848,7 +22027,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 12,
+    "id": 13,
     "full_name": "acme/checkout-api",
     "kind": "branches",
     "data": {
@@ -21900,7 +22079,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 13,
+    "id": 14,
     "full_name": "acme/checkout-api",
     "kind": "ci",
     "data": {
@@ -22009,7 +22188,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 14,
+    "id": 15,
     "full_name": "acme/checkout-api",
     "kind": "config",
     "data": {
@@ -22058,7 +22237,89 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 15,
+    "id": 16,
+    "full_name": "acme/checkout-api",
+    "kind": "inbox",
+    "data": {
+     "available": true,
+     "prs": 2,
+     "issues": 1,
+     "items": [
+      {
+       "type": "pr",
+       "number": 200,
+       "title": "Idempotency keys for payment intents",
+       "url": "https://github.com/acme/checkout-api/pull/200",
+       "author": "alice",
+       "authorIsBot": false,
+       "labels": [
+        {
+         "name": "feature",
+         "color": "a2eeef"
+        }
+       ],
+       "assignees": [],
+       "requestedReviewers": [
+        "carol"
+       ],
+       "draft": false,
+       "comments": 3,
+       "createdAt": "2026-11-09T23:00:00.000Z",
+       "updatedAt": "2026-11-18T23:00:00.000Z",
+       "headRef": "idempotency-keys-for-payment-intents",
+       "headSha": "02aca6851128ac11d5db2af45263e4a492e4b903"
+      },
+      {
+       "type": "issue",
+       "number": 214,
+       "title": "Intermittent 502 from the payments provider sandbox",
+       "url": "https://github.com/acme/checkout-api/issues/214",
+       "author": "carol",
+       "authorIsBot": false,
+       "labels": [
+        {
+         "name": "bug",
+         "color": "d73a4a"
+        }
+       ],
+       "assignees": [
+        "alice",
+        "dana"
+       ],
+       "requestedReviewers": [],
+       "draft": false,
+       "comments": 9,
+       "createdAt": "2026-11-08T11:00:00.000Z",
+       "updatedAt": "2026-11-17T11:00:00.000Z",
+       "headRef": null,
+       "headSha": null
+      },
+      {
+       "type": "pr",
+       "number": 207,
+       "title": "Retry webhooks with exponential backoff",
+       "url": "https://github.com/acme/checkout-api/pull/207",
+       "author": "dana",
+       "authorIsBot": false,
+       "labels": [],
+       "assignees": [],
+       "requestedReviewers": [
+        "alice"
+       ],
+       "draft": false,
+       "comments": 1,
+       "createdAt": "2026-11-09T12:00:00.000Z",
+       "updatedAt": "2026-11-16T12:00:00.000Z",
+       "headRef": "retry-webhooks-with-exponential-backoff",
+       "headSha": "da670e430e97ce6b7cf485d1b56092b6b88fbdd0"
+      }
+     ],
+     "truncated": false
+    },
+    "checked_at": "2026-11-20T10:00:00.000Z"
+   },
+   {
+    "id": 17,
     "full_name": "acme/design-system",
     "kind": "standards",
     "data": {
@@ -22119,7 +22380,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 16,
+    "id": 18,
     "full_name": "acme/design-system",
     "kind": "dependencies",
     "data": {
@@ -22210,7 +22471,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 17,
+    "id": 19,
     "full_name": "acme/design-system",
     "kind": "security",
     "data": {
@@ -22246,7 +22507,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 18,
+    "id": 20,
     "full_name": "acme/design-system",
     "kind": "release",
     "data": {
@@ -22261,7 +22522,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 19,
+    "id": 21,
     "full_name": "acme/design-system",
     "kind": "branches",
     "data": {
@@ -22293,7 +22554,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 20,
+    "id": 22,
     "full_name": "acme/design-system",
     "kind": "ci",
     "data": {
@@ -22393,7 +22654,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 21,
+    "id": 23,
     "full_name": "acme/design-system",
     "kind": "config",
     "data": {
@@ -22442,7 +22703,93 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 22,
+    "id": 24,
+    "full_name": "acme/design-system",
+    "kind": "inbox",
+    "data": {
+     "available": true,
+     "prs": 1,
+     "issues": 2,
+     "items": [
+      {
+       "type": "pr",
+       "number": 203,
+       "title": "Date picker: keyboard navigation",
+       "url": "https://github.com/acme/design-system/pull/203",
+       "author": "erin",
+       "authorIsBot": false,
+       "labels": [
+        {
+         "name": "a11y",
+         "color": "1d76db"
+        }
+       ],
+       "assignees": [],
+       "requestedReviewers": [
+        "alice"
+       ],
+       "draft": false,
+       "comments": 5,
+       "createdAt": "2026-11-10T06:00:00.000Z",
+       "updatedAt": "2026-11-20T06:00:00.000Z",
+       "headRef": "date-picker-keyboard-navigation",
+       "headSha": "38d01a7da16791e3b5946d5d9eee62a5bb74c826"
+      },
+      {
+       "type": "issue",
+       "number": 209,
+       "title": "Tooltip overflows the viewport near the right edge",
+       "url": "https://github.com/acme/design-system/issues/209",
+       "author": "frank",
+       "authorIsBot": false,
+       "labels": [
+        {
+         "name": "bug",
+         "color": "d73a4a"
+        },
+        {
+         "name": "good first issue",
+         "color": "7057ff"
+        }
+       ],
+       "assignees": [],
+       "requestedReviewers": [],
+       "draft": false,
+       "comments": 2,
+       "createdAt": "2026-11-08T09:00:00.000Z",
+       "updatedAt": "2026-11-14T09:00:00.000Z",
+       "headRef": null,
+       "headSha": null
+      },
+      {
+       "type": "issue",
+       "number": 215,
+       "title": "Proposal: density tokens",
+       "url": "https://github.com/acme/design-system/issues/215",
+       "author": "erin",
+       "authorIsBot": false,
+       "labels": [
+        {
+         "name": "discussion",
+         "color": "d4c5f9"
+        }
+       ],
+       "assignees": [],
+       "requestedReviewers": [],
+       "draft": false,
+       "comments": 14,
+       "createdAt": "2026-10-25T08:00:00.000Z",
+       "updatedAt": "2026-10-31T08:00:00.000Z",
+       "headRef": null,
+       "headSha": null
+      }
+     ],
+     "truncated": false
+    },
+    "checked_at": "2026-11-20T10:00:00.000Z"
+   },
+   {
+    "id": 25,
     "full_name": "acme/billing-worker",
     "kind": "standards",
     "data": {
@@ -22503,7 +22850,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 23,
+    "id": 26,
     "full_name": "acme/billing-worker",
     "kind": "dependencies",
     "data": {
@@ -22570,7 +22917,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 24,
+    "id": 27,
     "full_name": "acme/billing-worker",
     "kind": "security",
     "data": {
@@ -22644,7 +22991,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 25,
+    "id": 28,
     "full_name": "acme/billing-worker",
     "kind": "release",
     "data": {
@@ -22659,7 +23006,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 26,
+    "id": 29,
     "full_name": "acme/billing-worker",
     "kind": "branches",
     "data": {
@@ -22749,7 +23096,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 27,
+    "id": 30,
     "full_name": "acme/billing-worker",
     "kind": "ci",
     "data": {
@@ -22849,7 +23196,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 28,
+    "id": 31,
     "full_name": "acme/billing-worker",
     "kind": "config",
     "data": {
@@ -22898,7 +23245,159 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 29,
+    "id": 32,
+    "full_name": "acme/billing-worker",
+    "kind": "inbox",
+    "data": {
+     "available": true,
+     "prs": 5,
+     "issues": 1,
+     "items": [
+      {
+       "type": "pr",
+       "number": 207,
+       "title": "Bump sqlalchemy from 1.4.52 to 2.0.41",
+       "url": "https://github.com/acme/billing-worker/pull/207",
+       "author": "dependabot[bot]",
+       "authorIsBot": true,
+       "labels": [
+        {
+         "name": "dependencies",
+         "color": "0366d6"
+        }
+       ],
+       "assignees": [],
+       "requestedReviewers": [],
+       "draft": false,
+       "comments": 0,
+       "createdAt": "2026-11-09T09:00:00.000Z",
+       "updatedAt": "2026-11-19T09:00:00.000Z",
+       "headRef": "dependabot/sqlalchemy-2.0.41",
+       "headSha": "6dbadc8a4028a91310473c52a8a489e4f6c3419a"
+      },
+      {
+       "type": "pr",
+       "number": 231,
+       "title": "Bump celery from 5.3.6 to 5.5.3",
+       "url": "https://github.com/acme/billing-worker/pull/231",
+       "author": "dependabot[bot]",
+       "authorIsBot": true,
+       "labels": [
+        {
+         "name": "dependencies",
+         "color": "0366d6"
+        }
+       ],
+       "assignees": [],
+       "requestedReviewers": [],
+       "draft": false,
+       "comments": 0,
+       "createdAt": "2026-11-12T07:00:00.000Z",
+       "updatedAt": "2026-11-19T07:00:00.000Z",
+       "headRef": "dependabot/celery-5.5.3",
+       "headSha": "c998efce48c5b4beabd160b6c2f8a2e42d411bbe"
+      },
+      {
+       "type": "pr",
+       "number": 214,
+       "title": "Bump pydantic from 1.10.15 to 2.11.5",
+       "url": "https://github.com/acme/billing-worker/pull/214",
+       "author": "dependabot[bot]",
+       "authorIsBot": true,
+       "labels": [
+        {
+         "name": "dependencies",
+         "color": "0366d6"
+        }
+       ],
+       "assignees": [],
+       "requestedReviewers": [],
+       "draft": false,
+       "comments": 0,
+       "createdAt": "2026-11-17T02:00:00.000Z",
+       "updatedAt": "2026-11-19T02:00:00.000Z",
+       "headRef": "dependabot/pydantic-2.11.5",
+       "headSha": "52eca13e671f3f0d14f22b0f6565d993c4b8a055"
+      },
+      {
+       "type": "pr",
+       "number": 225,
+       "title": "Bump fastapi from 0.110.0 to 0.115.12",
+       "url": "https://github.com/acme/billing-worker/pull/225",
+       "author": "dependabot[bot]",
+       "authorIsBot": true,
+       "labels": [
+        {
+         "name": "dependencies",
+         "color": "0366d6"
+        }
+       ],
+       "assignees": [],
+       "requestedReviewers": [],
+       "draft": false,
+       "comments": 0,
+       "createdAt": "2026-11-07T18:00:00.000Z",
+       "updatedAt": "2026-11-18T18:00:00.000Z",
+       "headRef": "dependabot/fastapi-0.115.12",
+       "headSha": "3ca8e16c4a7fdff213fd0dabf56eefeeb813b844"
+      },
+      {
+       "type": "issue",
+       "number": 238,
+       "title": "Nightly reconciliation job times out",
+       "url": "https://github.com/acme/billing-worker/issues/238",
+       "author": "dana",
+       "authorIsBot": false,
+       "labels": [
+        {
+         "name": "bug",
+         "color": "d73a4a"
+        },
+        {
+         "name": "priority",
+         "color": "e99695"
+        }
+       ],
+       "assignees": [
+        "alice"
+       ],
+       "requestedReviewers": [],
+       "draft": false,
+       "comments": 7,
+       "createdAt": "2026-11-13T05:00:00.000Z",
+       "updatedAt": "2026-11-18T05:00:00.000Z",
+       "headRef": null,
+       "headSha": null
+      },
+      {
+       "type": "pr",
+       "number": 202,
+       "title": "Fix flaky invoice rounding test",
+       "url": "https://github.com/acme/billing-worker/pull/202",
+       "author": "alice",
+       "authorIsBot": false,
+       "labels": [
+        {
+         "name": "tests",
+         "color": "bfd4f2"
+        }
+       ],
+       "assignees": [],
+       "requestedReviewers": [],
+       "draft": true,
+       "comments": 0,
+       "createdAt": "2026-09-29T00:00:00.000Z",
+       "updatedAt": "2026-10-06T00:00:00.000Z",
+       "headRef": "fix-flaky-invoice-rounding-test",
+       "headSha": "6f24105f6f6f55ffa9713cda7ecc90d0efac4165"
+      }
+     ],
+     "truncated": false
+    },
+    "checked_at": "2026-11-20T10:00:00.000Z"
+   },
+   {
+    "id": 33,
     "full_name": "acme/mobile-app",
     "kind": "standards",
     "data": {
@@ -22959,7 +23458,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 30,
+    "id": 34,
     "full_name": "acme/mobile-app",
     "kind": "dependencies",
     "data": {
@@ -22972,7 +23471,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 31,
+    "id": 35,
     "full_name": "acme/mobile-app",
     "kind": "security",
     "data": {
@@ -23022,7 +23521,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 32,
+    "id": 36,
     "full_name": "acme/mobile-app",
     "kind": "release",
     "data": {
@@ -23037,7 +23536,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 33,
+    "id": 37,
     "full_name": "acme/mobile-app",
     "kind": "branches",
     "data": {
@@ -23117,7 +23616,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 34,
+    "id": 38,
     "full_name": "acme/mobile-app",
     "kind": "ci",
     "data": {
@@ -23217,7 +23716,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 35,
+    "id": 39,
     "full_name": "acme/mobile-app",
     "kind": "config",
     "data": {
@@ -23266,7 +23765,71 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 36,
+    "id": 40,
+    "full_name": "acme/mobile-app",
+    "kind": "inbox",
+    "data": {
+     "available": true,
+     "prs": 1,
+     "issues": 1,
+     "items": [
+      {
+       "type": "pr",
+       "number": 200,
+       "title": "Offline mode for the order history",
+       "url": "https://github.com/acme/mobile-app/pull/200",
+       "author": "gina",
+       "authorIsBot": false,
+       "labels": [
+        {
+         "name": "feature",
+         "color": "a2eeef"
+        }
+       ],
+       "assignees": [],
+       "requestedReviewers": [
+        "bob"
+       ],
+       "draft": false,
+       "comments": 8,
+       "createdAt": "2026-11-07T10:00:00.000Z",
+       "updatedAt": "2026-11-17T10:00:00.000Z",
+       "headRef": "offline-mode-for-the-order-history",
+       "headSha": "6ea127e4c3ab60198505f2e6166da781db3517fc"
+      },
+      {
+       "type": "issue",
+       "number": 208,
+       "title": "Crash on launch on Android 12 with a restored backup",
+       "url": "https://github.com/acme/mobile-app/issues/208",
+       "author": "support-bot[bot]",
+       "authorIsBot": true,
+       "labels": [
+        {
+         "name": "bug",
+         "color": "d73a4a"
+        },
+        {
+         "name": "crash",
+         "color": "b60205"
+        }
+       ],
+       "assignees": [],
+       "requestedReviewers": [],
+       "draft": false,
+       "comments": 3,
+       "createdAt": "2026-11-08T20:00:00.000Z",
+       "updatedAt": "2026-11-14T20:00:00.000Z",
+       "headRef": null,
+       "headSha": null
+      }
+     ],
+     "truncated": false
+    },
+    "checked_at": "2026-11-20T10:00:00.000Z"
+   },
+   {
+    "id": 41,
     "full_name": "acme/data-pipeline",
     "kind": "standards",
     "data": {
@@ -23327,7 +23890,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 37,
+    "id": 42,
     "full_name": "acme/data-pipeline",
     "kind": "dependencies",
     "data": {
@@ -23394,7 +23957,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 38,
+    "id": 43,
     "full_name": "acme/data-pipeline",
     "kind": "security",
     "data": {
@@ -23430,7 +23993,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 39,
+    "id": 44,
     "full_name": "acme/data-pipeline",
     "kind": "release",
     "data": {
@@ -23445,7 +24008,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 40,
+    "id": 45,
     "full_name": "acme/data-pipeline",
     "kind": "branches",
     "data": {
@@ -23539,7 +24102,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 41,
+    "id": 46,
     "full_name": "acme/data-pipeline",
     "kind": "ci",
     "data": {
@@ -23639,7 +24202,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 42,
+    "id": 47,
     "full_name": "acme/data-pipeline",
     "kind": "config",
     "data": {
@@ -23688,7 +24251,62 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 43,
+    "id": 48,
+    "full_name": "acme/data-pipeline",
+    "kind": "inbox",
+    "data": {
+     "available": true,
+     "prs": 2,
+     "issues": 0,
+     "items": [
+      {
+       "type": "pr",
+       "number": 209,
+       "title": "Bump apache-airflow from 2.10.5 to 2.11.0",
+       "url": "https://github.com/acme/data-pipeline/pull/209",
+       "author": "dependabot[bot]",
+       "authorIsBot": true,
+       "labels": [
+        {
+         "name": "dependencies",
+         "color": "0366d6"
+        }
+       ],
+       "assignees": [],
+       "requestedReviewers": [],
+       "draft": false,
+       "comments": 0,
+       "createdAt": "2026-11-16T02:00:00.000Z",
+       "updatedAt": "2026-11-19T02:00:00.000Z",
+       "headRef": "dependabot/apache-airflow-2.11.0",
+       "headSha": "83960a3fc610db8b42924a77c14cec7fe0426ee7"
+      },
+      {
+       "type": "pr",
+       "number": 202,
+       "title": "Partition the events table by day",
+       "url": "https://github.com/acme/data-pipeline/pull/202",
+       "author": "henry",
+       "authorIsBot": false,
+       "labels": [],
+       "assignees": [],
+       "requestedReviewers": [
+        "alice"
+       ],
+       "draft": false,
+       "comments": 2,
+       "createdAt": "2026-11-03T07:00:00.000Z",
+       "updatedAt": "2026-11-12T07:00:00.000Z",
+       "headRef": "partition-the-events-table-by-day",
+       "headSha": "3f1abac2824f6830664540c0abd73cb2605c05d3"
+      }
+     ],
+     "truncated": false
+    },
+    "checked_at": "2026-11-20T10:00:00.000Z"
+   },
+   {
+    "id": 49,
     "full_name": "acme/infra-terraform",
     "kind": "standards",
     "data": {
@@ -23749,7 +24367,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 44,
+    "id": 50,
     "full_name": "acme/infra-terraform",
     "kind": "dependencies",
     "data": {
@@ -23762,7 +24380,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 45,
+    "id": 51,
     "full_name": "acme/infra-terraform",
     "kind": "security",
     "data": {
@@ -23798,7 +24416,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 46,
+    "id": 52,
     "full_name": "acme/infra-terraform",
     "kind": "release",
     "data": {
@@ -23807,7 +24425,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 47,
+    "id": 53,
     "full_name": "acme/infra-terraform",
     "kind": "branches",
     "data": {
@@ -23911,7 +24529,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 48,
+    "id": 54,
     "full_name": "acme/infra-terraform",
     "kind": "ci",
     "data": {
@@ -23920,7 +24538,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 49,
+    "id": 55,
     "full_name": "acme/infra-terraform",
     "kind": "config",
     "data": {
@@ -23969,7 +24587,20 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 50,
+    "id": 56,
+    "full_name": "acme/infra-terraform",
+    "kind": "inbox",
+    "data": {
+     "available": true,
+     "prs": 0,
+     "issues": 0,
+     "items": [],
+     "truncated": false
+    },
+    "checked_at": "2026-11-20T10:00:00.000Z"
+   },
+   {
+    "id": 57,
     "full_name": "acme/docs-site",
     "kind": "standards",
     "data": {
@@ -24030,7 +24661,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 51,
+    "id": 58,
     "full_name": "acme/docs-site",
     "kind": "dependencies",
     "data": {
@@ -24097,7 +24728,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 52,
+    "id": 59,
     "full_name": "acme/docs-site",
     "kind": "security",
     "data": {
@@ -24133,7 +24764,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 53,
+    "id": 60,
     "full_name": "acme/docs-site",
     "kind": "release",
     "data": {
@@ -24148,7 +24779,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 54,
+    "id": 61,
     "full_name": "acme/docs-site",
     "kind": "branches",
     "data": {
@@ -24210,7 +24841,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 55,
+    "id": 62,
     "full_name": "acme/docs-site",
     "kind": "ci",
     "data": {
@@ -24319,7 +24950,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 56,
+    "id": 63,
     "full_name": "acme/docs-site",
     "kind": "config",
     "data": {
@@ -24368,7 +24999,67 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 57,
+    "id": 64,
+    "full_name": "acme/docs-site",
+    "kind": "inbox",
+    "data": {
+     "available": true,
+     "prs": 1,
+     "issues": 1,
+     "items": [
+      {
+       "type": "pr",
+       "number": 203,
+       "title": "Document the webhooks API",
+       "url": "https://github.com/acme/docs-site/pull/203",
+       "author": "alice",
+       "authorIsBot": false,
+       "labels": [
+        {
+         "name": "docs",
+         "color": "0075ca"
+        }
+       ],
+       "assignees": [],
+       "requestedReviewers": [
+        "erin"
+       ],
+       "draft": false,
+       "comments": 0,
+       "createdAt": "2026-11-12T02:00:00.000Z",
+       "updatedAt": "2026-11-18T02:00:00.000Z",
+       "headRef": "document-the-webhooks-api",
+       "headSha": "772bd8ad49c3bf987d6e4a0190c152630ff3fab1"
+      },
+      {
+       "type": "issue",
+       "number": 210,
+       "title": "Search does not find pages added this month",
+       "url": "https://github.com/acme/docs-site/issues/210",
+       "author": "frank",
+       "authorIsBot": false,
+       "labels": [
+        {
+         "name": "bug",
+         "color": "d73a4a"
+        }
+       ],
+       "assignees": [],
+       "requestedReviewers": [],
+       "draft": false,
+       "comments": 1,
+       "createdAt": "2026-11-01T07:00:00.000Z",
+       "updatedAt": "2026-11-11T07:00:00.000Z",
+       "headRef": null,
+       "headSha": null
+      }
+     ],
+     "truncated": false
+    },
+    "checked_at": "2026-11-20T10:00:00.000Z"
+   },
+   {
+    "id": 65,
     "full_name": "acme/cli-tools",
     "kind": "standards",
     "data": {
@@ -24429,7 +25120,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 58,
+    "id": 66,
     "full_name": "acme/cli-tools",
     "kind": "dependencies",
     "data": {
@@ -24479,7 +25170,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 59,
+    "id": 67,
     "full_name": "acme/cli-tools",
     "kind": "security",
     "data": {
@@ -24515,7 +25206,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 60,
+    "id": 68,
     "full_name": "acme/cli-tools",
     "kind": "release",
     "data": {
@@ -24530,7 +25221,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 61,
+    "id": 69,
     "full_name": "acme/cli-tools",
     "kind": "branches",
     "data": {
@@ -24572,7 +25263,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 62,
+    "id": 70,
     "full_name": "acme/cli-tools",
     "kind": "ci",
     "data": {
@@ -24672,7 +25363,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 63,
+    "id": 71,
     "full_name": "acme/cli-tools",
     "kind": "config",
     "data": {
@@ -24721,7 +25412,47 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 64,
+    "id": 72,
+    "full_name": "acme/cli-tools",
+    "kind": "inbox",
+    "data": {
+     "available": true,
+     "prs": 0,
+     "issues": 1,
+     "items": [
+      {
+       "type": "issue",
+       "number": 201,
+       "title": "Shell completions for fish",
+       "url": "https://github.com/acme/cli-tools/issues/201",
+       "author": "ivan",
+       "authorIsBot": false,
+       "labels": [
+        {
+         "name": "enhancement",
+         "color": "a2eeef"
+        },
+        {
+         "name": "good first issue",
+         "color": "7057ff"
+        }
+       ],
+       "assignees": [],
+       "requestedReviewers": [],
+       "draft": false,
+       "comments": 2,
+       "createdAt": "2026-10-25T12:00:00.000Z",
+       "updatedAt": "2026-11-05T12:00:00.000Z",
+       "headRef": null,
+       "headSha": null
+      }
+     ],
+     "truncated": false
+    },
+    "checked_at": "2026-11-20T10:00:00.000Z"
+   },
+   {
+    "id": 73,
     "full_name": "acme/analytics-dashboard",
     "kind": "standards",
     "data": {
@@ -24782,7 +25513,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 65,
+    "id": 74,
     "full_name": "acme/analytics-dashboard",
     "kind": "dependencies",
     "data": {
@@ -24881,7 +25612,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 66,
+    "id": 75,
     "full_name": "acme/analytics-dashboard",
     "kind": "security",
     "data": {
@@ -24955,7 +25686,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 67,
+    "id": 76,
     "full_name": "acme/analytics-dashboard",
     "kind": "release",
     "data": {
@@ -24964,7 +25695,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 68,
+    "id": 77,
     "full_name": "acme/analytics-dashboard",
     "kind": "branches",
     "data": {
@@ -25066,7 +25797,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 69,
+    "id": 78,
     "full_name": "acme/analytics-dashboard",
     "kind": "ci",
     "data": {
@@ -25166,7 +25897,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 70,
+    "id": 79,
     "full_name": "acme/analytics-dashboard",
     "kind": "config",
     "data": {
@@ -25215,7 +25946,111 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 71,
+    "id": 80,
+    "full_name": "acme/analytics-dashboard",
+    "kind": "inbox",
+    "data": {
+     "available": true,
+     "prs": 3,
+     "issues": 1,
+     "items": [
+      {
+       "type": "pr",
+       "number": 210,
+       "title": "Bump vite from 5.2.0 to 5.4.19",
+       "url": "https://github.com/acme/analytics-dashboard/pull/210",
+       "author": "dependabot[bot]",
+       "authorIsBot": true,
+       "labels": [
+        {
+         "name": "dependencies",
+         "color": "0366d6"
+        }
+       ],
+       "assignees": [],
+       "requestedReviewers": [],
+       "draft": false,
+       "comments": 0,
+       "createdAt": "2026-11-12T20:00:00.000Z",
+       "updatedAt": "2026-11-18T20:00:00.000Z",
+       "headRef": "dependabot/vite-5.4.19",
+       "headSha": "7e202583bd44cf0971f4c80ad2a3e66a43608279"
+      },
+      {
+       "type": "pr",
+       "number": 217,
+       "title": "Bump esbuild from 0.21.5 to 0.25.5",
+       "url": "https://github.com/acme/analytics-dashboard/pull/217",
+       "author": "dependabot[bot]",
+       "authorIsBot": true,
+       "labels": [
+        {
+         "name": "dependencies",
+         "color": "0366d6"
+        }
+       ],
+       "assignees": [],
+       "requestedReviewers": [],
+       "draft": false,
+       "comments": 0,
+       "createdAt": "2026-11-09T20:00:00.000Z",
+       "updatedAt": "2026-11-18T20:00:00.000Z",
+       "headRef": "dependabot/esbuild-0.25.5",
+       "headSha": "3bddd420d1cd6fbfa085e8217c38830d592d172d"
+      },
+      {
+       "type": "issue",
+       "number": 224,
+       "title": "Funnel chart double counts returning users",
+       "url": "https://github.com/acme/analytics-dashboard/issues/224",
+       "author": "carol",
+       "authorIsBot": false,
+       "labels": [
+        {
+         "name": "bug",
+         "color": "d73a4a"
+        }
+       ],
+       "assignees": [],
+       "requestedReviewers": [],
+       "draft": false,
+       "comments": 5,
+       "createdAt": "2026-11-12T21:00:00.000Z",
+       "updatedAt": "2026-11-15T21:00:00.000Z",
+       "headRef": null,
+       "headSha": null
+      },
+      {
+       "type": "pr",
+       "number": 200,
+       "title": "Upgrade to React 19",
+       "url": "https://github.com/acme/analytics-dashboard/pull/200",
+       "author": "bob",
+       "authorIsBot": false,
+       "labels": [
+        {
+         "name": "dependencies",
+         "color": "0366d6"
+        }
+       ],
+       "assignees": [],
+       "requestedReviewers": [
+        "alice"
+       ],
+       "draft": false,
+       "comments": 11,
+       "createdAt": "2026-10-09T20:00:00.000Z",
+       "updatedAt": "2026-10-12T20:00:00.000Z",
+       "headRef": "upgrade-to-react-19",
+       "headSha": "bc863d3a304bf567f5ecc72d2cb3b9ab71371ff0"
+      }
+     ],
+     "truncated": false
+    },
+    "checked_at": "2026-11-20T10:00:00.000Z"
+   },
+   {
+    "id": 81,
     "full_name": "acme/email-templates",
     "kind": "standards",
     "data": {
@@ -25276,7 +26111,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 72,
+    "id": 82,
     "full_name": "acme/email-templates",
     "kind": "dependencies",
     "data": {
@@ -25289,7 +26124,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 73,
+    "id": 83,
     "full_name": "acme/email-templates",
     "kind": "security",
     "data": {
@@ -25325,7 +26160,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 74,
+    "id": 84,
     "full_name": "acme/email-templates",
     "kind": "release",
     "data": {
@@ -25334,7 +26169,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 75,
+    "id": 85,
     "full_name": "acme/email-templates",
     "kind": "branches",
     "data": {
@@ -25460,7 +26295,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 76,
+    "id": 86,
     "full_name": "acme/email-templates",
     "kind": "ci",
     "data": {
@@ -25469,7 +26304,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 77,
+    "id": 87,
     "full_name": "acme/email-templates",
     "kind": "config",
     "data": {
@@ -25518,7 +26353,20 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 78,
+    "id": 88,
+    "full_name": "acme/email-templates",
+    "kind": "inbox",
+    "data": {
+     "available": true,
+     "prs": 0,
+     "issues": 0,
+     "items": [],
+     "truncated": false
+    },
+    "checked_at": "2026-11-20T10:00:00.000Z"
+   },
+   {
+    "id": 89,
     "full_name": "acme/legacy-monolith",
     "kind": "standards",
     "data": {
@@ -25579,7 +26427,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 79,
+    "id": 90,
     "full_name": "acme/legacy-monolith",
     "kind": "dependencies",
     "data": {
@@ -25592,7 +26440,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 80,
+    "id": 91,
     "full_name": "acme/legacy-monolith",
     "kind": "security",
     "data": {
@@ -25690,7 +26538,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 81,
+    "id": 92,
     "full_name": "acme/legacy-monolith",
     "kind": "release",
     "data": {
@@ -25705,7 +26553,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 82,
+    "id": 93,
     "full_name": "acme/legacy-monolith",
     "kind": "branches",
     "data": {
@@ -25849,7 +26697,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 83,
+    "id": 94,
     "full_name": "acme/legacy-monolith",
     "kind": "ci",
     "data": {
@@ -25949,7 +26797,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 84,
+    "id": 95,
     "full_name": "acme/legacy-monolith",
     "kind": "config",
     "data": {
@@ -25998,7 +26846,60 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 85,
+    "id": 96,
+    "full_name": "acme/legacy-monolith",
+    "kind": "inbox",
+    "data": {
+     "available": true,
+     "prs": 1,
+     "issues": 1,
+     "items": [
+      {
+       "type": "issue",
+       "number": 208,
+       "title": "Session cookies are not marked SameSite",
+       "url": "https://github.com/acme/legacy-monolith/issues/208",
+       "author": "security-team",
+       "authorIsBot": false,
+       "labels": [
+        {
+         "name": "security",
+         "color": "b60205"
+        }
+       ],
+       "assignees": [],
+       "requestedReviewers": [],
+       "draft": false,
+       "comments": 2,
+       "createdAt": "2026-10-15T08:00:00.000Z",
+       "updatedAt": "2026-10-21T08:00:00.000Z",
+       "headRef": null,
+       "headSha": null
+      },
+      {
+       "type": "pr",
+       "number": 201,
+       "title": "Remove the unused reporting module",
+       "url": "https://github.com/acme/legacy-monolith/pull/201",
+       "author": "alice",
+       "authorIsBot": false,
+       "labels": [],
+       "assignees": [],
+       "requestedReviewers": [],
+       "draft": true,
+       "comments": 0,
+       "createdAt": "2026-09-15T18:00:00.000Z",
+       "updatedAt": "2026-09-18T18:00:00.000Z",
+       "headRef": "remove-the-unused-reporting-module",
+       "headSha": "70babbef6206e1580598e3506e45ab73ee3deb54"
+      }
+     ],
+     "truncated": false
+    },
+    "checked_at": "2026-11-20T10:00:00.000Z"
+   },
+   {
+    "id": 97,
     "full_name": "acme/hackathon-2024",
     "kind": "standards",
     "data": {
@@ -26059,7 +26960,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 86,
+    "id": 98,
     "full_name": "acme/hackathon-2024",
     "kind": "dependencies",
     "data": {
@@ -26102,7 +27003,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 87,
+    "id": 99,
     "full_name": "acme/hackathon-2024",
     "kind": "security",
     "data": {
@@ -26138,7 +27039,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 88,
+    "id": 100,
     "full_name": "acme/hackathon-2024",
     "kind": "release",
     "data": {
@@ -26147,7 +27048,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 89,
+    "id": 101,
     "full_name": "acme/hackathon-2024",
     "kind": "branches",
     "data": {
@@ -26287,7 +27188,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 90,
+    "id": 102,
     "full_name": "acme/hackathon-2024",
     "kind": "ci",
     "data": {
@@ -26296,7 +27197,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 91,
+    "id": 103,
     "full_name": "acme/hackathon-2024",
     "kind": "config",
     "data": {
@@ -26345,7 +27246,20 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 92,
+    "id": 104,
+    "full_name": "acme/hackathon-2024",
+    "kind": "inbox",
+    "data": {
+     "available": true,
+     "prs": 0,
+     "issues": 0,
+     "items": [],
+     "truncated": false
+    },
+    "checked_at": "2026-11-20T10:00:00.000Z"
+   },
+   {
+    "id": 105,
     "full_name": "acme/sdk-python",
     "kind": "standards",
     "data": {
@@ -26406,7 +27320,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 93,
+    "id": 106,
     "full_name": "acme/sdk-python",
     "kind": "dependencies",
     "data": {
@@ -26449,7 +27363,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 94,
+    "id": 107,
     "full_name": "acme/sdk-python",
     "kind": "security",
     "data": {
@@ -26485,7 +27399,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 95,
+    "id": 108,
     "full_name": "acme/sdk-python",
     "kind": "release",
     "data": {
@@ -26500,7 +27414,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 96,
+    "id": 109,
     "full_name": "acme/sdk-python",
     "kind": "branches",
     "data": {
@@ -26532,7 +27446,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 97,
+    "id": 110,
     "full_name": "acme/sdk-python",
     "kind": "ci",
     "data": {
@@ -26632,7 +27546,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 98,
+    "id": 111,
     "full_name": "acme/sdk-python",
     "kind": "config",
     "data": {
@@ -26677,6 +27591,68 @@
        "drift": false
       }
      ]
+    },
+    "checked_at": "2026-11-20T10:00:00.000Z"
+   },
+   {
+    "id": 112,
+    "full_name": "acme/sdk-python",
+    "kind": "inbox",
+    "data": {
+     "available": true,
+     "prs": 1,
+     "issues": 1,
+     "items": [
+      {
+       "type": "pr",
+       "number": 204,
+       "title": "Async client",
+       "url": "https://github.com/acme/sdk-python/pull/204",
+       "author": "jules",
+       "authorIsBot": false,
+       "labels": [
+        {
+         "name": "feature",
+         "color": "a2eeef"
+        }
+       ],
+       "assignees": [],
+       "requestedReviewers": [
+        "alice"
+       ],
+       "draft": false,
+       "comments": 4,
+       "createdAt": "2026-11-13T11:00:00.000Z",
+       "updatedAt": "2026-11-19T11:00:00.000Z",
+       "headRef": "async-client",
+       "headSha": "194dfaa168327193ab19f998bb231cf8079e6e6a"
+      },
+      {
+       "type": "issue",
+       "number": 211,
+       "title": "Type hints are missing on paginated responses",
+       "url": "https://github.com/acme/sdk-python/issues/211",
+       "author": "ivan",
+       "authorIsBot": false,
+       "labels": [
+        {
+         "name": "typing",
+         "color": "c2e0c6"
+        }
+       ],
+       "assignees": [
+        "alice"
+       ],
+       "requestedReviewers": [],
+       "draft": false,
+       "comments": 0,
+       "createdAt": "2026-11-11T02:00:00.000Z",
+       "updatedAt": "2026-11-13T02:00:00.000Z",
+       "headRef": null,
+       "headSha": null
+      }
+     ],
+     "truncated": false
     },
     "checked_at": "2026-11-20T10:00:00.000Z"
    }
@@ -42854,6 +43830,13 @@
     "id": 3,
     "name": "Branches to clean up",
     "query": "health=branch-cleanup",
+    "created_at": "2026-10-31T12:00:00.000Z",
+    "updated_at": "2026-10-31T12:00:00.000Z"
+   },
+   {
+    "id": 4,
+    "name": "Bugs assigned to me",
+    "query": "inbox=1&section=assigned&label=bug",
     "created_at": "2026-10-31T12:00:00.000Z",
     "updated_at": "2026-10-31T12:00:00.000Z"
    }

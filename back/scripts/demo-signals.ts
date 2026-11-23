@@ -18,6 +18,7 @@ import { resolveBaseline } from '../src/domain/repo-baseline';
 import { analyzeBranches, type BranchInput, type PullInput } from '../src/lib/signals/branches';
 import { analyzeRuns, type RunInput } from '../src/lib/signals/ci';
 import { diffConfig } from '../src/lib/signals/config';
+import { buildInbox } from '../src/lib/signals/inbox';
 import { parseManifest, type Dependency, type RuntimeDecl } from '../src/lib/signals/manifests';
 import { dedupeRuntimes } from '../src/lib/signals/runtimes';
 import { summarizeAlerts, type SecurityAlert } from '../src/lib/signals/security';
@@ -305,6 +306,109 @@ function config(repo: Row, tidy: number) {
   return diffConfig(repoData, baseline);
 }
 
+/**
+ * Open pull requests and issues per repo: [kind, title, author, days since updated, extras].
+ * "alice" is the person looking at the demo (VIEWER_LOGIN in node/demo.ts).
+ */
+type InboxSeed = [
+  kind: 'pr' | 'issue', title: string, author: string, daysAgo: number,
+  extra?: { review?: string[]; assignees?: string[]; labels?: string[]; draft?: boolean; comments?: number },
+];
+const bump = (pkg: string, from: string, to: string): InboxSeed =>
+  ['pr', `Bump ${pkg} from ${from} to ${to}`, 'dependabot[bot]', 1, { labels: ['dependencies'] }];
+
+const INBOX: Record<string, InboxSeed[]> = {
+  'storefront-web': [
+    ['pr', 'New cart flow: quantity stepper and saved items', 'bob', 0, { review: ['alice'], labels: ['feature'], comments: 6 }],
+    ['pr', 'Fix hydration mismatch on the product page', 'carol', 2, { review: ['alice', 'bob'], labels: ['bug'], comments: 2 }],
+    bump('next', '15.3.0', '15.3.4'), bump('@tanstack/react-query', '5.80.0', '5.84.1'), bump('eslint', '9.28.0', '9.31.0'),
+    ['issue', 'Checkout button is hidden behind the cookie banner on mobile', 'dana', 1, { labels: ['bug', 'mobile'], assignees: ['alice'], comments: 4 }],
+    ['issue', 'Add structured data for product pages', 'bob', 12, { labels: ['seo'] }],
+  ],
+  'checkout-api': [
+    ['pr', 'Idempotency keys for payment intents', 'alice', 1, { review: ['carol'], labels: ['feature'], comments: 3 }],
+    ['pr', 'Retry webhooks with exponential backoff', 'dana', 4, { review: ['alice'], comments: 1 }],
+    ['issue', 'Intermittent 502 from the payments provider sandbox', 'carol', 3, { labels: ['bug'], assignees: ['alice', 'dana'], comments: 9 }],
+  ],
+  'design-system': [
+    ['pr', 'Date picker: keyboard navigation', 'erin', 0, { review: ['alice'], labels: ['a11y'], comments: 5 }],
+    ['issue', 'Tooltip overflows the viewport near the right edge', 'frank', 6, { labels: ['bug', 'good first issue'], comments: 2 }],
+    ['issue', 'Proposal: density tokens', 'erin', 20, { labels: ['discussion'], comments: 14 }],
+  ],
+  'billing-worker': [
+    ['pr', 'Fix flaky invoice rounding test', 'alice', 45, { draft: true, labels: ['tests'] }],
+    bump('sqlalchemy', '1.4.52', '2.0.41'), bump('pydantic', '1.10.15', '2.11.5'), bump('fastapi', '0.110.0', '0.115.12'), bump('celery', '5.3.6', '5.5.3'),
+    ['issue', 'Nightly reconciliation job times out', 'dana', 2, { labels: ['bug', 'priority'], assignees: ['alice'], comments: 7 }],
+  ],
+  'mobile-app': [
+    ['pr', 'Offline mode for the order history', 'gina', 3, { review: ['bob'], labels: ['feature'], comments: 8 }],
+    ['issue', 'Crash on launch on Android 12 with a restored backup', 'support-bot[bot]', 5, { labels: ['bug', 'crash'], comments: 3 }],
+  ],
+  'data-pipeline': [
+    ['pr', 'Partition the events table by day', 'henry', 8, { review: ['alice'], comments: 2 }],
+    bump('apache-airflow', '2.10.5', '2.11.0'),
+  ],
+  'docs-site': [
+    ['pr', 'Document the webhooks API', 'alice', 2, { review: ['erin'], labels: ['docs'] }],
+    ['issue', 'Search does not find pages added this month', 'frank', 9, { labels: ['bug'], comments: 1 }],
+  ],
+  'cli-tools': [
+    ['issue', 'Shell completions for fish', 'ivan', 15, { labels: ['enhancement', 'good first issue'], comments: 2 }],
+  ],
+  'analytics-dashboard': [
+    ['pr', 'Upgrade to React 19', 'bob', 38, { review: ['alice'], labels: ['dependencies'], comments: 11 }],
+    bump('vite', '5.2.0', '5.4.19'), bump('esbuild', '0.21.5', '0.25.5'),
+    ['issue', 'Funnel chart double counts returning users', 'carol', 4, { labels: ['bug'], comments: 5 }],
+  ],
+  'sdk-python': [
+    ['pr', 'Async client', 'jules', 1, { review: ['alice'], labels: ['feature'], comments: 4 }],
+    ['issue', 'Type hints are missing on paginated responses', 'ivan', 7, { labels: ['typing'], assignees: ['alice'] }],
+  ],
+  'legacy-monolith': [
+    ['pr', 'Remove the unused reporting module', 'alice', 62, { draft: true }],
+    ['issue', 'Session cookies are not marked SameSite', 'security-team', 30, { labels: ['security'], comments: 2 }],
+  ],
+};
+
+const LABEL_COLORS: Record<string, string> = {
+  bug: 'd73a4a', feature: 'a2eeef', dependencies: '0366d6', docs: '0075ca', security: 'b60205', 'good first issue': '7057ff',
+  enhancement: 'a2eeef', discussion: 'd4c5f9', priority: 'e99695', a11y: '1d76db', tests: 'bfd4f2', mobile: 'c5def5',
+  seo: 'fef2c0', crash: 'b60205', typing: 'c2e0c6',
+};
+
+function inbox(repo: Row, now: number) {
+  const rand = random(`${repo.name}:inbox`);
+  const issues: Row[] = [];
+  const pulls: Row[] = [];
+  (INBOX[repo.name] ?? []).forEach(([kind, title, author, daysAgo, extra = {}], index) => {
+    const number = 200 + index * 7 + Math.floor(rand() * 5);
+    const updatedAt = new Date(now - daysAgo * DAY - Math.floor(rand() * 20) * 3_600_000).toISOString();
+    issues.push({
+      number, title,
+      html_url: `https://github.com/${repo.full_name}/${kind === 'pr' ? 'pull' : 'issues'}/${number}`,
+      user: { login: author, type: author.endsWith('[bot]') ? 'Bot' : 'User' },
+      labels: (extra.labels ?? []).map((name) => ({ name, color: LABEL_COLORS[name] ?? 'ededed' })),
+      assignees: (extra.assignees ?? []).map((login) => ({ login })),
+      comments: extra.comments ?? 0,
+      created_at: new Date(new Date(updatedAt).getTime() - (2 + Math.floor(rand() * 10)) * DAY).toISOString(),
+      updated_at: updatedAt,
+      ...(kind === 'pr' && { pull_request: {} }),
+    });
+    if (kind === 'pr') {
+      const branch = author.endsWith('[bot]')
+        ? `dependabot/${title.split(' ')[1]}-${title.split(' ').pop()}`
+        : title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 40);
+      pulls.push({
+        number, draft: extra.draft ?? false,
+        requested_reviewers: (extra.review ?? []).map((login) => ({ login })),
+        head: { ref: branch, sha: sha(rand) },
+      });
+    }
+  });
+  issues.sort((a, b) => String(b.updated_at).localeCompare(String(a.updated_at)));
+  return { available: true, ...buildInbox(issues, pulls), truncated: false };
+}
+
 // ── Uptime, saved views ─────────────────────────────
 
 /** Checks every 30 minutes for two weeks, with a few fictional incidents. */
@@ -347,6 +451,7 @@ function savedViews(now: number): Row[] {
     { id: 1, name: 'Security alerts', query: 'health=security-alerts', created_at: at, updated_at: at },
     { id: 2, name: 'High priority, no CI', query: 'health=needs-ci&priority=high', created_at: at, updated_at: at },
     { id: 3, name: 'Branches to clean up', query: 'health=branch-cleanup', created_at: at, updated_at: at },
+    { id: 4, name: 'Bugs assigned to me', query: 'inbox=1&section=assigned&label=bug', created_at: at, updated_at: at },
   ];
 }
 
@@ -367,6 +472,7 @@ for (const repo of file.data.repos as Row[]) {
     branches: branches(repo, tidy, now),
     ci: ci(repo, now),
     config: config(repo, tidy),
+    inbox: inbox(repo, now),
   };
   for (const [kind, data] of Object.entries(byKind)) {
     signals.push({ id: signals.length + 1, full_name: repo.full_name, kind, data, checked_at: checkedAt });

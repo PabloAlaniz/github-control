@@ -26,6 +26,7 @@ import { dependenciesRoutes } from './routes/dependencies';
 import { branchesRoutes } from './routes/branches';
 import { configRoutes } from './routes/config';
 import { alertsRoutes } from './routes/alerts';
+import { inboxRoutes } from './routes/inbox';
 import { sendDueDigests } from './services/alert.service';
 import { runScheduledChecks } from './services/service-check.service';
 import { apiKeyAuth } from './middleware/auth';
@@ -126,6 +127,7 @@ app.route('/api/sync', syncRoutes);
 app.route('/api/settings', settingsRoutes);
 app.route('/api/traffic', trafficRoutes);
 app.route('/api/alerts', alertsRoutes);
+app.route('/api/inbox', inboxRoutes);
 app.route('/api', backupRoutes);
 
 // Stats endpoint

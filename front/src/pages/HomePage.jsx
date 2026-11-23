@@ -23,6 +23,7 @@ import { useServiceFilters } from '../hooks/useServiceFilters';
 import { useServiceActions } from '../hooks/useServiceActions';
 import { useFullSync } from '../hooks/useFullSync';
 import { useAlertCount } from '../hooks/useAlertCount';
+import { isInboxView } from '../lib/inbox';
 
 import { useSavedViews } from '../hooks/useSavedViews';
 import { useHotkeys } from '../hooks/useHotkeys';
@@ -163,7 +164,7 @@ export function HomePage() {
                         onAddToGroup={addRepoToGroup}
                         views={
                             <SavedViews
-                                views={savedViews}
+                                views={savedViews.filter((view) => !isInboxView(view))}
                                 currentQuery={viewQuery}
                                 onApply={(view) => applyViewState(parseViewState(view.query))}
                                 onSave={saveView}
@@ -183,6 +184,7 @@ export function HomePage() {
                             onActivity={() => navigate('/activity')}
                             onMetrics={() => navigate('/metrics')}
                             onDependencies={() => navigate('/dependencies')}
+                            onInbox={() => navigate('/inbox')}
                             onAlerts={() => navigate('/alerts')}
                             alertCount={alerts.count}
                             onSettings={() => navigate('/settings')}

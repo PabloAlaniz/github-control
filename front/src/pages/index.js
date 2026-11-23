@@ -5,3 +5,4 @@ export { MetricsPage } from './MetricsPage';
 export { RepoMetricsPage } from './RepoMetricsPage';
 export { DependenciesPage } from './DependenciesPage';
 export { AlertsPage } from './AlertsPage';
+export { InboxPage } from './InboxPage';

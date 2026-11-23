@@ -1,7 +1,7 @@
 import { Button } from '../../atoms/Button';
 import { Text } from '../../atoms/Text';
 import { BackupMenu } from '../BackupMenu';
-import { RefreshCw, Activity, LogOut, Plus, BarChart3, Command, Package, DownloadCloud, Settings, Sun, Moon, Monitor, Bell } from 'lucide-react';
+import { RefreshCw, Activity, LogOut, Plus, BarChart3, Command, Package, DownloadCloud, Settings, Sun, Moon, Monitor, Bell, Inbox } from 'lucide-react';
 import { useTheme } from '../../../hooks/useTheme';
 
 const SUBTITLES = {
@@ -54,6 +54,7 @@ export function HomeHeader({
     onActivity,
     onMetrics,
     onDependencies,
+    onInbox,
     onAlerts,
     alertCount,
     onSettings,
@@ -66,7 +67,7 @@ export function HomeHeader({
     const isServiceTab = activeTab === 'infrastructure';
 
     return (
-        <header className="flex items-center justify-between">
+        <header className="flex items-center justify-between gap-2">
             <div className="flex items-center gap-3">
                 <div>
                     <Text variant="h2" className="whitespace-nowrap">GitHub Control</Text>
@@ -75,7 +76,7 @@ export function HomeHeader({
                     </Text>
                 </div>
             </div>
-            <div className="flex items-center gap-2 whitespace-nowrap">
+            <div className="flex items-center gap-1.5 whitespace-nowrap">
                 {onOpenPalette && (
                     <Button
                         onClick={onOpenPalette}
@@ -112,18 +113,24 @@ export function HomeHeader({
                         <span className="hidden sm:inline">Add Service</span>
                     </Button>
                 )}
-                <Button onClick={onActivity} variant="ghost" className="gap-2">
+                {onInbox && (
+                    <Button onClick={onInbox} variant="ghost" className="gap-2 px-2.5" title="Open pull requests and issues across repos">
+                        <Inbox size={16} />
+                        <span className="hidden min-[1440px]:inline">Inbox</span>
+                    </Button>
+                )}
+                <Button onClick={onActivity} variant="ghost" className="gap-2 px-2.5" title="Activity" aria-label="Activity">
                     <Activity size={16} />
-                    <span className="hidden sm:inline">Activity</span>
+                    <span className="hidden min-[1440px]:inline">Activity</span>
                 </Button>
-                <Button onClick={onMetrics} variant="ghost" className="gap-2">
+                <Button onClick={onMetrics} variant="ghost" className="gap-2 px-2.5" title="Metrics" aria-label="Metrics">
                     <BarChart3 size={16} />
-                    <span className="hidden sm:inline">Metrics</span>
+                    <span className="hidden min-[1440px]:inline">Metrics</span>
                 </Button>
                 {onDependencies && (
-                    <Button onClick={onDependencies} variant="ghost" className="gap-2">
+                    <Button onClick={onDependencies} variant="ghost" className="gap-2 px-2.5" title="Dependencies" aria-label="Dependencies">
                         <Package size={16} />
-                        <span className="hidden sm:inline">Deps</span>
+                        <span className="hidden min-[1440px]:inline">Deps</span>
                     </Button>
                 )}
                 {onAlerts && (

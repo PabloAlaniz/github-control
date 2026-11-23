@@ -1,7 +1,8 @@
 import {
     GitBranch, Folder, Bookmark, RefreshCw, Activity, BarChart3, LogOut,
-    LayoutGrid, FlaskConical, Server, RotateCcw, Package, DownloadCloud, Settings, SunMoon, Bell,
+    LayoutGrid, FlaskConical, Server, RotateCcw, Package, DownloadCloud, Settings, SunMoon, Bell, Inbox,
 } from 'lucide-react';
+import { isInboxView } from './inbox';
 import { nextTheme, setTheme } from './theme';
 
 /**
@@ -20,6 +21,7 @@ export function buildCommands({ repos = [], groups = [], views = [], actions }) 
         { id: 'tab:infrastructure', section: 'Go to', icon: Server, label: 'Infra tab', keywords: ['services', 'infrastructure'], run: () => a.setTab('infrastructure') },
         { id: 'nav:activity', section: 'Go to', icon: Activity, label: 'Activity', keywords: ['log'], run: () => a.navigate('/activity') },
         { id: 'nav:dependencies', section: 'Go to', icon: Package, label: 'Dependencies', keywords: ['packages', 'runtimes', 'versions'], run: () => a.navigate('/dependencies') },
+        { id: 'nav:inbox', section: 'Go to', icon: Inbox, label: 'Inbox', keywords: ['pull requests', 'prs', 'issues', 'reviews', 'dependabot', 'merge'], run: () => a.navigate('/inbox') },
         { id: 'nav:alerts', section: 'Go to', icon: Bell, label: 'Alerts', keywords: ['notifications', 'channels', 'slack', 'webhook', 'digest'], run: () => a.navigate('/alerts') },
         { id: 'nav:settings', section: 'Go to', icon: Settings, label: 'Settings', keywords: ['config', 'token', 'baseline'], run: () => a.navigate('/settings') },
         { id: 'nav:metrics', section: 'Go to', icon: BarChart3, label: 'Metrics', keywords: ['charts'], run: () => a.navigate('/metrics') },
@@ -28,7 +30,8 @@ export function buildCommands({ repos = [], groups = [], views = [], actions }) 
     for (const view of views) {
         commands.push({
             id: `view:${view.id}`, section: 'Views', icon: Bookmark,
-            label: view.name, hint: 'View', run: () => a.applyView(view),
+            label: view.name, hint: isInboxView(view) ? 'Inbox view' : 'View',
+            run: () => (isInboxView(view) ? a.navigate(`/inbox?${view.query}`) : a.applyView(view)),
         });
     }
 

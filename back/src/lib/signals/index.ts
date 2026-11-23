@@ -6,6 +6,7 @@ import { collectRelease } from './release';
 import { collectBranches } from './branches';
 import { collectCi } from './ci';
 import { collectConfig } from './config';
+import { collectInbox } from './inbox';
 
 export * from './types';
 
@@ -18,6 +19,7 @@ export const SIGNAL_COLLECTORS = {
   branches: collectBranches,
   ci: collectCi,
   config: collectConfig,
+  inbox: collectInbox,
 } satisfies Record<string, SignalCollector>;
 
 export type SignalKind = keyof typeof SIGNAL_COLLECTORS;

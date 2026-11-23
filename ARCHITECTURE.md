@@ -138,11 +138,13 @@ The repo settings baseline is one of these settings: `domain/repo-baseline.ts` h
 
 A signal is data about one repo that is fetched from GitHub and cached: one record per repo and kind in the `repo_signals` collection, with the processed result as JSON. Each kind has a collector in `lib/signals/` (a function from a `SignalContext` to plain data) registered in `SIGNAL_COLLECTORS`; adding a kind is adding an entry there and the UI for it. The context memoizes the repo metadata and file tree, so the collectors of one sync share those calls.
 
-Current kinds: `standards`, `dependencies`, `security`, `release`, `branches`, `ci`, `config`.
+Current kinds: `standards`, `dependencies`, `security`, `release`, `branches`, `ci`, `config`, `inbox`.
 
 `services/signal.service.ts` runs the collectors and stores the results; kinds fail independently, so a missing permission on one does not lose the others. By convention a signal keeps its long detail under `items`: `GET /api/repos` attaches only the summary of each signal to a repo, and `GET /api/repos/:owner/:repo/signals` returns everything. Cross-repo questions (`services/dependency.service.ts`) are answered in application code from the stored signals, so they work the same on every storage.
 
-Two routes act on GitHub from what a signal showed: `routes/branches.ts` (delete branches) and `routes/config.ts` (apply the settings baseline). Both re-read the current state from GitHub before changing anything and log every change.
+The inbox is a signal like the others: each repo's open pull requests and issues are one `inbox` record, and `services/inbox.service.ts` flattens the records of the active repos into one list. Sections and filters are the frontend's (`front/src/lib/inbox.js`); a saved inbox view is a saved view whose query starts with `inbox=1`.
+
+Three routes act on GitHub from what a signal showed: `routes/branches.ts` (delete branches), `routes/config.ts` (apply the settings baseline) and `routes/inbox.ts` (merge pull requests). All re-read the current state from GitHub before changing anything and log every change.
 
 ### Service checks
 

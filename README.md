@@ -36,6 +36,7 @@ Open http://localhost:13337. From a clone, without Docker: `DEMO=true npm start`
 - **History**: a daily snapshot per repo (LOC, files, stars, issues, health) with charts and date-to-date comparison.
 - **Monorepo aware**: detects apps inside a repo and tracks each one's health and coverage.
 - **Services**: the deployed URLs behind your repos, health-checked every 15 minutes (configurable), with uptime, latency and incident history.
+- **Inbox**: the open pull requests and issues of every repo in one list, with sections (needs my review, mine, assigned to me, dependency updates, stale), filters you can save, keyboard navigation and guarded bulk merge.
 - **Alerts**: know when CI breaks, a service goes down, a serious security alert appears, a repo you care about goes stale or a health score drops, in Slack, Discord, Telegram, ntfy or any webhook, with an optional daily or weekly digest.
 - **Coverage from CI**: a workflow step reports coverage per repo or per app.
 - **AI summaries** (optional): a structured summary of a repo's README using the Claude API.
@@ -189,7 +190,7 @@ A target is `current` (the configured storage), `sqlite:<file>`, `json:<dir>`, `
 
 A **full sync** refreshes the repository list from GitHub and then updates health, code metrics, the daily snapshot, monorepo apps, CI status, traffic and signals for every active repo. Traffic is only available for repositories your token has push access to.
 
-Signals degrade gracefully with the token's permissions: security alerts need read access to them, deleting branches needs write access to the repository, and reading or changing repo settings needs admin access. Without a permission, that signal is shown as not available instead of failing the sync.
+Signals degrade gracefully with the token's permissions: security alerts need read access to them, deleting branches and merging pull requests need write access to the repository, and reading or changing repo settings needs admin access. Without a permission, that signal is shown as not available instead of failing the sync.
 
 - On the Node server it runs automatically every `SYNC_INTERVAL_HOURS`, and right after setup.
 - Start one by hand with `POST /api/sync`; follow it with `GET /api/sync/status`.
@@ -198,10 +199,24 @@ Signals degrade gracefully with the token's permissions: security alerts need re
 
 ### What changes on GitHub
 
-Almost everything is read-only. Two actions write to GitHub, both only when you ask and both recorded in the activity log:
+Almost everything is read-only. Three actions write to GitHub, all only when you ask and all recorded in the activity log:
 
 - **Branch cleanup** deletes the branches you select. The server re-checks each one first and never deletes the default branch, a protected branch, or a branch that moved since it was listed.
+- **Merging pull requests** from the inbox. The server re-checks each one first and skips it if it is closed, a draft, has new commits since it was listed, or has failing or running checks. GitHub's own rules (required reviews, conflicts, branch protection) still apply.
 - **Applying the settings baseline** changes only the settings that differ. Review the baseline in **Settings** before applying it in bulk.
+
+## Inbox
+
+![The inbox on the dependency updates section, grouped by repo, with four pull requests selected](docs/inbox.png)
+
+The **Inbox** lists the open pull requests and issues of all your active repos. Every sync reads them, and **Refresh** reads them again on demand; opening the page costs no GitHub calls.
+
+- **Sections** are ready-made questions: what needs my review, my pull requests, what is assigned to me, dependency updates (Dependabot, Renovate), pull requests nobody touched in 30 days, all pull requests, all issues. "Me" is the account the GitHub token belongs to.
+- **Filters** by text, repo, label and draft state live in the URL. Name a combination to keep it under *Saved views*.
+- **Keyboard**: `j`/`k` to move, `x` to select, `o` or `Enter` to open on GitHub, `/` to search.
+- **Merge** the selected pull requests in one go: dependency updates are grouped by repo so a whole repo can be selected at once.
+
+It keeps the 100 most recently updated open items of each repo.
 
 ## Alerts
 
@@ -263,6 +278,7 @@ curl -X POST -H "Authorization: Bearer $API_KEY" http://localhost:13337/api/sync
 | Traffic | `GET /api/traffic/summary`, `/api/traffic/repo/:owner/:repo`, `POST /api/traffic/repo/:owner/:repo/sync` |
 | Signals | `GET /api/repos/:owner/:repo/signals`, `POST .../signals/sync?kinds=`, `POST .../branches/delete`, `POST .../config/apply` |
 | Dependencies | `GET /api/dependencies` |
+| Inbox | `GET /api/inbox`, `POST /api/inbox/refresh`, `POST /api/inbox/merge` |
 | Alerts | `GET /api/alerts?status={open,resolved,all}`, `POST /api/alerts/evaluate`, `GET/POST /api/alerts/channels`, `PUT/DELETE /api/alerts/channels/:id`, `POST /api/alerts/channels/:id/test` |
 | Saved views | `GET/POST /api/saved-views`, `DELETE /api/saved-views/:id` |
 | Services & apps | `/api/services`, `GET /api/services/uptime`, `/api/repo-apps` |
