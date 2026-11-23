@@ -1,0 +1,1 @@
+export { CiStatusBadge } from './CiStatusBadge';

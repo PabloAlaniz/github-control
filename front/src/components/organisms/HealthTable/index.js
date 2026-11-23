@@ -1,0 +1,1 @@
+export { HealthTable } from './HealthTable';

@@ -1,0 +1,88 @@
+# OPTIONAL — reports test coverage to a running GitHub Control instance.
+#
+# Also an example of how any repo can feed coverage into the dashboard
+# (see back/docs/ci-coverage-setup.md). It does nothing unless both are set:
+#   Variable: DASHBOARD_URL      — your instance's base URL
+#   Secret:   COVERAGE_API_TOKEN — same value as CI_COVERAGE_TOKEN on the server
+#
+# Forks without that config skip both jobs silently.
+
+name: Report coverage
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  frontend:
+    if: ${{ vars.DASHBOARD_URL != '' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: cd front && npx vitest run --coverage
+
+      - name: Report frontend coverage
+        env:
+          DASHBOARD_URL: ${{ vars.DASHBOARD_URL }}
+          TOKEN: ${{ secrets.COVERAGE_API_TOKEN }}
+        run: |
+          set -euo pipefail
+          COVERAGE_JSON="front/coverage/coverage-summary.json"
+          if [[ -z "${DASHBOARD_URL:-}" || -z "${TOKEN:-}" ]]; then
+            echo "::warning::Skipping — missing DASHBOARD_URL or COVERAGE_API_TOKEN"
+            exit 0
+          fi
+          if [[ ! -f "$COVERAGE_JSON" ]]; then
+            echo "::warning::Coverage file not found: $COVERAGE_JSON"
+            exit 0
+          fi
+          COVERAGE=$(jq -r '.total.lines.pct // empty' "$COVERAGE_JSON" | xargs printf '%.0f')
+          echo "Frontend coverage: ${COVERAGE}%"
+          curl -sS --fail-with-body -X POST \
+            -H "Content-Type: application/json" \
+            -H "Authorization: Bearer $TOKEN" \
+            "${DASHBOARD_URL}/api/repos/${{ github.repository }}/coverage" \
+            -d "{\"coverage\": $COVERAGE, \"label\": \"frontend\", \"commit_sha\": \"${{ github.sha }}\"}"
+
+  backend:
+    if: ${{ vars.DASHBOARD_URL != '' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+      - run: cd back && npm ci
+      - run: cd back && npx vitest run --coverage
+
+      - name: Report backend coverage
+        env:
+          DASHBOARD_URL: ${{ vars.DASHBOARD_URL }}
+          TOKEN: ${{ secrets.COVERAGE_API_TOKEN }}
+        run: |
+          set -euo pipefail
+          COVERAGE_JSON="back/coverage/coverage-summary.json"
+          if [[ -z "${DASHBOARD_URL:-}" || -z "${TOKEN:-}" ]]; then
+            echo "::warning::Skipping — missing DASHBOARD_URL or COVERAGE_API_TOKEN"
+            exit 0
+          fi
+          if [[ ! -f "$COVERAGE_JSON" ]]; then
+            echo "::warning::Coverage file not found: $COVERAGE_JSON"
+            exit 0
+          fi
+          COVERAGE=$(jq -r '.total.lines.pct // empty' "$COVERAGE_JSON" | xargs printf '%.0f')
+          echo "Backend coverage: ${COVERAGE}%"
+          curl -sS --fail-with-body -X POST \
+            -H "Content-Type: application/json" \
+            -H "Authorization: Bearer $TOKEN" \
+            "${DASHBOARD_URL}/api/repos/${{ github.repository }}/coverage" \
+            -d "{\"coverage\": $COVERAGE, \"label\": \"backend\", \"commit_sha\": \"${{ github.sha }}\"}"

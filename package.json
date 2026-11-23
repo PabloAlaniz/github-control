@@ -1,0 +1,35 @@
+{
+  "name": "github-control",
+  "version": "0.1.0",
+  "description": "Self-hosted dashboard to see, organize and keep healthy all your GitHub repositories",
+  "private": true,
+  "workspaces": [
+    "front",
+    "back"
+  ],
+  "scripts": {
+    "dev": "concurrently \"npm run dev -w github-control-front\" \"npm run dev:back\" --names \"front,back\" --prefix-colors \"cyan,magenta\"",
+    "dev:back": "cd back && wrangler dev --port 13337 -e dev",
+    "build": "npm run build -w github-control-front",
+    "test": "npm run test:run -w github-control-front",
+    "test:back": "cd back && npx vitest run",
+    "test:all": "npm run test && npm run test:back",
+    "test:e2e": "npm run test:e2e -w github-control-front",
+    "test:coverage": "npm run test:coverage -w github-control-front",
+    "deploy": "npm run build && cd back && npx wrangler deploy",
+    "build:server": "npm run build:node -w github-control-back",
+    "start": "npm run build && npm run build:server && cd back && node dist/server.mjs",
+    "cli": "npm run cli -w github-control-back --"
+  },
+  "devDependencies": {
+    "@octokit/rest": "^20.0.2",
+    "@playwright/test": "^1.65.1",
+    "concurrently": "^8.2.2",
+    "p-limit": "^7.3.3",
+    "pg": "^8.18.0"
+  },
+  "license": "MIT",
+  "engines": {
+    "node": ">=22.13"
+  }
+}

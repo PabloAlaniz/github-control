@@ -1,0 +1,46 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+
+# Local data
+data/
+demo-data/
+*.db
+*.db-shm
+*.db-wal
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Environment
+.env
+.env.local
+back/config/snapshot.json
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+
+# Test / Coverage
+coverage/
+test-results/
+
+# Claude Code
+.claude/
+
+# Backend secrets
+back/.dev.vars
+back/.wrangler/
+
+# Legacy code (local reference only)
+_legacy/

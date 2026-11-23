@@ -1,0 +1,1 @@
+export { RepoCardSkeleton } from './RepoCardSkeleton';

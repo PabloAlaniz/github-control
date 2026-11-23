@@ -1,0 +1,29 @@
+services:
+  github-control:
+    build: .
+    container_name: github-control
+    restart: unless-stopped
+    ports:
+      - "13337:13337"
+    volumes:
+      # Configuration (config.json) and data. Keep this volume to keep your setup.
+      - github-control-data:/data
+    # Everything below is optional. With nothing set, open http://localhost:13337
+    # and follow the setup wizard (the setup code is in `docker logs github-control`).
+    # Values set here take precedence over the wizard's and are never asked for.
+    environment:
+      - STORAGE_DRIVER=${STORAGE_DRIVER:-}
+      - DATABASE_URL=${DATABASE_URL:-}
+      - GITHUB_TOKEN=${GITHUB_TOKEN:-}
+      - GITHUB_ORGS=${GITHUB_ORGS:-}
+      - AUTH_USERNAME=${AUTH_USERNAME:-}
+      - AUTH_PASSWORD=${AUTH_PASSWORD:-}
+      - JWT_SECRET=${JWT_SECRET:-}
+      - API_KEY=${API_KEY:-}
+      - SYNC_INTERVAL_HOURS=${SYNC_INTERVAL_HOURS:-}
+      - PUBLIC_BADGES=${PUBLIC_BADGES:-}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
+      - CI_COVERAGE_TOKEN=${CI_COVERAGE_TOKEN:-}
+
+volumes:
+  github-control-data:

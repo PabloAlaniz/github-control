@@ -1,0 +1,5 @@
+{
+  "DATABASE_URL": "postgresql://user:password@host/database?sslmode=require",
+  "GITHUB_TOKEN": "ghp_your_token_here",
+  "API_KEY": "your-api-key-if-backend-requires-auth"
+}

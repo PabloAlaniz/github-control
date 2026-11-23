@@ -1,0 +1,38 @@
+{
+  "name": "github-control-back",
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "build:frontend": "cd .. && npm run build && cp -r front/dist/* back/public/",
+    "tail": "wrangler tail",
+    "test": "vitest run",
+    "build:server": "esbuild src/server.ts --bundle --platform=node --format=esm --target=node20 --external:pg-native --outfile=dist/server.mjs --banner:js=\"import{createRequire as __createRequire}from'module';const require=__createRequire(import.meta.url);\"",
+    "start": "node dist/server.mjs",
+    "build:cli": "esbuild src/cli-main.ts --bundle --platform=node --format=esm --target=node20 --external:pg-native --outfile=dist/cli.mjs --banner:js=\"import{createRequire as __createRequire}from'module';const require=__createRequire(import.meta.url);\"",
+    "build:node": "npm run build:server && npm run build:cli",
+    "cli": "node dist/cli.mjs"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.88.0",
+    "@hono/node-server": "^2.1.11",
+    "@neondatabase/serverless": "^0.9.0",
+    "@octokit/rest": "^20.0.2",
+    "hono": "^4.13.19",
+    "modern-tar": "^0.8.6",
+    "pg": "^8.23.1",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^5.20261120.1",
+    "@electric-sql/pglite": "^0.5.17",
+    "@electric-sql/pglite-socket": "^0.2.20",
+    "@types/pg": "^8.23.1",
+    "@vitest/coverage-v8": "^5.1.1",
+    "esbuild": "^0.28.2",
+    "typescript": "^5.9.3",
+    "vitest": "^5.1.1",
+    "wrangler": "^4.166.0"
+  }
+}

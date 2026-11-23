@@ -1,0 +1,26 @@
+# Dependencias e instalables (se reinstalan con npm ci dentro de la imagen)
+node_modules
+**/node_modules
+
+# Build outputs (el frontend se buildea dentro de la imagen)
+front/dist
+back/public
+dist
+
+# Estado local de wrangler y secrets
+back/.wrangler
+back/.dev.vars
+.env
+.env.local
+
+# Git / IDE / OS
+.git
+.github
+.idea
+.vscode
+.DS_Store
+
+# Docs y tests no necesarios en runtime
+coverage
+test-results
+_legacy

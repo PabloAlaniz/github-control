@@ -1,0 +1,144 @@
+/**
+ * Node composition root: decides, per request, whether the instance is
+ * configured (main app) or still needs the first-run wizard (setup app), and
+ * serves the built frontend. Kept free of `listen()` so it can be tested.
+ */
+import { existsSync, readFileSync } from 'node:fs';
+import { join } from 'node:path';
+import { Hono } from 'hono';
+import { serveStatic } from '@hono/node-server/serve-static';
+import app from '../index';
+import '../infrastructure/storage/node';
+import type { AppConfig } from '../config';
+import { randomSecret } from '../lib/password';
+import {
+  ensureSecrets, loadConfigFile, mergeValues, resolveConfig, saveConfigFile,
+} from './config-store';
+import { createSetupApp, verifyGithubToken } from './setup-app';
+import { createSettingsStore } from './settings';
+import { CLIENT_IP_HEADER } from '../routes/auth';
+import { createStorage } from '../infrastructure/storage';
+import { getSyncStatus, isSyncDue, startFullSync } from '../services/full-sync.service';
+import { runScheduledChecks } from '../services/service-check.service';
+import { sqliteAvailable } from '../infrastructure/storage/sql/sqlite-client';
+
+const DEFAULT_SYNC_INTERVAL_HOURS = 24;
+/** How often the server checks whether a sync is due. */
+const SYNC_CHECK_MINUTES = 10;
+/** How often the server health-checks the registered services (uptime history). */
+const SERVICE_CHECK_MINUTES = 15;
+
+export interface ServerOptions {
+  env: Record<string, string | undefined>;
+  /** Holds config.json and, for the file drivers, the data itself. */
+  dataDir: string;
+  /** Built frontend (front/dist). Optional: the API works without it. */
+  staticDir?: string;
+  verifyGithubToken?: (token: string) => Promise<string>;
+  /** Run full syncs on a schedule (and right after setup). Off unless asked for. */
+  autoSync?: boolean;
+  log?: (message: string) => void;
+}
+
+export function createServerApp(options: ServerOptions) {
+  const { env, dataDir, staticDir } = options;
+  const log = options.log ?? console.log;
+
+  let config: AppConfig | null = null;
+  let setupApp: Hono | null = null;
+
+  const load = () => {
+    const resolved = resolveConfig(env, loadConfigFile(dataDir), dataDir);
+    if (resolved.missing.length > 0) return resolved;
+    ensureSecrets(env, dataDir);
+    config = resolveConfig(env, loadConfigFile(dataDir), dataDir).config;
+    config.settings = createSettingsStore({
+      env, dataDir, config, verifyGithubToken: options.verifyGithubToken ?? verifyGithubToken,
+    });
+    setupApp = null;
+    return resolved;
+  };
+
+  /** Starts a full sync when the data is older than the configured interval. */
+  const syncIfDue = async (trigger: string) => {
+    if (!options.autoSync || !config) return;
+    try {
+      const ctx = { config, storage: createStorage(config) };
+      const intervalHours = Number(config.SYNC_INTERVAL_HOURS ?? DEFAULT_SYNC_INTERVAL_HOURS);
+      const { latest } = await ctx.storage.repos.getCacheStatus();
+      if (!isSyncDue(latest, intervalHours) || getSyncStatus(ctx).running) return;
+      log(`Starting ${trigger} sync...`);
+      const summary = await startFullSync(ctx, { trigger }).finished;
+      log(summary.error
+        ? `Sync failed: ${summary.error}`
+        : `Sync finished: ${summary.repos.synced}/${summary.repos.total} repos, ${summary.repos.failed} failed.`);
+    } catch (error: any) {
+      log(`Sync check failed: ${error.message}`);
+    }
+  };
+
+  /** Health-checks every active service and records the result in the uptime history. */
+  const checkServices = async () => {
+    if (!options.autoSync || !config) return;
+    try {
+      await runScheduledChecks({ config, storage: createStorage(config) });
+    } catch (error: any) {
+      log(`Service checks failed: ${error.message}`);
+    }
+  };
+
+  const { missing } = load();
+  if (config) {
+    log(`Storage: ${(config as AppConfig).STORAGE_DRIVER}`);
+  } else {
+    const setupCode = randomSecret(9);
+    const provided = mergeValues(env, loadConfigFile(dataDir));
+
+    setupApp = createSetupApp({
+      setupCode,
+      provided,
+      verifyGithubToken: options.verifyGithubToken ?? verifyGithubToken,
+      sqliteAvailable: sqliteAvailable(),
+      complete(values) {
+        saveConfigFile(dataDir, values);
+        load();
+        log('Setup complete.');
+        void syncIfDue('setup');
+      },
+    });
+    log(`Setup required (missing: ${missing.join(', ')}).`);
+    log(`Open the app in a browser and enter this setup code: ${setupCode}`);
+  }
+
+  if (options.autoSync) {
+    void syncIfDue('schedule');
+    setInterval(() => void syncIfDue('schedule'), SYNC_CHECK_MINUTES * 60_000).unref();
+    setInterval(() => void checkServices(), SERVICE_CHECK_MINUTES * 60_000).unref();
+  }
+
+  const root = new Hono();
+
+  root.all('/api/*', (c) => {
+    // Identify the client by its socket address (or the proxy's word for it when
+    // TRUST_PROXY is on); whatever the client sent in that header is discarded.
+    const headers = new Headers(c.req.raw.headers);
+    const socketAddress = (c.env as { incoming?: { socket?: { remoteAddress?: string } } } | undefined)
+      ?.incoming?.socket?.remoteAddress;
+    const forwarded = env.TRUST_PROXY === 'true' ? headers.get('x-forwarded-for')?.split(',')[0].trim() : undefined;
+    headers.set(CLIENT_IP_HEADER, forwarded || socketAddress || 'local');
+    headers.delete('cf-connecting-ip');
+    const request = new Request(c.req.raw, { headers });
+
+    return config ? app.fetch(request, config) : setupApp!.fetch(request);
+  });
+
+  if (staticDir && existsSync(join(staticDir, 'index.html'))) {
+    const indexHtml = readFileSync(join(staticDir, 'index.html'), 'utf8');
+    root.use('*', serveStatic({ root: staticDir }));
+    root.get('*', (c) => c.html(indexHtml)); // SPA fallback
+  } else {
+    root.get('*', (c) => c.json({ message: 'API only: the frontend build was not found', staticDir }, 404));
+  }
+
+  return root;
+}

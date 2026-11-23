@@ -1,0 +1,24 @@
+# Runs the published image instead of building from source.
+#
+#   docker compose -f docker-compose.image.yml up -d
+#   docker compose -f docker-compose.image.yml pull && docker compose -f docker-compose.image.yml up -d   # update
+#
+# With nothing else set, open http://localhost:13337 and follow the setup wizard
+# (the setup code is in `docker logs github-control`). Any variable from
+# .env.example can be put in a `.env` file next to this one.
+services:
+  github-control:
+    image: ghcr.io/pabloalaniz/github-control:${GITHUB_CONTROL_VERSION:-latest}
+    container_name: github-control
+    restart: unless-stopped
+    ports:
+      - "${PORT:-13337}:13337"
+    volumes:
+      # Configuration (config.json) and data. Keep this volume to keep your setup.
+      - github-control-data:/data
+    env_file:
+      - path: .env
+        required: false
+
+volumes:
+  github-control-data:

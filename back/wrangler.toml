@@ -1,0 +1,38 @@
+name = "github-control"
+main = "src/index.ts"
+compatibility_date = "2025-01-15"
+compatibility_flags = ["nodejs_compat"]
+
+# Static assets con binding para control desde el Worker
+[assets]
+directory = "../front/dist"
+binding = "ASSETS"
+not_found_handling = "single-page-application"
+# El Worker maneja todas las rutas primero (wrangler 3.x compatibility)
+run_worker_first = true
+
+[vars]
+ENVIRONMENT = "production"
+
+# Cron: health-check the registered services every 15 minutes (uptime history).
+# Triggers are applied by `wrangler deploy` or `wrangler triggers deploy`;
+# `wrangler versions upload` does not update them.
+[triggers]
+crons = ["*/15 * * * *"]
+
+# Development environment (no assets needed - Vite serves frontend separately)
+[env.dev]
+name = "github-control-dev"
+
+[env.dev.vars]
+ENVIRONMENT = "development"
+DISABLE_AUTH = "true"
+
+# Secrets (set via `wrangler secret put`):
+# - DATABASE_URL: postgresql://...
+# - GITHUB_TOKEN: ghp_...
+# - CI_COVERAGE_TOKEN: ...
+# - API_KEY: Bearer token for API authentication (agents/CI)
+# - AUTH_USERNAME: Username for browser login
+# - AUTH_PASSWORD: Password for browser login
+# - JWT_SECRET: Secret key for signing JWT tokens
