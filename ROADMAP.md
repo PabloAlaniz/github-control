@@ -22,12 +22,14 @@ Where GitHub Control is heading. Nothing here is a promise; priorities follow wh
 - Demo mode: one variable starts the app on a fictional dataset, editable or read-only
 - Dark theme, following the system or chosen by hand
 - Inbox: open pull requests and issues across repos, with sections, saved filters, keyboard navigation and guarded bulk merge
+- Release download counts, CI and release badges, repo and summary cards with themes, and a page with the Markdown to copy
+- Public status page for services, with a status badge
 - Alerts for failing CI, services down, serious security alerts, stale repos and low health, sent to Slack, Discord, Telegram, ntfy or a webhook, with daily or weekly digests
 
 ## Next
 
-- **Release download counts.**
-- **Summary cards** (SVG) with totals across repos.
+- **Policy as code**: the settings baseline and the health score weights in a versioned file, with a dry run.
+- **MCP server** over the API.
 
 ## Later
 

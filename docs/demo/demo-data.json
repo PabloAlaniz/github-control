@@ -21477,7 +21477,9 @@
      "name": "v3.12.0",
      "publishedAt": "2026-11-16T12:00:00.000Z",
      "url": "https://github.com/acme/storefront-web/releases/tag/v3.12.0",
-     "unreleasedCommits": 7
+     "unreleasedCommits": 7,
+     "downloads": 0,
+     "latestDownloads": 0
     },
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
@@ -22022,7 +22024,9 @@
      "name": "v1.8.2",
      "publishedAt": "2026-11-09T12:00:00.000Z",
      "url": "https://github.com/acme/checkout-api/releases/tag/v1.8.2",
-     "unreleasedCommits": 3
+     "unreleasedCommits": 3,
+     "downloads": 0,
+     "latestDownloads": 0
     },
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
@@ -22517,7 +22521,9 @@
      "name": "v5.2.0",
      "publishedAt": "2026-11-18T12:00:00.000Z",
      "url": "https://github.com/acme/design-system/releases/tag/v5.2.0",
-     "unreleasedCommits": 0
+     "unreleasedCommits": 0,
+     "downloads": 2975,
+     "latestDownloads": 238
     },
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
@@ -23001,7 +23007,9 @@
      "name": "v0.9.4",
      "publishedAt": "2026-08-16T12:00:00.000Z",
      "url": "https://github.com/acme/billing-worker/releases/tag/v0.9.4",
-     "unreleasedCommits": 41
+     "unreleasedCommits": 41,
+     "downloads": 0,
+     "latestDownloads": 0
     },
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
@@ -23531,7 +23539,9 @@
      "name": "v2.6.0",
      "publishedAt": "2026-10-28T12:00:00.000Z",
      "url": "https://github.com/acme/mobile-app/releases/tag/v2.6.0",
-     "unreleasedCommits": 18
+     "unreleasedCommits": 18,
+     "downloads": 0,
+     "latestDownloads": 0
     },
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
@@ -24003,7 +24013,9 @@
      "name": "2025.10.1",
      "publishedAt": "2026-10-03T12:00:00.000Z",
      "url": "https://github.com/acme/data-pipeline/releases/tag/2025.10.1",
-     "unreleasedCommits": 26
+     "unreleasedCommits": 26,
+     "downloads": 0,
+     "latestDownloads": 0
     },
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
@@ -24774,7 +24786,9 @@
      "name": "v1.3.0",
      "publishedAt": "2026-10-21T12:00:00.000Z",
      "url": "https://github.com/acme/docs-site/releases/tag/v1.3.0",
-     "unreleasedCommits": 12
+     "unreleasedCommits": 12,
+     "downloads": 0,
+     "latestDownloads": 0
     },
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
@@ -25216,7 +25230,9 @@
      "name": "v2.4.1",
      "publishedAt": "2026-11-11T12:00:00.000Z",
      "url": "https://github.com/acme/cli-tools/releases/tag/v2.4.1",
-     "unreleasedCommits": 0
+     "unreleasedCommits": 0,
+     "downloads": 18420,
+     "latestDownloads": 1474
     },
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
@@ -26548,7 +26564,9 @@
      "name": "v7.41.3",
      "publishedAt": "2026-01-14T12:00:00.000Z",
      "url": "https://github.com/acme/legacy-monolith/releases/tag/v7.41.3",
-     "unreleasedCommits": 64
+     "unreleasedCommits": 64,
+     "downloads": 0,
+     "latestDownloads": 0
     },
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
@@ -27409,7 +27427,9 @@
      "name": "v1.14.0",
      "publishedAt": "2026-11-14T12:00:00.000Z",
      "url": "https://github.com/acme/sdk-python/releases/tag/v1.14.0",
-     "unreleasedCommits": 2
+     "unreleasedCommits": 2,
+     "downloads": 6310,
+     "latestDownloads": 505
     },
     "checked_at": "2026-11-20T10:00:00.000Z"
    },

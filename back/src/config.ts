@@ -34,6 +34,8 @@ export type AppConfig = {
   ANTHROPIC_API_KEY?: string;
   /** 'true' serves unauthenticated SVG badges for public repos at /api/badges. Off by default. */
   PUBLIC_BADGES?: string;
+  /** 'true' serves the unauthenticated status page of the registered services (/status, /api/status). Off by default. */
+  PUBLIC_STATUS?: string;
   /** Present when settings can be changed at runtime (Node server). Not a stored value. */
   settings?: SettingsStore;
   /** JSON object `{ setting: expected }`: the repo settings baseline. Unset uses the defaults. */

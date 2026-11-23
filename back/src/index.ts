@@ -18,7 +18,9 @@ import { repoAppsRoutes } from './routes/repo-apps';
 import { backupRoutes } from './routes/backup';
 import { syncRoutes } from './routes/sync';
 import { trafficRoutes } from './routes/traffic';
-import { badgeRoutes } from './routes/badges';
+import { badgeRoutes, BADGE_METRICS } from './routes/badges';
+import { statusRoutes } from './routes/status';
+import { CARD_THEMES } from './lib/cards';
 import { settingsRoutes } from './routes/settings';
 import { savedViewsRoutes } from './routes/saved-views';
 import { signalsRoutes } from './routes/signals';
@@ -97,6 +99,9 @@ app.get('/api/setup/status', (c) => c.json({
 // Public README badges (opt-in, public repos only). Mounted before the auth middleware.
 app.route('/api/badges', badgeRoutes);
 
+// Public status page data (opt-in). Mounted before the auth middleware.
+app.route('/api/status', statusRoutes);
+
 // Auth routes (public, before API key middleware)
 app.route('/api/auth', authRoutes);
 
@@ -129,6 +134,14 @@ app.route('/api/traffic', trafficRoutes);
 app.route('/api/alerts', alertsRoutes);
 app.route('/api/inbox', inboxRoutes);
 app.route('/api', backupRoutes);
+
+// What can be embedded elsewhere, and whether each public surface is switched on.
+app.get('/api/embeds', (c) => c.json({
+  badges: c.env.PUBLIC_BADGES === 'true',
+  status: c.env.PUBLIC_STATUS === 'true',
+  metrics: BADGE_METRICS,
+  themes: CARD_THEMES,
+}));
 
 // Stats endpoint
 app.get('/api/stats', async (c) => {

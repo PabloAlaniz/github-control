@@ -37,6 +37,7 @@ Open http://localhost:13337. From a clone, without Docker: `DEMO=true npm start`
 - **Monorepo aware**: detects apps inside a repo and tracks each one's health and coverage.
 - **Services**: the deployed URLs behind your repos, health-checked every 15 minutes (configurable), with uptime, latency and incident history.
 - **Inbox**: the open pull requests and issues of every repo in one list, with sections (needs my review, mine, assigned to me, dependency updates, stale), filters you can save, keyboard navigation and guarded bulk merge.
+- **Public surface** (opt-in): badges and cards for your READMEs, a summary card of your open source work, and a status page for your services.
 - **Alerts**: know when CI breaks, a service goes down, a serious security alert appears, a repo you care about goes stale or a health score drops, in Slack, Discord, Telegram, ntfy or any webhook, with an optional daily or weekly digest.
 - **Coverage from CI**: a workflow step reports coverage per repo or per app.
 - **AI summaries** (optional): a structured summary of a repo's README using the Claude API.
@@ -151,7 +152,8 @@ Every setting can also be given as an environment variable. Variables win over t
 | `SERVICE_CHECK_MINUTES` | Minutes between service health checks (1 to 1440) | `15` |
 | `ALERT_STALE_DAYS` | Days without commits before a high or medium priority repo raises an alert; `0` turns it off | `90` |
 | `ALERT_HEALTH_BELOW` | Health score under which a repo raises an alert; `0` turns it off | `40` |
-| `PUBLIC_BADGES` | `true` serves public SVG badges for public repos | off |
+| `PUBLIC_BADGES` | `true` serves public SVG badges and cards for public repos | off |
+| `PUBLIC_STATUS` | `true` serves the public status page of your services at `/status` | off |
 | `REPO_BASELINE` | JSON object `{ "setting": true/false }`: the repo settings every repo is expected to have | a small default set |
 | `ANTHROPIC_API_KEY` | Enables AI summaries | off |
 | `CI_COVERAGE_TOKEN` | Token CI uses to report coverage | off |
@@ -159,7 +161,7 @@ Every setting can also be given as an environment variable. Variables win over t
 | `TRUST_PROXY` | `true` to take the client address from `X-Forwarded-For` | off |
 | `DISABLE_AUTH` | `true` turns sign-in off. Local use only. | off |
 
-The GitHub token, organizations, sync interval, badges, the repo settings baseline and your password can also be changed later from the **Settings** page (settings given as environment variables appear there as locked).
+The GitHub token, organizations, sync interval, badges, the status page, the repo settings baseline and your password can also be changed later from the **Settings** page (settings given as environment variables appear there as locked).
 
 See [`.env.example`](.env.example).
 
@@ -246,15 +248,37 @@ To be told, add a **channel** on that page: Slack, Discord, Telegram, ntfy or a 
 
 Service checks run every 15 minutes; set `SERVICE_CHECK_MINUTES` to check more often (an outage shorter than the interval can go unnoticed). On Cloudflare Workers the interval is the Cron Trigger in `back/wrangler.toml`, which also drives alerts and digests.
 
-## Badges
+## Badges and cards
 
-With `PUBLIC_BADGES=true`, the server exposes SVG badges you can embed in a README. They need no authentication, so they only exist for **public** repositories; a private repo answers like one that does not exist.
+With `PUBLIC_BADGES=true`, the server exposes SVG images you can embed in a README. They need no authentication, so they only exist for **public** repositories; a private repo answers like one that does not exist, and the summary counts public repos only.
+
+![A summary card: public repos, stars, lines of code, views, release downloads and average health](docs/summary-card.svg)
+
+![A repo card: name, description, language, stars, health, coverage and latest release](docs/repo-card.svg)
 
 ```markdown
 ![views](https://your-server.example/api/badges/OWNER/REPO/views.svg)
+![OWNER/REPO](https://your-server.example/api/badges/OWNER/REPO/card.svg)
+![Open source at a glance](https://your-server.example/api/badges/summary.svg)
 ```
 
-Available: `stars`, `views` and `clones` (last 14 days), `loc`, `coverage`, `health`.
+- **Badges**: `stars`, `views` and `clones` (last 14 days), `loc`, `coverage`, `health`, `ci`, `release`, `downloads` (of the files attached to releases). `?label=` replaces the left text and `?style=flat-square` removes the rounded corners.
+- **Cards**: `card.svg` for one repo and `summary.svg` for all of them. `?theme=light` or `?theme=dark` fixes the colors; by default a card follows the reader's system theme. The summary also takes `?title=`.
+
+The **Badges and embeds** page (command palette, or the *Badges* link on a public repo) previews each one and gives you the Markdown to copy.
+
+## Status page
+
+![The public status page: overall state and 90 days of history per service](docs/status.png)
+
+With `PUBLIC_STATUS=true`, `/status` is a page anyone can open, without signing in: whether everything is up, and for each active service its current state and 90 days of history. It shows names and states only, never URLs, providers or repos. Deactivate a service to keep it off the page.
+
+```markdown
+[![status](https://your-server.example/api/status/badge.svg)](https://your-server.example/status)
+![uptime](https://your-server.example/api/status/badge.svg?service=SLUG)
+```
+
+`GET /api/status` returns the same data as JSON. Both switches are also on the **Settings** page.
 
 ## API
 
@@ -278,6 +302,7 @@ curl -X POST -H "Authorization: Bearer $API_KEY" http://localhost:13337/api/sync
 | Traffic | `GET /api/traffic/summary`, `/api/traffic/repo/:owner/:repo`, `POST /api/traffic/repo/:owner/:repo/sync` |
 | Signals | `GET /api/repos/:owner/:repo/signals`, `POST .../signals/sync?kinds=`, `POST .../branches/delete`, `POST .../config/apply` |
 | Dependencies | `GET /api/dependencies` |
+| Public (no sign-in, opt-in) | `GET /api/badges/:owner/:repo/:metric.svg`, `.../card.svg`, `/api/badges/summary.svg`, `GET /api/status`, `/api/status/badge.svg` |
 | Inbox | `GET /api/inbox`, `POST /api/inbox/refresh`, `POST /api/inbox/merge` |
 | Alerts | `GET /api/alerts?status={open,resolved,all}`, `POST /api/alerts/evaluate`, `GET/POST /api/alerts/channels`, `PUT/DELETE /api/alerts/channels/:id`, `POST /api/alerts/channels/:id/test` |
 | Saved views | `GET/POST /api/saved-views`, `DELETE /api/saved-views/:id` |

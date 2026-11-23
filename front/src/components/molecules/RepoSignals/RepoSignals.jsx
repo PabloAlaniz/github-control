@@ -150,6 +150,12 @@ function ReleaseCard({ data }) {
                             ? <span className="text-green-700">default branch is released</span>
                             : <span className="font-medium">{data.unreleasedCommits} commits not released yet</span>}
                 </div>
+                {data.downloads > 0 && (
+                    <div className="text-gray-500">
+                        {data.downloads.toLocaleString('en-US')} downloads
+                        {data.latestDownloads > 0 && ` (${data.latestDownloads.toLocaleString('en-US')} of ${data.tag})`}
+                    </div>
+                )}
             </div>
         </SignalCard>
     );
@@ -401,6 +407,11 @@ export function RepoSignals({ repo, onSync, syncing = false, onCleanupBranches, 
                         <RefreshCw size={12} className={syncing ? 'animate-spin' : ''} />
                         {syncing ? 'Syncing...' : 'Sync signals'}
                     </button>
+                )}
+                {repo.isPrivate === false && repo.fullName && (
+                    <a href={`/embeds?repo=${encodeURIComponent(repo.fullName)}`} className="text-xs text-blue-600 hover:underline">
+                        Badges
+                    </a>
                 )}
             </div>
             {hasAny ? (

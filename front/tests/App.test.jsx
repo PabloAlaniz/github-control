@@ -13,6 +13,8 @@ vi.mock('@/pages', () => ({
   DependenciesPage: () => <div data-testid="dependencies-page">Dependencies Page</div>,
   AlertsPage: () => <div data-testid="alerts-page">Alerts Page</div>,
   InboxPage: () => <div data-testid="inbox-page">Inbox Page</div>,
+  EmbedsPage: () => <div data-testid="embeds-page">Embeds Page</div>,
+  StatusPage: () => <div data-testid="status-page">Status Page</div>,
 }));
 
 // Mock ProtectedRoute to render children for testing

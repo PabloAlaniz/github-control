@@ -1,6 +1,6 @@
 import {
     GitBranch, Folder, Bookmark, RefreshCw, Activity, BarChart3, LogOut,
-    LayoutGrid, FlaskConical, Server, RotateCcw, Package, DownloadCloud, Settings, SunMoon, Bell, Inbox,
+    LayoutGrid, FlaskConical, Server, RotateCcw, Package, DownloadCloud, Settings, SunMoon, Bell, Inbox, BadgeCheck,
 } from 'lucide-react';
 import { isInboxView } from './inbox';
 import { nextTheme, setTheme } from './theme';
@@ -23,6 +23,7 @@ export function buildCommands({ repos = [], groups = [], views = [], actions }) 
         { id: 'nav:dependencies', section: 'Go to', icon: Package, label: 'Dependencies', keywords: ['packages', 'runtimes', 'versions'], run: () => a.navigate('/dependencies') },
         { id: 'nav:inbox', section: 'Go to', icon: Inbox, label: 'Inbox', keywords: ['pull requests', 'prs', 'issues', 'reviews', 'dependabot', 'merge'], run: () => a.navigate('/inbox') },
         { id: 'nav:alerts', section: 'Go to', icon: Bell, label: 'Alerts', keywords: ['notifications', 'channels', 'slack', 'webhook', 'digest'], run: () => a.navigate('/alerts') },
+        { id: 'nav:embeds', section: 'Go to', icon: BadgeCheck, label: 'Badges and embeds', keywords: ['badge', 'card', 'svg', 'readme', 'status page', 'snippet', 'markdown'], run: () => a.navigate('/embeds') },
         { id: 'nav:settings', section: 'Go to', icon: Settings, label: 'Settings', keywords: ['config', 'token', 'baseline'], run: () => a.navigate('/settings') },
         { id: 'nav:metrics', section: 'Go to', icon: BarChart3, label: 'Metrics', keywords: ['charts'], run: () => a.navigate('/metrics') },
     ];

@@ -10,6 +10,7 @@ const PatchSchema = z.object({
   githubOrgs: z.array(z.string().regex(/^[A-Za-z0-9-]+$/, 'Invalid organization name')).max(50),
   syncIntervalHours: z.number().int().min(0).max(24 * 30),
   publicBadges: z.boolean(),
+  publicStatus: z.boolean(),
   repoBaseline: z.record(z.string().max(60), z.boolean()),
   password: z.object({
     current: z.string().min(1),

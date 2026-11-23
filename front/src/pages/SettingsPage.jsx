@@ -47,6 +47,7 @@ export function SettingsPage() {
     const [orgs, setOrgs] = useState('');
     const [interval, setIntervalHours] = useState('24');
     const [badges, setBadges] = useState(false);
+    const [statusPage, setStatusPage] = useState(false);
     const [baseline, setBaseline] = useState({});
     const [currentPassword, setCurrentPassword] = useState('');
     const [newPassword, setNewPassword] = useState('');
@@ -61,6 +62,7 @@ export function SettingsPage() {
         setOrgs(next.githubOrgs.join(', '));
         setIntervalHours(String(next.syncIntervalHours));
         setBadges(next.publicBadges);
+        setStatusPage(!!next.publicStatus);
         setBaseline(choicesOf(next.repoBaseline));
         setToken('');
         setCurrentPassword('');
@@ -93,6 +95,7 @@ export function SettingsPage() {
         if (parseOrgs(orgs).join(',') !== settings.githubOrgs.join(',')) patch.githubOrgs = parseOrgs(orgs);
         if (Number(interval) !== settings.syncIntervalHours) patch.syncIntervalHours = Number(interval);
         if (badges !== settings.publicBadges) patch.publicBadges = badges;
+        if (statusPage !== !!settings.publicStatus) patch.publicStatus = statusPage;
         if (JSON.stringify(toBaseline(baseline)) !== JSON.stringify(toBaseline(choicesOf(settings.repoBaseline)))) {
             patch.repoBaseline = toBaseline(baseline);
         }
@@ -201,7 +204,7 @@ export function SettingsPage() {
                                     </Field>
                                 </Section>
 
-                                <Section title="Badges">
+                                <Section title="Public pages">
                                     <label className="flex items-start gap-3 text-sm text-gray-700">
                                         <input
                                             type="checkbox" checked={badges} className="mt-1"
@@ -210,10 +213,25 @@ export function SettingsPage() {
                                         <span>
                                             Serve public SVG badges
                                             <span className="block text-xs text-gray-500">
-                                                {isLocked('publicBadges') ? LOCKED_NOTE : 'Anyone can fetch them, without signing in. Only for public repositories.'}
+                                                {isLocked('publicBadges') ? LOCKED_NOTE : 'Badges and cards anyone can fetch, without signing in. Only for public repositories.'}
                                             </span>
                                         </span>
                                     </label>
+                                    <label className="flex items-start gap-3 text-sm text-gray-700">
+                                        <input
+                                            type="checkbox" checked={statusPage} className="mt-1"
+                                            disabled={isLocked('publicStatus')} onChange={(e) => setStatusPage(e.target.checked)}
+                                        />
+                                        <span>
+                                            Serve a public status page
+                                            <span className="block text-xs text-gray-500">
+                                                {isLocked('publicStatus') ? LOCKED_NOTE : 'Anyone can open /status: the name, state and uptime of your active services. No URLs or repos.'}
+                                            </span>
+                                        </span>
+                                    </label>
+                                    <p className="text-xs text-gray-500">
+                                        Snippets to copy are on the <a href="/embeds" className="text-blue-600 hover:underline">Badges and embeds</a> page.
+                                    </p>
                                 </Section>
 
                                 {settings.repoBaseline?.length > 0 && (

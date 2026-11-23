@@ -42,6 +42,9 @@ export function demoConfig(mode: DemoMode, resetMinutes: number): AppConfig {
     JWT_SECRET: randomSecret(),
     SYNC_INTERVAL_HOURS: '0',
     VIEWER_LOGIN: 'alice',
+    // The public surfaces are part of what the demo shows.
+    PUBLIC_BADGES: 'true',
+    PUBLIC_STATUS: 'true',
     DEMO: mode,
     DEMO_RESET_MINUTES: String(resetMinutes),
   };

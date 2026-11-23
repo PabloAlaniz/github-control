@@ -3,7 +3,7 @@
  * that own their configuration (the Node server); absent where configuration
  * is fixed at deploy time (Cloudflare Workers).
  */
-export type SettingName = 'githubToken' | 'githubOrgs' | 'syncIntervalHours' | 'publicBadges' | 'repoBaseline' | 'password';
+export type SettingName = 'githubToken' | 'githubOrgs' | 'syncIntervalHours' | 'publicBadges' | 'publicStatus' | 'repoBaseline' | 'password';
 
 /** One repo setting the baseline can enforce. `expected` is null when it is not enforced. */
 export interface BaselineOption {
@@ -19,6 +19,7 @@ export interface SettingsView {
   githubOrgs: string[];
   syncIntervalHours: number;
   publicBadges: boolean;
+  publicStatus: boolean;
   /** Every repo setting the app can check, with the value expected of it (if any). */
   repoBaseline: BaselineOption[];
   /** Settings fixed by an environment variable: shown, but not editable. */
@@ -30,6 +31,7 @@ export interface SettingsPatch {
   githubOrgs?: string[];
   syncIntervalHours?: number;
   publicBadges?: boolean;
+  publicStatus?: boolean;
   /** `{ setting: expected }` for the settings to enforce; settings left out are not checked. */
   repoBaseline?: Record<string, boolean>;
   password?: { current: string; next: string };

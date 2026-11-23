@@ -8,6 +8,7 @@ const fakeOctokit = (repos: Record<string, any>) => ({
     get: vi.fn().mockResolvedValue({ data: { default_branch: 'main' } }),
     getLatestRelease: vi.fn().mockRejectedValue(notFound),
     listTags: vi.fn().mockResolvedValue({ data: [] }),
+    listReleases: vi.fn().mockResolvedValue({ data: [] }),
     getCommit: vi.fn(),
     compareCommitsWithBasehead: vi.fn().mockResolvedValue({ data: { ahead_by: 0 } }),
     ...repos,
@@ -22,11 +23,17 @@ describe('collectRelease', () => {
         tag_name: 'v1.2.0', name: 'Spring', published_at: '2026-10-01T00:00:00Z', html_url: 'https://x/r',
       } }),
       compareCommitsWithBasehead: vi.fn().mockResolvedValue({ data: { ahead_by: 14 } }),
+      listReleases: vi.fn().mockResolvedValue({ data: [
+        { tag_name: 'v1.2.0', assets: [{ download_count: 30 }, { download_count: 12 }] },
+        { tag_name: 'v1.1.0', assets: [{ download_count: 100 }] },
+        { tag_name: 'v1.0.0' },
+      ] }),
     });
 
     expect(await collect(octokit)).toEqual({
       hasRelease: true, source: 'release', tag: 'v1.2.0', name: 'Spring',
       publishedAt: '2026-10-01T00:00:00Z', url: 'https://x/r', unreleasedCommits: 14,
+      downloads: 142, latestDownloads: 42,
     });
     expect(octokit.repos.compareCommitsWithBasehead).toHaveBeenCalledWith({
       owner: 'me', repo: 'api', basehead: 'v1.2.0...main', per_page: 1,
@@ -51,6 +58,7 @@ describe('collectRelease', () => {
     expect(await collect(octokit)).toEqual({
       hasRelease: true, source: 'tag', tag: 'v0.3.0', name: null, publishedAt: '2026-09-09T00:00:00Z',
       url: 'https://github.com/me/api/releases/tag/v0.3.0', unreleasedCommits: 3,
+      downloads: null, latestDownloads: null,
     });
     expect(octokit.repos.getCommit).toHaveBeenCalledWith({ owner: 'me', repo: 'api', ref: 'abc' });
   });
@@ -65,6 +73,19 @@ describe('collectRelease', () => {
 
     const missing = fakeOctokit({ ...tags, getCommit: vi.fn().mockRejectedValue(notFound) });
     expect((await collect(missing) as any).publishedAt).toBeNull();
+  });
+
+  it('leaves downloads unknown when releases cannot be listed, and for bare tags', async () => {
+    const octokit = fakeOctokit({
+      getLatestRelease: vi.fn().mockResolvedValue({ data: { tag_name: 'v1' } }),
+      listReleases: vi.fn().mockRejectedValue({ status: 403 }),
+    });
+    expect(await collect(octokit)).toMatchObject({ downloads: null, latestDownloads: null });
+
+    const boom = { status: 500 };
+    await expect(collect(fakeOctokit({
+      getLatestRelease: vi.fn().mockResolvedValue({ data: { tag_name: 'v1' } }), listReleases: vi.fn().mockRejectedValue(boom),
+    }))).rejects.toBe(boom);
   });
 
   it('reports repos that never released', async () => {

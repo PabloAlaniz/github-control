@@ -31,7 +31,11 @@ export function compactNumber(value: number): string {
   return String(value);
 }
 
-export function renderBadge(label: string, value: string, color: keyof typeof COLORS | string = 'blue'): string {
+export type BadgeStyle = 'flat' | 'flat-square';
+
+export function renderBadge(
+  label: string, value: string, color: keyof typeof COLORS | string = 'blue', style: BadgeStyle = 'flat',
+): string {
   const left = textWidth(label) + 12;
   const right = textWidth(value) + 12;
   const width = left + right;
@@ -41,7 +45,7 @@ export function renderBadge(label: string, value: string, color: keyof typeof CO
 
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="20" role="img" aria-label="${safeLabel}: ${safeValue}">
   <title>${safeLabel}: ${safeValue}</title>
-  <clipPath id="r"><rect width="${width}" height="20" rx="3"/></clipPath>
+  <clipPath id="r"><rect width="${width}" height="20" rx="${style === 'flat-square' ? 0 : 3}"/></clipPath>
   <g clip-path="url(#r)">
     <rect width="${left}" height="20" fill="#4b5563"/>
     <rect x="${left}" width="${right}" height="20" fill="${fill}"/>

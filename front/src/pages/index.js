@@ -6,3 +6,5 @@ export { RepoMetricsPage } from './RepoMetricsPage';
 export { DependenciesPage } from './DependenciesPage';
 export { AlertsPage } from './AlertsPage';
 export { InboxPage } from './InboxPage';
+export { EmbedsPage } from './EmbedsPage';
+export { StatusPage } from './StatusPage';

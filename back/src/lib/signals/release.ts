@@ -43,9 +43,27 @@ async function latestTag(ctx: SignalContext): Promise<LatestVersion | null> {
   return { source: 'tag', tag: tag.name, name: null, publishedAt, url: `https://github.com/${owner}/${repo}/releases/tag/${encodeURIComponent(tag.name)}` };
 }
 
+/** Downloads of the files attached to releases (the latest 100 releases). Null when it cannot be read. */
+async function releaseDownloads(ctx: SignalContext, latestTag: string) {
+  const { octokit, owner, repo } = ctx;
+  try {
+    const { data } = await octokit.repos.listReleases({ owner, repo, per_page: 100 });
+    const of = (release: { assets?: { download_count?: number }[] }) =>
+      (release.assets ?? []).reduce((sum, asset) => sum + (asset.download_count ?? 0), 0);
+    return {
+      downloads: data.reduce((sum, release) => sum + of(release), 0),
+      latestDownloads: of(data.find((release) => release.tag_name === latestTag) ?? {}),
+    };
+  } catch (err: any) {
+    if (!isUnavailable(err)) throw err;
+    return { downloads: null, latestDownloads: null };
+  }
+}
+
 /**
- * Latest published version (release, or tag if there are no releases) and how
- * many commits on the default branch are not in it yet.
+ * Latest published version (release, or tag if there are no releases), how
+ * many commits on the default branch are not in it yet, and how many times
+ * the files attached to releases were downloaded.
  */
 export const collectRelease: SignalCollector = async (ctx) => {
   const { octokit, owner, repo } = ctx;
@@ -63,5 +81,10 @@ export const collectRelease: SignalCollector = async (ctx) => {
     if (!isUnavailable(err)) throw err;  // the tag no longer exists or is not comparable
   }
 
-  return { hasRelease: true, ...latest, unreleasedCommits };
+  // Only releases carry downloadable files; a bare tag has none.
+  const downloads = latest.source === 'release'
+    ? await releaseDownloads(ctx, latest.tag)
+    : { downloads: null, latestDownloads: null };
+
+  return { hasRelease: true, ...latest, unreleasedCommits, ...downloads };
 };

@@ -150,6 +150,10 @@ Three routes act on GitHub from what a signal showed: `routes/branches.ts` (dele
 
 `services/service-check.service.ts` probes a service, updates its latest status and appends the result to the `service_checks` collection. The same function serves the manual check, the Node timer and the Worker's `scheduled` handler. `GET /api/services/uptime` turns that history into uptime, mean latency, incidents (transitions into "down") and a per-day series.
 
+### Public surface
+
+Two groups of routes answer without authentication, each behind its own switch and mounted before the auth middleware: `routes/badges.ts` (`PUBLIC_BADGES`: badges and cards, public repos only) and `routes/status.ts` (`PUBLIC_STATUS`: the names, states and uptime of active services). Both render from stored data, so a request never reaches GitHub. `lib/badge.ts` and `lib/cards.ts` build the SVG by hand; anything a caller can supply (`label`, `title`) is escaped and length-limited.
+
 ### Alerts
 
 `domain/alerts.ts` is the rule book: a pure function from the stored state (repos, services, signals) to the conditions that hold right now, each with a stable key such as `ci_failing:acme/api`. `services/alert.service.ts` compares them with the open records of the `alerts` collection and opens, updates or resolves accordingly, so there is no event to miss: whatever changed the data, the next evaluation sees the result. It runs at the end of a full sync and of every round of service checks, one evaluation at a time per storage.

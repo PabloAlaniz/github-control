@@ -143,6 +143,9 @@ const RELEASES: Record<string, [string, number, number]> = {
   'legacy-monolith': ['v7.41.3', 310, 64],
 };
 
+/** Downloads of release files, for the public repos that ship some. */
+const DOWNLOADS: Record<string, number> = { 'cli-tools': 18420, 'sdk-python': 6310, 'design-system': 2975 };
+
 /** How tidy each repo is, 0..1: drives standards, branch leftovers and settings drift. */
 const TIDINESS: Record<string, number> = {
   'storefront-web': 0.9, 'checkout-api': 0.8, 'design-system': 1, 'billing-worker': 0.45, 'mobile-app': 0.6,
@@ -225,6 +228,9 @@ function release(repo: Row, now: number) {
     publishedAt: new Date(now - daysAgo * DAY).toISOString(),
     url: `https://github.com/${repo.full_name}/releases/tag/${tag}`,
     unreleasedCommits,
+    // Files attached to releases only matter for what people install: the public repos.
+    downloads: repo.is_private ? 0 : DOWNLOADS[repo.name] ?? 0,
+    latestDownloads: repo.is_private ? 0 : Math.round((DOWNLOADS[repo.name] ?? 0) * 0.08),
   };
 }
 

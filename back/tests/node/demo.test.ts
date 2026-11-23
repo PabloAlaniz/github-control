@@ -150,6 +150,20 @@ describe('demo mode: server', () => {
     expect((await send('POST', '/api/inbox/merge', { pulls: [] })).status).toBe(403);
   });
 
+  it('shows the public surfaces: cards, badges and the status page', async () => {
+    const { send } = start({ DEMO: 'true' });
+
+    const summary = await send('GET', '/api/badges/summary.svg');
+    expect(summary.headers.get('Content-Type')).toContain('image/svg+xml');
+    expect(await summary.text()).toMatch(/\d+ public repos/);
+    expect(await (await send('GET', '/api/badges/acme/cli-tools/downloads.svg')).text()).toContain('downloads: 18.4k');
+    expect((await send('GET', '/api/badges/acme/checkout-api/card.svg')).status).toBe(404);   // private
+
+    const status = await (await send('GET', '/api/status')).json();
+    expect(status.services.map((service: any) => service.name)).toEqual(['Checkout API', 'Docs', 'Storefront']);
+    expect(await (await send('GET', '/api/embeds')).json()).toMatchObject({ badges: true, status: true });
+  });
+
   it('accepts local edits and refuses what needs GitHub', async () => {
     const { send } = start({ DEMO: 'true' });
 

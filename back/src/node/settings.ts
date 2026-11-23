@@ -21,6 +21,7 @@ const ENV_KEYS: Record<SettingName, string[]> = {
   githubOrgs: ['GITHUB_ORGS'],
   syncIntervalHours: ['SYNC_INTERVAL_HOURS'],
   publicBadges: ['PUBLIC_BADGES'],
+  publicStatus: ['PUBLIC_STATUS'],
   repoBaseline: ['REPO_BASELINE'],
   password: ['AUTH_PASSWORD', 'AUTH_PASSWORD_HASH', 'DISABLE_AUTH'],
 };
@@ -50,6 +51,7 @@ export function createSettingsStore({ env, dataDir, config, verifyGithubToken }:
     githubOrgs: configuredOrgs(config),
     syncIntervalHours: Number(config.SYNC_INTERVAL_HOURS ?? DEFAULT_SYNC_INTERVAL_HOURS),
     publicBadges: config.PUBLIC_BADGES === 'true',
+    publicStatus: config.PUBLIC_STATUS === 'true',
     repoBaseline: baselineOptions(config.REPO_BASELINE),
     locked,
   });
@@ -77,6 +79,7 @@ export function createSettingsStore({ env, dataDir, config, verifyGithubToken }:
       if (patch.githubOrgs !== undefined) values.GITHUB_ORGS = patch.githubOrgs.join(',');
       if (patch.syncIntervalHours !== undefined) values.SYNC_INTERVAL_HOURS = String(patch.syncIntervalHours);
       if (patch.publicBadges !== undefined) values.PUBLIC_BADGES = String(patch.publicBadges);
+      if (patch.publicStatus !== undefined) values.PUBLIC_STATUS = String(patch.publicStatus);
       if (patch.repoBaseline !== undefined) {
         const unknown = Object.keys(patch.repoBaseline).filter((key) => !isBaselineKey(key));
         if (unknown.length > 0) throw new SettingsError(`Not a repo setting the baseline can enforce: ${unknown.join(', ')}`);

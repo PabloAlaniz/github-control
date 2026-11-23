@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="480" height="124" viewBox="0 0 480 124" role="img" aria-label="acme/cli-tools: Cli tools for the Acme platform. Rust, ★ 640, health 77/100, coverage 81%, v2.4.1">
+  <title>acme/cli-tools: Cli tools for the Acme platform. Rust, ★ 640, health 77/100, coverage 81%, v2.4.1</title>
+  <style>text{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif}.bg{fill:#ffffff;stroke:#d0d7de}.title{fill:#0969da}.text{fill:#1f2328}.muted{fill:#59636e}@media(prefers-color-scheme:dark){.bg{fill:#0d1117;stroke:#30363d}.title{fill:#58a6ff}.text{fill:#e6edf3}.muted{fill:#9198a1}}</style>
+  <rect class="bg" x="0.5" y="0.5" width="479" height="123" rx="6"/>
+  <text class="title" x="24" y="38" font-size="16" font-weight="600">acme/cli-tools</text>
+  <text class="muted" x="24" y="64" font-size="13">Cli tools for the Acme platform</text>
+  <circle cx="30" cy="97" r="6" fill="#dea584"/>
+  <text class="text" x="44" y="101" font-size="12">Rust   ·   ★ 640   ·   health 77/100   ·   coverage 81%   ·   v2.4.1</text>
+</svg>
