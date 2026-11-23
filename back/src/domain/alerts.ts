@@ -8,6 +8,7 @@
  * (resolved).
  */
 import { computeHealthScore, repoRowToHealthInput } from '../lib/analyzers/healthScore';
+import { resolvePolicy, type HealthPolicy, type PolicyConfig } from './policy';
 
 export const ALERT_KINDS = ['ci_failing', 'service_down', 'security', 'repo_stale', 'health_low'] as const;
 export type AlertKind = (typeof ALERT_KINDS)[number];
@@ -32,22 +33,16 @@ export interface AlertOptions {
   staleDays: number;
   /** Health score under which a repo is reported. 0 turns the rule off. */
   healthBelow: number;
+  /** How the health score is computed (weights, custom checks). Unset = the built-in score. */
+  health?: HealthPolicy;
 }
 
 export const DEFAULT_ALERT_OPTIONS: AlertOptions = { staleDays: 90, healthBelow: 40 };
 
-const numberOr = (raw: string | undefined, fallback: number, max: number) => {
-  if (raw === undefined || raw.trim() === '') return fallback;
-  const value = Number(raw);
-  return Number.isFinite(value) && value >= 0 && value <= max ? Math.floor(value) : fallback;
-};
-
-/** Options from the `ALERT_STALE_DAYS` and `ALERT_HEALTH_BELOW` settings. */
-export function resolveAlertOptions(config: { ALERT_STALE_DAYS?: string; ALERT_HEALTH_BELOW?: string }): AlertOptions {
-  return {
-    staleDays: numberOr(config.ALERT_STALE_DAYS, DEFAULT_ALERT_OPTIONS.staleDays, 3650),
-    healthBelow: numberOr(config.ALERT_HEALTH_BELOW, DEFAULT_ALERT_OPTIONS.healthBelow, 100),
-  };
+/** Options from the policy in force (or the `ALERT_STALE_DAYS` and `ALERT_HEALTH_BELOW` settings). */
+export function resolveAlertOptions(config: PolicyConfig): AlertOptions {
+  const policy = resolvePolicy(config);
+  return { ...policy.alerts, health: policy.health };
 }
 
 export interface Condition {
@@ -120,7 +115,7 @@ function repoConditions(repo: Record<string, any>, input: ConditionInput): Condi
 
   // Only repos whose health was actually checked: an unchecked repo scores low for lack of data.
   if (options.healthBelow > 0 && repo.last_health_check) {
-    const { score, grade } = computeHealthScore(repoRowToHealthInput({ ...repo, signals }));
+    const { score, grade } = computeHealthScore(repoRowToHealthInput({ ...repo, signals }), options.health);
     if (score < options.healthBelow) {
       found.push({
         key: `health_low:${fullName}`, kind: 'health_low', entity: fullName,

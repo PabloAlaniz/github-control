@@ -1,5 +1,6 @@
 import type { Octokit } from '@octokit/rest';
 import { resolveBaseline, type Baseline } from '../../domain/repo-baseline';
+import type { CustomCheck } from '../../domain/policy';
 
 /**
  * A "signal" is a per-repo piece of data fetched from GitHub on demand and
@@ -26,12 +27,20 @@ export interface SignalContext {
   repo: string;
   /** Settings baseline the repo is compared against. */
   baseline: Baseline;
+  /** What the policy asks of the signals: its custom checks and optional sources. */
+  policy: SignalPolicy;
   /** Repo metadata (memoized: several collectors share it within a single sync). */
   repoInfo(): Promise<RepoInfo>;
   /** Paths in the default branch's tree (memoized). Empty repo → []. */
   tree(): Promise<string[]>;
   /** Contents of a text file on the default branch, or null if it does not exist. */
   readFile(path: string): Promise<string | null>;
+}
+
+export interface SignalPolicy {
+  checks: CustomCheck[];
+  /** Ask the OpenSSF Scorecard API about public repos. */
+  scorecard: boolean;
 }
 
 export type SignalData = Record<string, unknown>;
@@ -50,6 +59,7 @@ function decodeBase64(content: string): string {
 
 export function createSignalContext(
   octokit: Octokit, owner: string, repo: string, baseline: Baseline = resolveBaseline(undefined),
+  policy: SignalPolicy = { checks: [], scorecard: false },
 ): SignalContext {
   let repoPromise: Promise<RepoInfo> | undefined;
   let treePromise: Promise<string[]> | undefined;
@@ -59,6 +69,7 @@ export function createSignalContext(
     owner,
     repo,
     baseline,
+    policy,
     repoInfo() {
       repoPromise ??= octokit.repos.get({ owner, repo }).then(res => res.data as unknown as RepoInfo);
       return repoPromise;

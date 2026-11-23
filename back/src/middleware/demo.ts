@@ -20,10 +20,18 @@ const GITHUB_READS = [
   /^\/api\/repos\/[^/]+\/[^/]+\/(prs|readme)$/,
 ];
 
+/** Requests that are not GETs but change nothing: fine in any demo. */
+const DRY_RUNS = [
+  /^\/api\/policy\/plan$/,
+  // MCP messages are POSTs; what a tool does goes through this guard again as its own request.
+  /^\/api\/mcp$/,
+];
+
 const READ_METHODS = new Set(['GET', 'HEAD', 'OPTIONS']);
 
 export function demoAllows(mode: string, method: string, path: string): boolean {
   if (READ_METHODS.has(method)) return !GITHUB_READS.some((pattern) => pattern.test(path));
+  if (method === 'POST' && DRY_RUNS.some((pattern) => pattern.test(path))) return true;
   return mode === 'true' && LOCAL_WRITES.some((pattern) => pattern.test(path));
 }
 

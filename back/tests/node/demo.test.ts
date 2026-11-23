@@ -114,7 +114,7 @@ describe('demo mode: server', () => {
     const { send } = start({ DEMO: 'true' });
 
     const { signals } = await (await send('GET', '/api/repos/acme/billing-worker/signals')).json();
-    expect(Object.keys(signals).sort()).toEqual(['branches', 'ci', 'config', 'dependencies', 'inbox', 'release', 'security', 'standards']);
+    expect(Object.keys(signals).sort()).toEqual(['branches', 'ci', 'config', 'dependencies', 'inbox', 'policy', 'release', 'scorecard', 'security', 'standards']);
 
     const inventory = await (await send('GET', '/api/dependencies')).json();
     expect(inventory.packages.length).toBeGreaterThan(10);
@@ -162,6 +162,32 @@ describe('demo mode: server', () => {
     const status = await (await send('GET', '/api/status')).json();
     expect(status.services.map((service: any) => service.name)).toEqual(['Checkout API', 'Docs', 'Storefront']);
     expect(await (await send('GET', '/api/embeds')).json()).toMatchObject({ badges: true, status: true });
+  });
+
+  it('runs under its own policy, which can be planned against but not changed', async () => {
+    const { send } = start({ DEMO: 'true' });
+
+    const policy = await (await send('GET', '/api/policy')).json();
+    expect(policy).toMatchObject({ source: 'file', editable: false, errors: [] });
+    expect(policy.yaml).toContain('id: codeowners');
+
+    const { health_score: health } = (await (await send('GET', '/api/repos')).json()).find((repo: any) => repo.full_name === 'acme/design-system');
+    expect(health.breakdown.custom.checks.map((check: any) => check.passed)).toEqual([true, true, true]);
+    expect(health.breakdown.tests.weight).toBe(35);
+
+    const plan = await send('POST', '/api/policy/plan', { yaml: 'health: { weights: { tests: 0 } }' });
+    expect(plan.status).toBe(200);
+    expect((await plan.json()).impact.repos).toBeGreaterThan(5);
+    expect((await send('PUT', '/api/policy', { yaml: 'alerts: { stale_days: 1 }' })).status).toBe(403);
+  });
+
+  it('answers MCP requests, with the same limits as its HTTP API', async () => {
+    const { send } = start({ DEMO: 'readonly' });
+    const call = async (name: string, args: unknown) =>
+      (await (await send('POST', '/api/mcp', { jsonrpc: '2.0', id: 1, method: 'tools/call', params: { name, arguments: args } })).json()).result;
+
+    expect(JSON.parse((await call('list_alerts', {})).content[0].text).open).toBeGreaterThan(0);
+    expect(await call('update_repo', { repo: 'acme/docs-site', priority: 'high' })).toMatchObject({ isError: true });
   });
 
   it('accepts local edits and refuses what needs GitHub', async () => {

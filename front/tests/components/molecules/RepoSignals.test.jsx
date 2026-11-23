@@ -300,3 +300,55 @@ describe('RepoSignals', () => {
         });
     });
 });
+
+describe('RepoSignals: policy, scorecard and downloads', () => {
+    const repo = (signals, extra = {}) => ({ fullName: 'me/api', isPrivate: false, signals, ...extra });
+
+    it('lists the policy checks with their outcome', () => {
+        render(<RepoSignals repo={repo({ policy: { passed: 1, total: 2, checks: [
+            { id: 'codeowners', label: 'CODEOWNERS file', passed: true },
+            { id: 'no-env', label: 'No .env committed', passed: false },
+            { id: 'internal', label: 'Internal docs', passed: null },
+        ] } })} />);
+
+        expect(screen.getByText('Policy checks')).toBeInTheDocument();
+        expect(screen.getByText('1/2')).toBeInTheDocument();
+        expect(screen.getByText('Internal docs').closest('li')).toHaveTextContent('n/a');
+    });
+
+    it('shows no policy card when the policy has no checks', () => {
+        render(<RepoSignals repo={repo({ policy: { passed: 0, total: 0, checks: [] }, standards })} />);
+        expect(screen.queryByText('Policy checks')).not.toBeInTheDocument();
+    });
+
+    it('shows the OpenSSF Scorecard with its weakest checks and a link to the report', () => {
+        render(<RepoSignals repo={repo({ scorecard: {
+            enabled: true, available: true, score: 6.4, date: '2026-01-01T00:00:00Z',
+            weakest: [{ name: 'Pinned-Dependencies', score: 0, reason: 'unpinned' }, { name: 'Code-Review', score: 5, reason: null }],
+        } })} />);
+
+        expect(screen.getByText('6.4')).toBeInTheDocument();
+        expect(screen.getByText('Pinned-Dependencies').closest('li')).toHaveAttribute('title', 'unpinned');
+        expect(screen.getByRole('link', { name: 'Full report' })).toHaveAttribute('href', 'https://scorecard.dev/viewer/?uri=github.com/me/api');
+    });
+
+    it('explains a scorecard that is not available, and hides it when the policy has it off', () => {
+        const { rerender } = render(<RepoSignals repo={repo({ scorecard: { enabled: true, available: false, reason: 'private' } })} />);
+        expect(screen.getByText('Only for public repos')).toBeInTheDocument();
+        rerender(<RepoSignals repo={repo({ scorecard: { enabled: true, available: false, reason: 'not_scanned' } })} />);
+        expect(screen.getByText(/Not scanned by the Scorecard project/)).toBeInTheDocument();
+        rerender(<RepoSignals repo={repo({ scorecard: { enabled: false }, standards })} />);
+        expect(screen.queryByText('OpenSSF Scorecard')).not.toBeInTheDocument();
+    });
+
+    it('shows release downloads and links public repos to their badges', () => {
+        const release = { hasRelease: true, tag: 'v2.0.0', source: 'release', publishedAt: null, unreleasedCommits: 0, downloads: 15300, latestDownloads: 420 };
+        const { rerender } = render(<RepoSignals repo={repo({ release })} />);
+        expect(screen.getByText('15,300 downloads (420 of v2.0.0)')).toBeInTheDocument();
+        expect(screen.getByRole('link', { name: 'Badges' })).toHaveAttribute('href', '/embeds?repo=me%2Fapi');
+
+        rerender(<RepoSignals repo={repo({ release: { ...release, downloads: 0 } }, { isPrivate: true })} />);
+        expect(screen.queryByText(/downloads/)).not.toBeInTheDocument();
+        expect(screen.queryByRole('link', { name: 'Badges' })).not.toBeInTheDocument();
+    });
+});

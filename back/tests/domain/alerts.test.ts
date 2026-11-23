@@ -120,10 +120,10 @@ describe('alert rules', () => {
 
 describe('alert options', () => {
   it('uses the defaults unless a valid value is configured', () => {
-    expect(resolveAlertOptions({})).toEqual({ staleDays: 90, healthBelow: 40 });
-    expect(resolveAlertOptions({ ALERT_STALE_DAYS: '30', ALERT_HEALTH_BELOW: '0' })).toEqual({ staleDays: 30, healthBelow: 0 });
-    expect(resolveAlertOptions({ ALERT_STALE_DAYS: 'soon', ALERT_HEALTH_BELOW: '150' })).toEqual({ staleDays: 90, healthBelow: 40 });
-    expect(resolveAlertOptions({ ALERT_STALE_DAYS: ' ', ALERT_HEALTH_BELOW: '-1' })).toEqual({ staleDays: 90, healthBelow: 40 });
+    expect(resolveAlertOptions({})).toMatchObject({ staleDays: 90, healthBelow: 40 });
+    expect(resolveAlertOptions({ ALERT_STALE_DAYS: '30', ALERT_HEALTH_BELOW: '0' })).toMatchObject({ staleDays: 30, healthBelow: 0 });
+    expect(resolveAlertOptions({ ALERT_STALE_DAYS: 'soon', ALERT_HEALTH_BELOW: '150' })).toMatchObject({ staleDays: 90, healthBelow: 40 });
+    expect(resolveAlertOptions({ ALERT_STALE_DAYS: ' ', ALERT_HEALTH_BELOW: '-1' })).toMatchObject({ staleDays: 90, healthBelow: 40 });
   });
 });
 

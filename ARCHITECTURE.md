@@ -138,7 +138,7 @@ The repo settings baseline is one of these settings: `domain/repo-baseline.ts` h
 
 A signal is data about one repo that is fetched from GitHub and cached: one record per repo and kind in the `repo_signals` collection, with the processed result as JSON. Each kind has a collector in `lib/signals/` (a function from a `SignalContext` to plain data) registered in `SIGNAL_COLLECTORS`; adding a kind is adding an entry there and the UI for it. The context memoizes the repo metadata and file tree, so the collectors of one sync share those calls.
 
-Current kinds: `standards`, `dependencies`, `security`, `release`, `branches`, `ci`, `config`, `inbox`.
+Current kinds: `standards`, `dependencies`, `security`, `release`, `branches`, `ci`, `config`, `inbox`, `policy`, `scorecard`.
 
 `services/signal.service.ts` runs the collectors and stores the results; kinds fail independently, so a missing permission on one does not lose the others. By convention a signal keeps its long detail under `items`: `GET /api/repos` attaches only the summary of each signal to a repo, and `GET /api/repos/:owner/:repo/signals` returns everything. Cross-repo questions (`services/dependency.service.ts`) are answered in application code from the stored signals, so they work the same on every storage.
 
@@ -149,6 +149,16 @@ Three routes act on GitHub from what a signal showed: `routes/branches.ts` (dele
 ### Service checks
 
 `services/service-check.service.ts` probes a service, updates its latest status and appends the result to the `service_checks` collection. The same function serves the manual check, the Node timer and the Worker's `scheduled` handler. `GET /api/services/uptime` turns that history into uptime, mean latency, incidents (transitions into "down") and a per-day series.
+
+### Policy
+
+`domain/policy.ts` turns one YAML document into the `Policy` everything else reads: the settings baseline, the health score weights and custom checks, the alert thresholds and optional signals. Sections a document leaves out fall back to the defaults (or the older single-purpose settings), and a document that does not parse is ignored rather than fatal. The document reaches the configuration as `POLICY` from one of three places: a file followed by `node/policy-file.ts` (`POLICY_FILE`), the environment, or the settings store when it is applied from the app.
+
+`services/policy.service.ts` plans a change without making it: it builds the candidate policy and recomputes scores, settings drift and alert conditions from stored data under both policies. For that the `config` signal keeps the actual value of every setting the baseline could enforce, not only those it enforces today. Custom checks run in the `policy` signal collector against the repo's file tree, so their results are stored like any other signal.
+
+### MCP
+
+`routes/mcp.ts` implements the stateless part of MCP's Streamable HTTP transport by hand (JSON-RPC over POST, JSON answers). A tool does not touch storage: it sends a request to the app's own routes with the caller's credentials. Authentication, validation, the activity log and the demo restrictions therefore apply to an agent exactly as to any other client, and a tool can never do more than the HTTP API allows.
 
 ### Public surface
 

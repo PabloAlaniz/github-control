@@ -41,7 +41,8 @@ Open http://localhost:13337. From a clone, without Docker: `DEMO=true npm start`
 - **Alerts**: know when CI breaks, a service goes down, a serious security alert appears, a repo you care about goes stale or a health score drops, in Slack, Discord, Telegram, ntfy or any webhook, with an optional daily or weekly digest.
 - **Coverage from CI**: a workflow step reports coverage per repo or per app.
 - **AI summaries** (optional): a structured summary of a repo's README using the Claude API.
-- **API for agents and CI**: everything in the UI is available over HTTP with an API key, plus an activity log of who changed what.
+- **Policy as code**: the settings baseline, what counts for the health score, checks of your own and the alert thresholds in one YAML document, with a dry run that shows what a change would do before you apply it.
+- **API and MCP for agents and CI**: everything in the UI is available over HTTP with an API key, the dashboard is an MCP server your coding agent can use as tools, and an activity log records who changed what.
 - **Your data, your storage**: SQLite, JSON files, CSV files or PostgreSQL. Switch between them with one command.
 
 ![The dashboard in the dark theme, with one repo's signals open](docs/dark.png)
@@ -139,6 +140,8 @@ To keep a copy of the demo data in a real storage instead, import it: `node back
 
 Every setting can also be given as an environment variable. Variables win over the wizard's answers, and the wizard does not ask for what the environment already provides. With `GITHUB_TOKEN`, `AUTH_USERNAME` and `AUTH_PASSWORD` set, the wizard never appears.
 
+Settings that describe what you expect of your repos (the baseline, health weights, alert thresholds) are better kept in the [policy](#policy).
+
 | Variable | Purpose | Default |
 |---|---|---|
 | `STORAGE_DRIVER` | `sqlite`, `json`, `csv` or `postgres` | `json` (`postgres` if `DATABASE_URL` is set) |
@@ -154,7 +157,9 @@ Every setting can also be given as an environment variable. Variables win over t
 | `ALERT_HEALTH_BELOW` | Health score under which a repo raises an alert; `0` turns it off | `40` |
 | `PUBLIC_BADGES` | `true` serves public SVG badges and cards for public repos | off |
 | `PUBLIC_STATUS` | `true` serves the public status page of your services at `/status` | off |
-| `REPO_BASELINE` | JSON object `{ "setting": true/false }`: the repo settings every repo is expected to have | a small default set |
+| `POLICY_FILE` | Path to the policy document (YAML). The file is then the source of truth | none |
+| `POLICY` | The policy document itself (YAML or JSON) | none |
+| `REPO_BASELINE` | JSON object `{ "setting": true/false }`: the repo settings every repo is expected to have. Superseded by the policy's `baseline` | a small default set |
 | `ANTHROPIC_API_KEY` | Enables AI summaries | off |
 | `CI_COVERAGE_TOKEN` | Token CI uses to report coverage | off |
 | `DATA_DIR`, `PORT`, `HOST` | Where data lives and where to listen | `./data`, `13337`, `0.0.0.0` |
@@ -206,6 +211,73 @@ Almost everything is read-only. Three actions write to GitHub, all only when you
 - **Branch cleanup** deletes the branches you select. The server re-checks each one first and never deletes the default branch, a protected branch, or a branch that moved since it was listed.
 - **Merging pull requests** from the inbox. The server re-checks each one first and skips it if it is closed, a draft, has new commits since it was listed, or has failing or running checks. GitHub's own rules (required reviews, conflicts, branch protection) still apply.
 - **Applying the settings baseline** changes only the settings that differ. Review the baseline in **Settings** before applying it in bulk.
+
+## Policy
+
+![The policy document on the left and, on the right, the preview of a change: what changes and how scores move](docs/policy.png)
+
+What you expect of every repo lives in one YAML document, on the **Policy** page:
+
+```yaml
+version: 1
+
+baseline:                 # repo settings every repo must have (drift is shown per repo and can be fixed in bulk)
+  delete_branch_on_merge: true
+  allow_merge_commit: false
+  has_wiki: false
+
+health:
+  weights:                # how much each category counts; relative to each other
+    tests: 35             # ci, tests, docs, quality, hygiene, freshness, custom
+    freshness: 10
+  checks:                 # checks of your own, counted in the health score
+    - id: codeowners
+      label: CODEOWNERS file
+      weight: 6
+      files: [CODEOWNERS, .github/CODEOWNERS]     # passes when one exists
+    - id: no-env-file
+      label: No .env file committed
+      weight: 6
+      forbidden: ['.env', '**/.env']              # passes when none exists
+      only: public                                # or: private
+
+alerts:
+  stale_days: 90
+  health_below: 40
+
+signals:
+  openssf_scorecard: true   # fetch the OpenSSF Scorecard of public repos
+```
+
+Every section is optional; what you leave out keeps its default. A complete example is in [`docs/demo/policy.yml`](docs/demo/policy.yml).
+
+**Preview changes** is a dry run: it validates the document and shows what it changes, how the health score of each repo would move, how many settings would be out of line and how many alerts would be open, all computed from what the last sync stored. Nothing changes until you press **Apply**. New checks and newly enforced settings are read from GitHub at the next sync.
+
+To keep the policy **under version control**, put it in a file and point `POLICY_FILE` at it (for example a file from a repo, mounted into the container). The file is then the only way to change the policy: the server re-reads it within seconds of a change, ignores an edit that is not valid, and the page becomes preview-only. `POLICY` takes the document itself as an environment variable (the way to set it on Cloudflare Workers).
+
+The OpenSSF Scorecard is off unless the policy turns it on. When on, each sync asks `api.securityscorecards.dev` about your **public** repos (their names are sent to that service; private repos are never asked about) and shows the score and its weakest checks on the repo.
+
+## MCP server
+
+GitHub Control is also an [MCP](https://modelcontextprotocol.io) server, so a coding agent can ask it about your repos instead of you copying things over. It speaks the Streamable HTTP transport at `/api/mcp`, authenticated with the API key. Any MCP client that supports that transport can connect with the URL and an `Authorization: Bearer <API_KEY>` header; for example, with Claude Code:
+
+```bash
+claude mcp add --transport http github-control https://your-server.example/api/mcp \
+  --header "Authorization: Bearer $API_KEY"
+```
+
+| Tool | What it does |
+|---|---|
+| `list_repos` | Repos with health, CI, priority and last commit; filter by text, priority, language, CI state or health |
+| `get_repo` | One repo in full: metadata, notes, health breakdown and signals |
+| `list_alerts` | Open (or resolved) alerts |
+| `get_inbox` | Open pull requests and issues; filter by type, repo or requested reviewer |
+| `list_dependencies` | Packages and versions across repos, diverging majors, end-of-life runtimes |
+| `list_services` | Services with their state and uptime |
+| `get_policy`, `plan_policy` | The policy in force, and a dry run of a new one |
+| `update_repo` | Set a repo's priority, next action or notes in the dashboard |
+
+The tools read what the dashboard already knows; none of them calls GitHub, and only `update_repo` changes anything (the dashboard's own notes, never GitHub). Each call goes through the same API as everything else, so it is logged in the activity log as an agent.
 
 ## Inbox
 
@@ -303,6 +375,8 @@ curl -X POST -H "Authorization: Bearer $API_KEY" http://localhost:13337/api/sync
 | Signals | `GET /api/repos/:owner/:repo/signals`, `POST .../signals/sync?kinds=`, `POST .../branches/delete`, `POST .../config/apply` |
 | Dependencies | `GET /api/dependencies` |
 | Public (no sign-in, opt-in) | `GET /api/badges/:owner/:repo/:metric.svg`, `.../card.svg`, `/api/badges/summary.svg`, `GET /api/status`, `/api/status/badge.svg` |
+| Policy | `GET /api/policy`, `POST /api/policy/plan`, `PUT /api/policy` |
+| MCP | `POST /api/mcp` |
 | Inbox | `GET /api/inbox`, `POST /api/inbox/refresh`, `POST /api/inbox/merge` |
 | Alerts | `GET /api/alerts?status={open,resolved,all}`, `POST /api/alerts/evaluate`, `GET/POST /api/alerts/channels`, `PUT/DELETE /api/alerts/channels/:id`, `POST /api/alerts/channels/:id/test` |
 | Saved views | `GET/POST /api/saved-views`, `DELETE /api/saved-views/:id` |

@@ -16,7 +16,8 @@ import {
 } from './config-store';
 import { createSetupApp, verifyGithubToken } from './setup-app';
 import { createSettingsStore } from './settings';
-import { demoConfig, demoMode, demoResetMinutes, loadDemoData, readDemoData } from './demo';
+import { followPolicyFile } from './policy-file';
+import { demoConfig, demoMode, demoResetMinutes, loadDemoData, readDemoData, readDemoPolicy } from './demo';
 import { CLIENT_IP_HEADER } from '../routes/auth';
 import { createStorage } from '../infrastructure/storage';
 import { getSyncStatus, isSyncDue, startFullSync } from '../services/full-sync.service';
@@ -63,7 +64,7 @@ function createDemoApp(options: ServerOptions, mode: 'true' | 'readonly', log: (
   if (!options.demoDataPath) throw new Error('Demo mode needs the demo dataset: set DEMO_DATA to its path.');
   const file = readDemoData(options.demoDataPath);
   const resetMinutes = demoResetMinutes(env);
-  const config = demoConfig(mode, resetMinutes);
+  const config = demoConfig(mode, resetMinutes, readDemoPolicy(options.demoDataPath));
   const storage = createStorage(config);
 
   // The alerts are derived from the dataset by the real rules; a demo has no channels to tell.
@@ -94,6 +95,9 @@ function createConfiguredApp(options: ServerOptions, log: (message: string) => v
     if (resolved.missing.length > 0) return resolved;
     ensureSecrets(env, dataDir);
     config = resolveConfig(env, loadConfigFile(dataDir), dataDir).config;
+    // Where the policy comes from decides whether the app may change it.
+    if (env.POLICY_FILE?.trim()) followPolicyFile(env.POLICY_FILE.trim(), config, log);
+    else config.POLICY_SOURCE = env.POLICY?.trim() ? 'env' : config.POLICY ? 'saved' : 'default';
     config.settings = createSettingsStore({
       env, dataDir, config, verifyGithubToken: options.verifyGithubToken ?? verifyGithubToken,
     });

@@ -10,6 +10,7 @@ import {
 } from '../application/ports/settings';
 import { configuredOrgs } from '../lib/github/repos';
 import { BASELINE_SETTINGS, baselineValues, isBaselineKey } from '../domain/repo-baseline';
+import { parsePolicyDocument, resolvePolicy } from '../domain/policy';
 import { constantTimeEqual, hashPassword, verifyPassword } from '../lib/password';
 import { saveConfigFile, type ConfigValues } from './config-store';
 
@@ -23,6 +24,7 @@ const ENV_KEYS: Record<SettingName, string[]> = {
   publicBadges: ['PUBLIC_BADGES'],
   publicStatus: ['PUBLIC_STATUS'],
   repoBaseline: ['REPO_BASELINE'],
+  policy: ['POLICY', 'POLICY_FILE'],
   password: ['AUTH_PASSWORD', 'AUTH_PASSWORD_HASH', 'DISABLE_AUTH'],
 };
 
@@ -41,8 +43,13 @@ export interface SettingsDeps {
 }
 
 export function createSettingsStore({ env, dataDir, config, verifyGithubToken }: SettingsDeps): SettingsStore {
-  const locked = (Object.keys(ENV_KEYS) as SettingName[])
+  const lockedByEnv = (Object.keys(ENV_KEYS) as SettingName[])
     .filter((name) => ENV_KEYS[name].some((key) => !!env[key]?.trim()));
+  /** A policy that sets the baseline takes it out of the settings form. */
+  const policySetsBaseline = () => !!parsePolicyDocument(config.POLICY ?? '').document?.baseline;
+  const lockedNow = (): SettingName[] => (
+    policySetsBaseline() && !lockedByEnv.includes('repoBaseline') ? [...lockedByEnv, 'repoBaseline'] : lockedByEnv
+  );
 
   const read = (): SettingsView => ({
     storageDriver: config.STORAGE_DRIVER ?? 'postgres',
@@ -52,8 +59,8 @@ export function createSettingsStore({ env, dataDir, config, verifyGithubToken }:
     syncIntervalHours: Number(config.SYNC_INTERVAL_HOURS ?? DEFAULT_SYNC_INTERVAL_HOURS),
     publicBadges: config.PUBLIC_BADGES === 'true',
     publicStatus: config.PUBLIC_STATUS === 'true',
-    repoBaseline: baselineOptions(config.REPO_BASELINE),
-    locked,
+    repoBaseline: baselineOptions(JSON.stringify(resolvePolicy(config).baseline)),
+    locked: lockedNow(),
   });
 
   return {
@@ -61,9 +68,10 @@ export function createSettingsStore({ env, dataDir, config, verifyGithubToken }:
 
     async update(patch: SettingsPatch) {
       const requested = (Object.keys(patch) as SettingName[]).filter((name) => patch[name] !== undefined);
+      const locked = lockedNow();
       const blocked = requested.filter((name) => locked.includes(name));
       if (blocked.length > 0) {
-        throw new SettingsError(`Set by an environment variable and cannot be changed here: ${blocked.join(', ')}`);
+        throw new SettingsError(`Set by an environment variable or by the policy, and cannot be changed here: ${blocked.join(', ')}`);
       }
 
       const values: ConfigValues = {};
@@ -85,6 +93,13 @@ export function createSettingsStore({ env, dataDir, config, verifyGithubToken }:
         if (unknown.length > 0) throw new SettingsError(`Not a repo setting the baseline can enforce: ${unknown.join(', ')}`);
         // Stored even when empty: '{}' means "enforce nothing", unlike an unset value (the defaults).
         values.REPO_BASELINE = JSON.stringify(patch.repoBaseline);
+      }
+
+      if (patch.policy !== undefined) {
+        const { errors } = parsePolicyDocument(patch.policy);
+        if (errors.length > 0) throw new SettingsError(`Not a valid policy: ${errors.join('; ')}`);
+        values.POLICY = patch.policy.trim() ? patch.policy : '';
+        config.POLICY_SOURCE = patch.policy.trim() ? 'saved' : 'default';
       }
 
       if (patch.password !== undefined) {

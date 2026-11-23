@@ -48,6 +48,10 @@ export type AppConfig = {
   ALERT_STALE_DAYS?: string;
   /** Health score under which a repo raises an alert. '0' turns it off. Default 40. */
   ALERT_HEALTH_BELOW?: string;
+  /** The policy document (YAML): settings baseline, health weights and checks, alert thresholds. See domain/policy.ts. */
+  POLICY?: string;
+  /** Where POLICY comes from: a file (POLICY_FILE), the environment, or saved from the app. Not a stored value. */
+  POLICY_SOURCE?: 'file' | 'env' | 'saved' | 'default';
   /** Who "me" is in the inbox, instead of asking GitHub. Set by demo mode. */
   VIEWER_LOGIN?: string;
   /** Set by the Node server's demo mode: 'true' (local edits allowed) or 'readonly'. See node/demo.ts. */

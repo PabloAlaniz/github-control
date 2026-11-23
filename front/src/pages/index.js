@@ -8,3 +8,4 @@ export { AlertsPage } from './AlertsPage';
 export { InboxPage } from './InboxPage';
 export { EmbedsPage } from './EmbedsPage';
 export { StatusPage } from './StatusPage';
+export { PolicyPage } from './PolicyPage';

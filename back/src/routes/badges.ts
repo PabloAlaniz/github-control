@@ -5,6 +5,9 @@ import { computeHealthScore, repoRowToHealthInput } from '../lib/analyzers/healt
 import { compactNumber, renderBadge, type BadgeStyle } from '../lib/badge';
 import { cardTheme, renderRepoCard, renderSummaryCard } from '../lib/cards';
 import { LANGUAGE_COLORS } from '../lib/language-colors';
+import { resolvePolicy } from '../domain/policy';
+import { groupSignals } from '../services/signal.service';
+import type { AppConfig } from '../config';
 
 /**
  * Public SVG badges and cards for READMEs:
@@ -23,7 +26,13 @@ export const badgeRoutes = new Hono<HttpEnv>();
 const TRAFFIC_DAYS = 14;
 
 type Badge = { label: string; value: string; color: string };
-type Metric = (repo: Record<string, any>, storage: Storage) => Promise<Badge> | Badge;
+type Metric = (repo: Record<string, any>, storage: Storage, config: AppConfig) => Promise<Badge> | Badge;
+
+/** The repo's health score under the policy in force, custom checks included. */
+async function healthScore(repo: Record<string, any>, storage: Storage, config: AppConfig): Promise<number> {
+  const signals = groupSignals(await storage.signals.getRepoSignals(repo.full_name), { summary: true }).get(repo.full_name) ?? {};
+  return computeHealthScore(repoRowToHealthInput({ ...repo, signals }), resolvePolicy(config).health).score;
+}
 
 async function trafficTotal(storage: Storage, fullName: string, field: 'views' | 'clones'): Promise<number> {
   const days = await storage.traffic.getDaily(fullName, TRAFFIC_DAYS);
@@ -39,8 +48,8 @@ const METRICS: Record<string, Metric> = {
   clones: async (repo, storage) => ({
     label: `clones (${TRAFFIC_DAYS}d)`, value: compactNumber(await trafficTotal(storage, repo.full_name, 'clones')), color: 'blue',
   }),
-  health: (repo) => {
-    const { score } = computeHealthScore(repoRowToHealthInput(repo));
+  health: async (repo, storage, config) => {
+    const score = await healthScore(repo, storage, config);
     return { label: 'health', value: `${score}/100`, color: score >= 80 ? 'green' : score >= 50 ? 'yellow' : 'red' };
   },
   coverage: (repo) => {
@@ -100,7 +109,7 @@ badgeRoutes.get('/summary.svg', async (c) => {
 
   const scored = open.filter((repo) => repo.last_health_check);
   const health = scored.length
-    ? Math.round(sum(scored.map((repo) => computeHealthScore(repoRowToHealthInput(repo)).score)) / scored.length)
+    ? Math.round(sum(await Promise.all(scored.map((repo) => healthScore(repo, storage, c.env)))) / scored.length)
     : null;
 
   const title = (c.req.query('title') ?? '').trim().slice(0, 60) || 'Open source at a glance';
@@ -121,7 +130,7 @@ async function repoCard(c: Context<HttpEnv>, fullName: string) {
 
   const release = await releaseSignal(c.var.storage, fullName);
   const facts = [`★ ${compactNumber(repo.stars ?? 0)}`];
-  if (repo.last_health_check) facts.push(`health ${computeHealthScore(repoRowToHealthInput(repo)).score}/100`);
+  if (repo.last_health_check) facts.push(`health ${await healthScore(repo, c.var.storage, c.env)}/100`);
   if (repo.test_coverage !== null && repo.test_coverage !== undefined) facts.push(`coverage ${repo.test_coverage}%`);
   if (release?.hasRelease) facts.push(String(release.tag));
 
@@ -144,7 +153,7 @@ badgeRoutes.get('/:owner/:repo/:file', async (c) => {
     return c.json({ error: 'Badge not found' }, 404);
   }
 
-  const badge = await metric(repo, c.var.storage);
+  const badge = await metric(repo, c.var.storage, c.env);
   const label = (c.req.query('label') ?? '').trim().slice(0, 40) || badge.label;
   const style: BadgeStyle = c.req.query('style') === 'flat-square' ? 'flat-square' : 'flat';
   return c.body(renderBadge(label, badge.value, badge.color, style), 200, SVG_HEADERS);

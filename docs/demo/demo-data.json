@@ -21683,7 +21683,18 @@
        "actual": false,
        "drift": false
       }
-     ]
+     ],
+     "actuals": {
+      "delete_branch_on_merge": true,
+      "allow_squash_merge": true,
+      "allow_merge_commit": false,
+      "allow_rebase_merge": null,
+      "allow_auto_merge": null,
+      "allow_update_branch": true,
+      "has_issues": null,
+      "has_projects": null,
+      "has_wiki": false
+     }
     },
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
@@ -21868,6 +21879,129 @@
    },
    {
     "id": 9,
+    "full_name": "acme/storefront-web",
+    "kind": "policy",
+    "data": {
+     "checks": [
+      {
+       "id": "codeowners",
+       "passed": true,
+       "label": "CODEOWNERS file"
+      },
+      {
+       "id": "no-env-file",
+       "passed": true,
+       "label": "No .env file committed"
+      },
+      {
+       "id": "security-policy",
+       "passed": true,
+       "label": "Security policy"
+      }
+     ],
+     "passed": 3,
+     "total": 3
+    },
+    "checked_at": "2026-11-20T10:00:00.000Z"
+   },
+   {
+    "id": 10,
+    "full_name": "acme/storefront-web",
+    "kind": "scorecard",
+    "data": {
+     "enabled": true,
+     "available": true,
+     "score": 7.6,
+     "date": "2026-11-17T12:00:00.000Z",
+     "weakest": [
+      {
+       "name": "Dependency-Update-Tool",
+       "score": 5,
+       "reason": "partially in place"
+      },
+      {
+       "name": "License",
+       "score": 6,
+       "reason": "partially in place"
+      },
+      {
+       "name": "Security-Policy",
+       "score": 6,
+       "reason": "partially in place"
+      },
+      {
+       "name": "Token-Permissions",
+       "score": 6,
+       "reason": "partially in place"
+      },
+      {
+       "name": "SAST",
+       "score": 7,
+       "reason": "partially in place"
+      }
+     ],
+     "items": [
+      {
+       "name": "Branch-Protection",
+       "score": 9,
+       "reason": "no problems found"
+      },
+      {
+       "name": "Code-Review",
+       "score": 8,
+       "reason": "no problems found"
+      },
+      {
+       "name": "Dangerous-Workflow",
+       "score": 10,
+       "reason": "no problems found"
+      },
+      {
+       "name": "Dependency-Update-Tool",
+       "score": 5,
+       "reason": "partially in place"
+      },
+      {
+       "name": "License",
+       "score": 6,
+       "reason": "partially in place"
+      },
+      {
+       "name": "Maintained",
+       "score": 8,
+       "reason": "no problems found"
+      },
+      {
+       "name": "Pinned-Dependencies",
+       "score": 9,
+       "reason": "no problems found"
+      },
+      {
+       "name": "SAST",
+       "score": 7,
+       "reason": "partially in place"
+      },
+      {
+       "name": "Security-Policy",
+       "score": 6,
+       "reason": "partially in place"
+      },
+      {
+       "name": "Token-Permissions",
+       "score": 6,
+       "reason": "partially in place"
+      },
+      {
+       "name": "Vulnerabilities",
+       "score": 10,
+       "reason": "no problems found"
+      }
+     ]
+    },
+    "checked_at": "2026-11-20T10:00:00.000Z"
+   },
+   {
+    "id": 11,
     "full_name": "acme/checkout-api",
     "kind": "standards",
     "data": {
@@ -21928,7 +22062,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 10,
+    "id": 12,
     "full_name": "acme/checkout-api",
     "kind": "dependencies",
     "data": {
@@ -21978,7 +22112,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 11,
+    "id": 13,
     "full_name": "acme/checkout-api",
     "kind": "security",
     "data": {
@@ -22014,7 +22148,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 12,
+    "id": 14,
     "full_name": "acme/checkout-api",
     "kind": "release",
     "data": {
@@ -22031,7 +22165,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 13,
+    "id": 15,
     "full_name": "acme/checkout-api",
     "kind": "branches",
     "data": {
@@ -22083,7 +22217,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 14,
+    "id": 16,
     "full_name": "acme/checkout-api",
     "kind": "ci",
     "data": {
@@ -22192,7 +22326,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 15,
+    "id": 17,
     "full_name": "acme/checkout-api",
     "kind": "config",
     "data": {
@@ -22236,12 +22370,23 @@
        "actual": false,
        "drift": false
       }
-     ]
+     ],
+     "actuals": {
+      "delete_branch_on_merge": true,
+      "allow_squash_merge": true,
+      "allow_merge_commit": true,
+      "allow_rebase_merge": null,
+      "allow_auto_merge": null,
+      "allow_update_branch": true,
+      "has_issues": null,
+      "has_projects": null,
+      "has_wiki": false
+     }
     },
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 16,
+    "id": 18,
     "full_name": "acme/checkout-api",
     "kind": "inbox",
     "data": {
@@ -22323,7 +22468,45 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 17,
+    "id": 19,
+    "full_name": "acme/checkout-api",
+    "kind": "policy",
+    "data": {
+     "checks": [
+      {
+       "id": "codeowners",
+       "passed": true,
+       "label": "CODEOWNERS file"
+      },
+      {
+       "id": "no-env-file",
+       "passed": true,
+       "label": "No .env file committed"
+      },
+      {
+       "id": "security-policy",
+       "passed": null,
+       "label": "Security policy"
+      }
+     ],
+     "passed": 2,
+     "total": 2
+    },
+    "checked_at": "2026-11-20T10:00:00.000Z"
+   },
+   {
+    "id": 20,
+    "full_name": "acme/checkout-api",
+    "kind": "scorecard",
+    "data": {
+     "enabled": true,
+     "available": false,
+     "reason": "private"
+    },
+    "checked_at": "2026-11-20T10:00:00.000Z"
+   },
+   {
+    "id": 21,
     "full_name": "acme/design-system",
     "kind": "standards",
     "data": {
@@ -22384,7 +22567,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 18,
+    "id": 22,
     "full_name": "acme/design-system",
     "kind": "dependencies",
     "data": {
@@ -22475,7 +22658,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 19,
+    "id": 23,
     "full_name": "acme/design-system",
     "kind": "security",
     "data": {
@@ -22511,7 +22694,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 20,
+    "id": 24,
     "full_name": "acme/design-system",
     "kind": "release",
     "data": {
@@ -22528,7 +22711,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 21,
+    "id": 25,
     "full_name": "acme/design-system",
     "kind": "branches",
     "data": {
@@ -22560,7 +22743,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 22,
+    "id": 26,
     "full_name": "acme/design-system",
     "kind": "ci",
     "data": {
@@ -22660,7 +22843,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 23,
+    "id": 27,
     "full_name": "acme/design-system",
     "kind": "config",
     "data": {
@@ -22704,12 +22887,23 @@
        "actual": false,
        "drift": false
       }
-     ]
+     ],
+     "actuals": {
+      "delete_branch_on_merge": true,
+      "allow_squash_merge": true,
+      "allow_merge_commit": false,
+      "allow_rebase_merge": null,
+      "allow_auto_merge": null,
+      "allow_update_branch": true,
+      "has_issues": null,
+      "has_projects": null,
+      "has_wiki": false
+     }
     },
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 24,
+    "id": 28,
     "full_name": "acme/design-system",
     "kind": "inbox",
     "data": {
@@ -22795,7 +22989,130 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 25,
+    "id": 29,
+    "full_name": "acme/design-system",
+    "kind": "policy",
+    "data": {
+     "checks": [
+      {
+       "id": "codeowners",
+       "passed": true,
+       "label": "CODEOWNERS file"
+      },
+      {
+       "id": "no-env-file",
+       "passed": true,
+       "label": "No .env file committed"
+      },
+      {
+       "id": "security-policy",
+       "passed": true,
+       "label": "Security policy"
+      }
+     ],
+     "passed": 3,
+     "total": 3
+    },
+    "checked_at": "2026-11-20T10:00:00.000Z"
+   },
+   {
+    "id": 30,
+    "full_name": "acme/design-system",
+    "kind": "scorecard",
+    "data": {
+     "enabled": true,
+     "available": true,
+     "score": 8.8,
+     "date": "2026-11-17T12:00:00.000Z",
+     "weakest": [
+      {
+       "name": "Code-Review",
+       "score": 7,
+       "reason": "partially in place"
+      },
+      {
+       "name": "SAST",
+       "score": 7,
+       "reason": "partially in place"
+      },
+      {
+       "name": "Token-Permissions",
+       "score": 7,
+       "reason": "partially in place"
+      },
+      {
+       "name": "Branch-Protection",
+       "score": 8,
+       "reason": "no problems found"
+      },
+      {
+       "name": "Dangerous-Workflow",
+       "score": 9,
+       "reason": "no problems found"
+      }
+     ],
+     "items": [
+      {
+       "name": "Branch-Protection",
+       "score": 8,
+       "reason": "no problems found"
+      },
+      {
+       "name": "Code-Review",
+       "score": 7,
+       "reason": "partially in place"
+      },
+      {
+       "name": "Dangerous-Workflow",
+       "score": 9,
+       "reason": "no problems found"
+      },
+      {
+       "name": "Dependency-Update-Tool",
+       "score": 10,
+       "reason": "no problems found"
+      },
+      {
+       "name": "License",
+       "score": 10,
+       "reason": "no problems found"
+      },
+      {
+       "name": "Maintained",
+       "score": 9,
+       "reason": "no problems found"
+      },
+      {
+       "name": "Pinned-Dependencies",
+       "score": 10,
+       "reason": "no problems found"
+      },
+      {
+       "name": "SAST",
+       "score": 7,
+       "reason": "partially in place"
+      },
+      {
+       "name": "Security-Policy",
+       "score": 10,
+       "reason": "no problems found"
+      },
+      {
+       "name": "Token-Permissions",
+       "score": 7,
+       "reason": "partially in place"
+      },
+      {
+       "name": "Vulnerabilities",
+       "score": 10,
+       "reason": "no problems found"
+      }
+     ]
+    },
+    "checked_at": "2026-11-20T10:00:00.000Z"
+   },
+   {
+    "id": 31,
     "full_name": "acme/billing-worker",
     "kind": "standards",
     "data": {
@@ -22856,7 +23173,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 26,
+    "id": 32,
     "full_name": "acme/billing-worker",
     "kind": "dependencies",
     "data": {
@@ -22923,7 +23240,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 27,
+    "id": 33,
     "full_name": "acme/billing-worker",
     "kind": "security",
     "data": {
@@ -22997,7 +23314,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 28,
+    "id": 34,
     "full_name": "acme/billing-worker",
     "kind": "release",
     "data": {
@@ -23014,7 +23331,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 29,
+    "id": 35,
     "full_name": "acme/billing-worker",
     "kind": "branches",
     "data": {
@@ -23104,7 +23421,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 30,
+    "id": 36,
     "full_name": "acme/billing-worker",
     "kind": "ci",
     "data": {
@@ -23204,7 +23521,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 31,
+    "id": 37,
     "full_name": "acme/billing-worker",
     "kind": "config",
     "data": {
@@ -23248,12 +23565,23 @@
        "actual": true,
        "drift": true
       }
-     ]
+     ],
+     "actuals": {
+      "delete_branch_on_merge": false,
+      "allow_squash_merge": false,
+      "allow_merge_commit": false,
+      "allow_rebase_merge": null,
+      "allow_auto_merge": null,
+      "allow_update_branch": true,
+      "has_issues": null,
+      "has_projects": null,
+      "has_wiki": true
+     }
     },
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 32,
+    "id": 38,
     "full_name": "acme/billing-worker",
     "kind": "inbox",
     "data": {
@@ -23405,7 +23733,45 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 33,
+    "id": 39,
+    "full_name": "acme/billing-worker",
+    "kind": "policy",
+    "data": {
+     "checks": [
+      {
+       "id": "codeowners",
+       "passed": false,
+       "label": "CODEOWNERS file"
+      },
+      {
+       "id": "no-env-file",
+       "passed": true,
+       "label": "No .env file committed"
+      },
+      {
+       "id": "security-policy",
+       "passed": null,
+       "label": "Security policy"
+      }
+     ],
+     "passed": 1,
+     "total": 2
+    },
+    "checked_at": "2026-11-20T10:00:00.000Z"
+   },
+   {
+    "id": 40,
+    "full_name": "acme/billing-worker",
+    "kind": "scorecard",
+    "data": {
+     "enabled": true,
+     "available": false,
+     "reason": "private"
+    },
+    "checked_at": "2026-11-20T10:00:00.000Z"
+   },
+   {
+    "id": 41,
     "full_name": "acme/mobile-app",
     "kind": "standards",
     "data": {
@@ -23466,7 +23832,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 34,
+    "id": 42,
     "full_name": "acme/mobile-app",
     "kind": "dependencies",
     "data": {
@@ -23479,7 +23845,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 35,
+    "id": 43,
     "full_name": "acme/mobile-app",
     "kind": "security",
     "data": {
@@ -23529,7 +23895,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 36,
+    "id": 44,
     "full_name": "acme/mobile-app",
     "kind": "release",
     "data": {
@@ -23546,7 +23912,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 37,
+    "id": 45,
     "full_name": "acme/mobile-app",
     "kind": "branches",
     "data": {
@@ -23626,7 +23992,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 38,
+    "id": 46,
     "full_name": "acme/mobile-app",
     "kind": "ci",
     "data": {
@@ -23726,7 +24092,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 39,
+    "id": 47,
     "full_name": "acme/mobile-app",
     "kind": "config",
     "data": {
@@ -23770,12 +24136,23 @@
        "actual": false,
        "drift": false
       }
-     ]
+     ],
+     "actuals": {
+      "delete_branch_on_merge": true,
+      "allow_squash_merge": false,
+      "allow_merge_commit": true,
+      "allow_rebase_merge": null,
+      "allow_auto_merge": null,
+      "allow_update_branch": false,
+      "has_issues": null,
+      "has_projects": null,
+      "has_wiki": false
+     }
     },
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 40,
+    "id": 48,
     "full_name": "acme/mobile-app",
     "kind": "inbox",
     "data": {
@@ -23839,7 +24216,45 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 41,
+    "id": 49,
+    "full_name": "acme/mobile-app",
+    "kind": "policy",
+    "data": {
+     "checks": [
+      {
+       "id": "codeowners",
+       "passed": true,
+       "label": "CODEOWNERS file"
+      },
+      {
+       "id": "no-env-file",
+       "passed": true,
+       "label": "No .env file committed"
+      },
+      {
+       "id": "security-policy",
+       "passed": null,
+       "label": "Security policy"
+      }
+     ],
+     "passed": 2,
+     "total": 2
+    },
+    "checked_at": "2026-11-20T10:00:00.000Z"
+   },
+   {
+    "id": 50,
+    "full_name": "acme/mobile-app",
+    "kind": "scorecard",
+    "data": {
+     "enabled": true,
+     "available": false,
+     "reason": "private"
+    },
+    "checked_at": "2026-11-20T10:00:00.000Z"
+   },
+   {
+    "id": 51,
     "full_name": "acme/data-pipeline",
     "kind": "standards",
     "data": {
@@ -23900,7 +24315,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 42,
+    "id": 52,
     "full_name": "acme/data-pipeline",
     "kind": "dependencies",
     "data": {
@@ -23967,7 +24382,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 43,
+    "id": 53,
     "full_name": "acme/data-pipeline",
     "kind": "security",
     "data": {
@@ -24003,7 +24418,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 44,
+    "id": 54,
     "full_name": "acme/data-pipeline",
     "kind": "release",
     "data": {
@@ -24020,7 +24435,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 45,
+    "id": 55,
     "full_name": "acme/data-pipeline",
     "kind": "branches",
     "data": {
@@ -24114,7 +24529,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 46,
+    "id": 56,
     "full_name": "acme/data-pipeline",
     "kind": "ci",
     "data": {
@@ -24214,7 +24629,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 47,
+    "id": 57,
     "full_name": "acme/data-pipeline",
     "kind": "config",
     "data": {
@@ -24258,12 +24673,23 @@
        "actual": false,
        "drift": false
       }
-     ]
+     ],
+     "actuals": {
+      "delete_branch_on_merge": true,
+      "allow_squash_merge": false,
+      "allow_merge_commit": false,
+      "allow_rebase_merge": null,
+      "allow_auto_merge": null,
+      "allow_update_branch": false,
+      "has_issues": null,
+      "has_projects": null,
+      "has_wiki": false
+     }
     },
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 48,
+    "id": 58,
     "full_name": "acme/data-pipeline",
     "kind": "inbox",
     "data": {
@@ -24318,7 +24744,45 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 49,
+    "id": 59,
+    "full_name": "acme/data-pipeline",
+    "kind": "policy",
+    "data": {
+     "checks": [
+      {
+       "id": "codeowners",
+       "passed": false,
+       "label": "CODEOWNERS file"
+      },
+      {
+       "id": "no-env-file",
+       "passed": true,
+       "label": "No .env file committed"
+      },
+      {
+       "id": "security-policy",
+       "passed": null,
+       "label": "Security policy"
+      }
+     ],
+     "passed": 1,
+     "total": 2
+    },
+    "checked_at": "2026-11-20T10:00:00.000Z"
+   },
+   {
+    "id": 60,
+    "full_name": "acme/data-pipeline",
+    "kind": "scorecard",
+    "data": {
+     "enabled": true,
+     "available": false,
+     "reason": "private"
+    },
+    "checked_at": "2026-11-20T10:00:00.000Z"
+   },
+   {
+    "id": 61,
     "full_name": "acme/infra-terraform",
     "kind": "standards",
     "data": {
@@ -24379,7 +24843,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 50,
+    "id": 62,
     "full_name": "acme/infra-terraform",
     "kind": "dependencies",
     "data": {
@@ -24392,7 +24856,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 51,
+    "id": 63,
     "full_name": "acme/infra-terraform",
     "kind": "security",
     "data": {
@@ -24428,7 +24892,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 52,
+    "id": 64,
     "full_name": "acme/infra-terraform",
     "kind": "release",
     "data": {
@@ -24437,7 +24901,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 53,
+    "id": 65,
     "full_name": "acme/infra-terraform",
     "kind": "branches",
     "data": {
@@ -24541,7 +25005,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 54,
+    "id": 66,
     "full_name": "acme/infra-terraform",
     "kind": "ci",
     "data": {
@@ -24550,7 +25014,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 55,
+    "id": 67,
     "full_name": "acme/infra-terraform",
     "kind": "config",
     "data": {
@@ -24594,12 +25058,23 @@
        "actual": false,
        "drift": false
       }
-     ]
+     ],
+     "actuals": {
+      "delete_branch_on_merge": false,
+      "allow_squash_merge": true,
+      "allow_merge_commit": false,
+      "allow_rebase_merge": null,
+      "allow_auto_merge": null,
+      "allow_update_branch": false,
+      "has_issues": null,
+      "has_projects": null,
+      "has_wiki": false
+     }
     },
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 56,
+    "id": 68,
     "full_name": "acme/infra-terraform",
     "kind": "inbox",
     "data": {
@@ -24612,7 +25087,45 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 57,
+    "id": 69,
+    "full_name": "acme/infra-terraform",
+    "kind": "policy",
+    "data": {
+     "checks": [
+      {
+       "id": "codeowners",
+       "passed": false,
+       "label": "CODEOWNERS file"
+      },
+      {
+       "id": "no-env-file",
+       "passed": true,
+       "label": "No .env file committed"
+      },
+      {
+       "id": "security-policy",
+       "passed": null,
+       "label": "Security policy"
+      }
+     ],
+     "passed": 1,
+     "total": 2
+    },
+    "checked_at": "2026-11-20T10:00:00.000Z"
+   },
+   {
+    "id": 70,
+    "full_name": "acme/infra-terraform",
+    "kind": "scorecard",
+    "data": {
+     "enabled": true,
+     "available": false,
+     "reason": "private"
+    },
+    "checked_at": "2026-11-20T10:00:00.000Z"
+   },
+   {
+    "id": 71,
     "full_name": "acme/docs-site",
     "kind": "standards",
     "data": {
@@ -24673,7 +25186,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 58,
+    "id": 72,
     "full_name": "acme/docs-site",
     "kind": "dependencies",
     "data": {
@@ -24740,7 +25253,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 59,
+    "id": 73,
     "full_name": "acme/docs-site",
     "kind": "security",
     "data": {
@@ -24776,7 +25289,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 60,
+    "id": 74,
     "full_name": "acme/docs-site",
     "kind": "release",
     "data": {
@@ -24793,7 +25306,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 61,
+    "id": 75,
     "full_name": "acme/docs-site",
     "kind": "branches",
     "data": {
@@ -24855,7 +25368,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 62,
+    "id": 76,
     "full_name": "acme/docs-site",
     "kind": "ci",
     "data": {
@@ -24964,7 +25477,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 63,
+    "id": 77,
     "full_name": "acme/docs-site",
     "kind": "config",
     "data": {
@@ -25008,12 +25521,23 @@
        "actual": true,
        "drift": true
       }
-     ]
+     ],
+     "actuals": {
+      "delete_branch_on_merge": true,
+      "allow_squash_merge": false,
+      "allow_merge_commit": true,
+      "allow_rebase_merge": null,
+      "allow_auto_merge": null,
+      "allow_update_branch": false,
+      "has_issues": null,
+      "has_projects": null,
+      "has_wiki": true
+     }
     },
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 64,
+    "id": 78,
     "full_name": "acme/docs-site",
     "kind": "inbox",
     "data": {
@@ -25073,7 +25597,130 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 65,
+    "id": 79,
+    "full_name": "acme/docs-site",
+    "kind": "policy",
+    "data": {
+     "checks": [
+      {
+       "id": "codeowners",
+       "passed": true,
+       "label": "CODEOWNERS file"
+      },
+      {
+       "id": "no-env-file",
+       "passed": true,
+       "label": "No .env file committed"
+      },
+      {
+       "id": "security-policy",
+       "passed": false,
+       "label": "Security policy"
+      }
+     ],
+     "passed": 2,
+     "total": 3
+    },
+    "checked_at": "2026-11-20T10:00:00.000Z"
+   },
+   {
+    "id": 80,
+    "full_name": "acme/docs-site",
+    "kind": "scorecard",
+    "data": {
+     "enabled": true,
+     "available": true,
+     "score": 6.4,
+     "date": "2026-11-17T12:00:00.000Z",
+     "weakest": [
+      {
+       "name": "Vulnerabilities",
+       "score": 4,
+       "reason": "partially in place"
+      },
+      {
+       "name": "Branch-Protection",
+       "score": 5,
+       "reason": "partially in place"
+      },
+      {
+       "name": "Dangerous-Workflow",
+       "score": 5,
+       "reason": "partially in place"
+      },
+      {
+       "name": "Security-Policy",
+       "score": 5,
+       "reason": "partially in place"
+      },
+      {
+       "name": "Pinned-Dependencies",
+       "score": 6,
+       "reason": "partially in place"
+      }
+     ],
+     "items": [
+      {
+       "name": "Branch-Protection",
+       "score": 5,
+       "reason": "partially in place"
+      },
+      {
+       "name": "Code-Review",
+       "score": 8,
+       "reason": "no problems found"
+      },
+      {
+       "name": "Dangerous-Workflow",
+       "score": 5,
+       "reason": "partially in place"
+      },
+      {
+       "name": "Dependency-Update-Tool",
+       "score": 7,
+       "reason": "partially in place"
+      },
+      {
+       "name": "License",
+       "score": 8,
+       "reason": "no problems found"
+      },
+      {
+       "name": "Maintained",
+       "score": 7,
+       "reason": "partially in place"
+      },
+      {
+       "name": "Pinned-Dependencies",
+       "score": 6,
+       "reason": "partially in place"
+      },
+      {
+       "name": "SAST",
+       "score": 6,
+       "reason": "partially in place"
+      },
+      {
+       "name": "Security-Policy",
+       "score": 5,
+       "reason": "partially in place"
+      },
+      {
+       "name": "Token-Permissions",
+       "score": 9,
+       "reason": "no problems found"
+      },
+      {
+       "name": "Vulnerabilities",
+       "score": 4,
+       "reason": "partially in place"
+      }
+     ]
+    },
+    "checked_at": "2026-11-20T10:00:00.000Z"
+   },
+   {
+    "id": 81,
     "full_name": "acme/cli-tools",
     "kind": "standards",
     "data": {
@@ -25134,7 +25781,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 66,
+    "id": 82,
     "full_name": "acme/cli-tools",
     "kind": "dependencies",
     "data": {
@@ -25184,7 +25831,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 67,
+    "id": 83,
     "full_name": "acme/cli-tools",
     "kind": "security",
     "data": {
@@ -25220,7 +25867,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 68,
+    "id": 84,
     "full_name": "acme/cli-tools",
     "kind": "release",
     "data": {
@@ -25237,7 +25884,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 69,
+    "id": 85,
     "full_name": "acme/cli-tools",
     "kind": "branches",
     "data": {
@@ -25279,7 +25926,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 70,
+    "id": 86,
     "full_name": "acme/cli-tools",
     "kind": "ci",
     "data": {
@@ -25379,7 +26026,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 71,
+    "id": 87,
     "full_name": "acme/cli-tools",
     "kind": "config",
     "data": {
@@ -25423,12 +26070,23 @@
        "actual": false,
        "drift": false
       }
-     ]
+     ],
+     "actuals": {
+      "delete_branch_on_merge": true,
+      "allow_squash_merge": true,
+      "allow_merge_commit": false,
+      "allow_rebase_merge": null,
+      "allow_auto_merge": null,
+      "allow_update_branch": true,
+      "has_issues": null,
+      "has_projects": null,
+      "has_wiki": false
+     }
     },
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 72,
+    "id": 88,
     "full_name": "acme/cli-tools",
     "kind": "inbox",
     "data": {
@@ -25468,7 +26126,130 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 73,
+    "id": 89,
+    "full_name": "acme/cli-tools",
+    "kind": "policy",
+    "data": {
+     "checks": [
+      {
+       "id": "codeowners",
+       "passed": true,
+       "label": "CODEOWNERS file"
+      },
+      {
+       "id": "no-env-file",
+       "passed": true,
+       "label": "No .env file committed"
+      },
+      {
+       "id": "security-policy",
+       "passed": true,
+       "label": "Security policy"
+      }
+     ],
+     "passed": 3,
+     "total": 3
+    },
+    "checked_at": "2026-11-20T10:00:00.000Z"
+   },
+   {
+    "id": 90,
+    "full_name": "acme/cli-tools",
+    "kind": "scorecard",
+    "data": {
+     "enabled": true,
+     "available": true,
+     "score": 8.2,
+     "date": "2026-11-17T12:00:00.000Z",
+     "weakest": [
+      {
+       "name": "SAST",
+       "score": 6,
+       "reason": "partially in place"
+      },
+      {
+       "name": "Branch-Protection",
+       "score": 7,
+       "reason": "partially in place"
+      },
+      {
+       "name": "Dangerous-Workflow",
+       "score": 7,
+       "reason": "partially in place"
+      },
+      {
+       "name": "Dependency-Update-Tool",
+       "score": 7,
+       "reason": "partially in place"
+      },
+      {
+       "name": "License",
+       "score": 7,
+       "reason": "partially in place"
+      }
+     ],
+     "items": [
+      {
+       "name": "Branch-Protection",
+       "score": 7,
+       "reason": "partially in place"
+      },
+      {
+       "name": "Code-Review",
+       "score": 10,
+       "reason": "no problems found"
+      },
+      {
+       "name": "Dangerous-Workflow",
+       "score": 7,
+       "reason": "partially in place"
+      },
+      {
+       "name": "Dependency-Update-Tool",
+       "score": 7,
+       "reason": "partially in place"
+      },
+      {
+       "name": "License",
+       "score": 7,
+       "reason": "partially in place"
+      },
+      {
+       "name": "Maintained",
+       "score": 10,
+       "reason": "no problems found"
+      },
+      {
+       "name": "Pinned-Dependencies",
+       "score": 8,
+       "reason": "no problems found"
+      },
+      {
+       "name": "SAST",
+       "score": 6,
+       "reason": "partially in place"
+      },
+      {
+       "name": "Security-Policy",
+       "score": 10,
+       "reason": "no problems found"
+      },
+      {
+       "name": "Token-Permissions",
+       "score": 10,
+       "reason": "no problems found"
+      },
+      {
+       "name": "Vulnerabilities",
+       "score": 8,
+       "reason": "no problems found"
+      }
+     ]
+    },
+    "checked_at": "2026-11-20T10:00:00.000Z"
+   },
+   {
+    "id": 91,
     "full_name": "acme/analytics-dashboard",
     "kind": "standards",
     "data": {
@@ -25529,7 +26310,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 74,
+    "id": 92,
     "full_name": "acme/analytics-dashboard",
     "kind": "dependencies",
     "data": {
@@ -25628,7 +26409,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 75,
+    "id": 93,
     "full_name": "acme/analytics-dashboard",
     "kind": "security",
     "data": {
@@ -25702,7 +26483,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 76,
+    "id": 94,
     "full_name": "acme/analytics-dashboard",
     "kind": "release",
     "data": {
@@ -25711,7 +26492,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 77,
+    "id": 95,
     "full_name": "acme/analytics-dashboard",
     "kind": "branches",
     "data": {
@@ -25813,7 +26594,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 78,
+    "id": 96,
     "full_name": "acme/analytics-dashboard",
     "kind": "ci",
     "data": {
@@ -25913,7 +26694,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 79,
+    "id": 97,
     "full_name": "acme/analytics-dashboard",
     "kind": "config",
     "data": {
@@ -25957,12 +26738,23 @@
        "actual": true,
        "drift": true
       }
-     ]
+     ],
+     "actuals": {
+      "delete_branch_on_merge": false,
+      "allow_squash_merge": true,
+      "allow_merge_commit": false,
+      "allow_rebase_merge": null,
+      "allow_auto_merge": null,
+      "allow_update_branch": false,
+      "has_issues": null,
+      "has_projects": null,
+      "has_wiki": true
+     }
     },
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 80,
+    "id": 98,
     "full_name": "acme/analytics-dashboard",
     "kind": "inbox",
     "data": {
@@ -26066,7 +26858,45 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 81,
+    "id": 99,
+    "full_name": "acme/analytics-dashboard",
+    "kind": "policy",
+    "data": {
+     "checks": [
+      {
+       "id": "codeowners",
+       "passed": false,
+       "label": "CODEOWNERS file"
+      },
+      {
+       "id": "no-env-file",
+       "passed": true,
+       "label": "No .env file committed"
+      },
+      {
+       "id": "security-policy",
+       "passed": null,
+       "label": "Security policy"
+      }
+     ],
+     "passed": 1,
+     "total": 2
+    },
+    "checked_at": "2026-11-20T10:00:00.000Z"
+   },
+   {
+    "id": 100,
+    "full_name": "acme/analytics-dashboard",
+    "kind": "scorecard",
+    "data": {
+     "enabled": true,
+     "available": false,
+     "reason": "private"
+    },
+    "checked_at": "2026-11-20T10:00:00.000Z"
+   },
+   {
+    "id": 101,
     "full_name": "acme/email-templates",
     "kind": "standards",
     "data": {
@@ -26127,7 +26957,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 82,
+    "id": 102,
     "full_name": "acme/email-templates",
     "kind": "dependencies",
     "data": {
@@ -26140,7 +26970,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 83,
+    "id": 103,
     "full_name": "acme/email-templates",
     "kind": "security",
     "data": {
@@ -26176,7 +27006,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 84,
+    "id": 104,
     "full_name": "acme/email-templates",
     "kind": "release",
     "data": {
@@ -26185,7 +27015,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 85,
+    "id": 105,
     "full_name": "acme/email-templates",
     "kind": "branches",
     "data": {
@@ -26311,7 +27141,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 86,
+    "id": 106,
     "full_name": "acme/email-templates",
     "kind": "ci",
     "data": {
@@ -26320,7 +27150,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 87,
+    "id": 107,
     "full_name": "acme/email-templates",
     "kind": "config",
     "data": {
@@ -26364,12 +27194,23 @@
        "actual": true,
        "drift": true
       }
-     ]
+     ],
+     "actuals": {
+      "delete_branch_on_merge": false,
+      "allow_squash_merge": false,
+      "allow_merge_commit": true,
+      "allow_rebase_merge": null,
+      "allow_auto_merge": null,
+      "allow_update_branch": true,
+      "has_issues": null,
+      "has_projects": null,
+      "has_wiki": true
+     }
     },
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 88,
+    "id": 108,
     "full_name": "acme/email-templates",
     "kind": "inbox",
     "data": {
@@ -26382,7 +27223,45 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 89,
+    "id": 109,
+    "full_name": "acme/email-templates",
+    "kind": "policy",
+    "data": {
+     "checks": [
+      {
+       "id": "codeowners",
+       "passed": false,
+       "label": "CODEOWNERS file"
+      },
+      {
+       "id": "no-env-file",
+       "passed": false,
+       "label": "No .env file committed"
+      },
+      {
+       "id": "security-policy",
+       "passed": false,
+       "label": "Security policy"
+      }
+     ],
+     "passed": 0,
+     "total": 3
+    },
+    "checked_at": "2026-11-20T10:00:00.000Z"
+   },
+   {
+    "id": 110,
+    "full_name": "acme/email-templates",
+    "kind": "scorecard",
+    "data": {
+     "enabled": true,
+     "available": false,
+     "reason": "not_scanned"
+    },
+    "checked_at": "2026-11-20T10:00:00.000Z"
+   },
+   {
+    "id": 111,
     "full_name": "acme/legacy-monolith",
     "kind": "standards",
     "data": {
@@ -26443,7 +27322,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 90,
+    "id": 112,
     "full_name": "acme/legacy-monolith",
     "kind": "dependencies",
     "data": {
@@ -26456,7 +27335,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 91,
+    "id": 113,
     "full_name": "acme/legacy-monolith",
     "kind": "security",
     "data": {
@@ -26554,7 +27433,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 92,
+    "id": 114,
     "full_name": "acme/legacy-monolith",
     "kind": "release",
     "data": {
@@ -26571,7 +27450,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 93,
+    "id": 115,
     "full_name": "acme/legacy-monolith",
     "kind": "branches",
     "data": {
@@ -26715,7 +27594,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 94,
+    "id": 116,
     "full_name": "acme/legacy-monolith",
     "kind": "ci",
     "data": {
@@ -26815,7 +27694,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 95,
+    "id": 117,
     "full_name": "acme/legacy-monolith",
     "kind": "config",
     "data": {
@@ -26859,12 +27738,23 @@
        "actual": true,
        "drift": true
       }
-     ]
+     ],
+     "actuals": {
+      "delete_branch_on_merge": false,
+      "allow_squash_merge": false,
+      "allow_merge_commit": true,
+      "allow_rebase_merge": null,
+      "allow_auto_merge": null,
+      "allow_update_branch": true,
+      "has_issues": null,
+      "has_projects": null,
+      "has_wiki": true
+     }
     },
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 96,
+    "id": 118,
     "full_name": "acme/legacy-monolith",
     "kind": "inbox",
     "data": {
@@ -26917,7 +27807,45 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 97,
+    "id": 119,
+    "full_name": "acme/legacy-monolith",
+    "kind": "policy",
+    "data": {
+     "checks": [
+      {
+       "id": "codeowners",
+       "passed": false,
+       "label": "CODEOWNERS file"
+      },
+      {
+       "id": "no-env-file",
+       "passed": false,
+       "label": "No .env file committed"
+      },
+      {
+       "id": "security-policy",
+       "passed": null,
+       "label": "Security policy"
+      }
+     ],
+     "passed": 0,
+     "total": 2
+    },
+    "checked_at": "2026-11-20T10:00:00.000Z"
+   },
+   {
+    "id": 120,
+    "full_name": "acme/legacy-monolith",
+    "kind": "scorecard",
+    "data": {
+     "enabled": true,
+     "available": false,
+     "reason": "private"
+    },
+    "checked_at": "2026-11-20T10:00:00.000Z"
+   },
+   {
+    "id": 121,
     "full_name": "acme/hackathon-2024",
     "kind": "standards",
     "data": {
@@ -26978,7 +27906,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 98,
+    "id": 122,
     "full_name": "acme/hackathon-2024",
     "kind": "dependencies",
     "data": {
@@ -27021,7 +27949,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 99,
+    "id": 123,
     "full_name": "acme/hackathon-2024",
     "kind": "security",
     "data": {
@@ -27057,7 +27985,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 100,
+    "id": 124,
     "full_name": "acme/hackathon-2024",
     "kind": "release",
     "data": {
@@ -27066,7 +27994,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 101,
+    "id": 125,
     "full_name": "acme/hackathon-2024",
     "kind": "branches",
     "data": {
@@ -27206,7 +28134,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 102,
+    "id": 126,
     "full_name": "acme/hackathon-2024",
     "kind": "ci",
     "data": {
@@ -27215,7 +28143,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 103,
+    "id": 127,
     "full_name": "acme/hackathon-2024",
     "kind": "config",
     "data": {
@@ -27259,12 +28187,23 @@
        "actual": true,
        "drift": true
       }
-     ]
+     ],
+     "actuals": {
+      "delete_branch_on_merge": false,
+      "allow_squash_merge": false,
+      "allow_merge_commit": true,
+      "allow_rebase_merge": null,
+      "allow_auto_merge": null,
+      "allow_update_branch": false,
+      "has_issues": null,
+      "has_projects": null,
+      "has_wiki": true
+     }
     },
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 104,
+    "id": 128,
     "full_name": "acme/hackathon-2024",
     "kind": "inbox",
     "data": {
@@ -27277,7 +28216,45 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 105,
+    "id": 129,
+    "full_name": "acme/hackathon-2024",
+    "kind": "policy",
+    "data": {
+     "checks": [
+      {
+       "id": "codeowners",
+       "passed": false,
+       "label": "CODEOWNERS file"
+      },
+      {
+       "id": "no-env-file",
+       "passed": false,
+       "label": "No .env file committed"
+      },
+      {
+       "id": "security-policy",
+       "passed": false,
+       "label": "Security policy"
+      }
+     ],
+     "passed": 0,
+     "total": 3
+    },
+    "checked_at": "2026-11-20T10:00:00.000Z"
+   },
+   {
+    "id": 130,
+    "full_name": "acme/hackathon-2024",
+    "kind": "scorecard",
+    "data": {
+     "enabled": true,
+     "available": false,
+     "reason": "not_scanned"
+    },
+    "checked_at": "2026-11-20T10:00:00.000Z"
+   },
+   {
+    "id": 131,
     "full_name": "acme/sdk-python",
     "kind": "standards",
     "data": {
@@ -27338,7 +28315,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 106,
+    "id": 132,
     "full_name": "acme/sdk-python",
     "kind": "dependencies",
     "data": {
@@ -27381,7 +28358,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 107,
+    "id": 133,
     "full_name": "acme/sdk-python",
     "kind": "security",
     "data": {
@@ -27417,7 +28394,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 108,
+    "id": 134,
     "full_name": "acme/sdk-python",
     "kind": "release",
     "data": {
@@ -27434,7 +28411,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 109,
+    "id": 135,
     "full_name": "acme/sdk-python",
     "kind": "branches",
     "data": {
@@ -27466,7 +28443,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 110,
+    "id": 136,
     "full_name": "acme/sdk-python",
     "kind": "ci",
     "data": {
@@ -27566,7 +28543,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 111,
+    "id": 137,
     "full_name": "acme/sdk-python",
     "kind": "config",
     "data": {
@@ -27610,12 +28587,23 @@
        "actual": false,
        "drift": false
       }
-     ]
+     ],
+     "actuals": {
+      "delete_branch_on_merge": true,
+      "allow_squash_merge": true,
+      "allow_merge_commit": false,
+      "allow_rebase_merge": null,
+      "allow_auto_merge": null,
+      "allow_update_branch": true,
+      "has_issues": null,
+      "has_projects": null,
+      "has_wiki": false
+     }
     },
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 112,
+    "id": 138,
     "full_name": "acme/sdk-python",
     "kind": "inbox",
     "data": {
@@ -27673,6 +28661,129 @@
       }
      ],
      "truncated": false
+    },
+    "checked_at": "2026-11-20T10:00:00.000Z"
+   },
+   {
+    "id": 139,
+    "full_name": "acme/sdk-python",
+    "kind": "policy",
+    "data": {
+     "checks": [
+      {
+       "id": "codeowners",
+       "passed": true,
+       "label": "CODEOWNERS file"
+      },
+      {
+       "id": "no-env-file",
+       "passed": true,
+       "label": "No .env file committed"
+      },
+      {
+       "id": "security-policy",
+       "passed": true,
+       "label": "Security policy"
+      }
+     ],
+     "passed": 3,
+     "total": 3
+    },
+    "checked_at": "2026-11-20T10:00:00.000Z"
+   },
+   {
+    "id": 140,
+    "full_name": "acme/sdk-python",
+    "kind": "scorecard",
+    "data": {
+     "enabled": true,
+     "available": true,
+     "score": 8.2,
+     "date": "2026-11-17T12:00:00.000Z",
+     "weakest": [
+      {
+       "name": "Code-Review",
+       "score": 6,
+       "reason": "partially in place"
+      },
+      {
+       "name": "Dangerous-Workflow",
+       "score": 6,
+       "reason": "partially in place"
+      },
+      {
+       "name": "Dependency-Update-Tool",
+       "score": 7,
+       "reason": "partially in place"
+      },
+      {
+       "name": "Pinned-Dependencies",
+       "score": 7,
+       "reason": "partially in place"
+      },
+      {
+       "name": "Maintained",
+       "score": 8,
+       "reason": "no problems found"
+      }
+     ],
+     "items": [
+      {
+       "name": "Branch-Protection",
+       "score": 10,
+       "reason": "no problems found"
+      },
+      {
+       "name": "Code-Review",
+       "score": 6,
+       "reason": "partially in place"
+      },
+      {
+       "name": "Dangerous-Workflow",
+       "score": 6,
+       "reason": "partially in place"
+      },
+      {
+       "name": "Dependency-Update-Tool",
+       "score": 7,
+       "reason": "partially in place"
+      },
+      {
+       "name": "License",
+       "score": 10,
+       "reason": "no problems found"
+      },
+      {
+       "name": "Maintained",
+       "score": 8,
+       "reason": "no problems found"
+      },
+      {
+       "name": "Pinned-Dependencies",
+       "score": 7,
+       "reason": "partially in place"
+      },
+      {
+       "name": "SAST",
+       "score": 10,
+       "reason": "no problems found"
+      },
+      {
+       "name": "Security-Policy",
+       "score": 8,
+       "reason": "no problems found"
+      },
+      {
+       "name": "Token-Permissions",
+       "score": 10,
+       "reason": "no problems found"
+      },
+      {
+       "name": "Vulnerabilities",
+       "score": 8,
+       "reason": "no problems found"
+      }
+     ]
     },
     "checked_at": "2026-11-20T10:00:00.000Z"
    }

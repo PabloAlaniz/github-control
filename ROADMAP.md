@@ -24,19 +24,20 @@ Where GitHub Control is heading. Nothing here is a promise; priorities follow wh
 - Inbox: open pull requests and issues across repos, with sections, saved filters, keyboard navigation and guarded bulk merge
 - Release download counts, CI and release badges, repo and summary cards with themes, and a page with the Markdown to copy
 - Public status page for services, with a status badge
+- Policy as code: baseline, health weights, custom checks and alert thresholds in one YAML document, from the app or a versioned file, with a dry run
+- OpenSSF Scorecard as an optional signal for public repos
+- MCP server: the dashboard as tools for coding agents
 - Alerts for failing CI, services down, serious security alerts, stale repos and low health, sent to Slack, Discord, Telegram, ntfy or a webhook, with daily or weekly digests
 
 ## Next
 
-- **Policy as code**: the settings baseline and the health score weights in a versioned file, with a dry run.
-- **MCP server** over the API.
+- **Search across repos.**
+- **Alerts by email**, and rules of your own.
 
 ## Later
 
 - **Inbox**: check status of each pull request in the list, review and comment without leaving it.
-- **Alerts by email**, and rules of your own.
 - **AI cost attribution**: track AI coding assistant usage per repo.
-- **Search across repos.**
 - GitHub App / OAuth sign-in, multiple users.
 - Better mobile layout.
 - Dependency inventory from lockfiles (resolved and transitive versions) and more ecosystems.
@@ -48,6 +49,8 @@ Where GitHub Control is heading. Nothing here is a promise; priorities follow wh
 - The dependency inventory reads direct dependencies declared in npm, PyPI, Go and Cargo manifests; it does not read lockfiles. End-of-life dates for Node and Python are a table in the code that has to be updated by hand.
 - Signals look at one page of results: the latest 100 workflow runs, 100 branches, 100 alerts per source and the 100 most recently updated open pull requests and issues.
 - The inbox is as fresh as the last sync or Refresh, and does not show the check status of a pull request; checks are verified when merging.
+- Custom checks look at file paths only (does a file exist, or not), not at file contents.
+- The MCP server is stateless: one JSON answer per request, no streaming or server-initiated messages.
 - Uptime is computed from periodic checks (every 15 minutes unless `SERVICE_CHECK_MINUTES` says otherwise), so an outage shorter than the interval can go unnoticed.
 - Alerts are evaluated after a sync or a round of service checks, not when something changes on GitHub: a broken build is noticed at the next sync. A failed delivery to a channel is recorded but not retried.
 - The standalone sync scripts under `back/scripts/` support PostgreSQL only.

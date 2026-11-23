@@ -1,5 +1,5 @@
 import type { AppConfig } from '../config';
-import { resolveBaseline } from '../domain/repo-baseline';
+import { policyBaseline, resolvePolicy } from '../domain/policy';
 import { getOctokit } from '../lib/github/client';
 import { diffConfig } from '../lib/signals/config';
 
@@ -27,7 +27,7 @@ export async function applyBaseline(config: AppConfig, owner: string, repo: stri
     throw new ConfigApplyError(`Could not read ${fullName}: ${err?.message ?? 'unknown error'}`, err?.status === 404 ? 404 : 502);
   }
 
-  const diff = diffConfig(repoData, resolveBaseline(config.REPO_BASELINE));
+  const diff = diffConfig(repoData, policyBaseline(resolvePolicy(config)));
   if (!diff.applicable) throw new ConfigApplyError(`${fullName} is archived and cannot be changed`, 409);
 
   const pending = diff.settings.filter(s => s.drift && (!keys || keys.includes(s.key)));

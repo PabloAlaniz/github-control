@@ -14,17 +14,21 @@
  */
 import { readFileSync, writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
-import { resolveBaseline } from '../src/domain/repo-baseline';
 import { analyzeBranches, type BranchInput, type PullInput } from '../src/lib/signals/branches';
 import { analyzeRuns, type RunInput } from '../src/lib/signals/ci';
 import { diffConfig } from '../src/lib/signals/config';
 import { buildInbox } from '../src/lib/signals/inbox';
+import { summarizeScorecard } from '../src/lib/signals/scorecard';
+import { buildPolicy, parsePolicyDocument, policyBaseline, runCustomChecks } from '../src/domain/policy';
 import { parseManifest, type Dependency, type RuntimeDecl } from '../src/lib/signals/manifests';
 import { dedupeRuntimes } from '../src/lib/signals/runtimes';
 import { summarizeAlerts, type SecurityAlert } from '../src/lib/signals/security';
 import { analyzeStandards } from '../src/lib/signals/standards';
 
 const FILE = fileURLToPath(new URL('../../docs/demo/demo-data.json', import.meta.url).href);
+const POLICY = buildPolicy(parsePolicyDocument(
+  readFileSync(fileURLToPath(new URL('../../docs/demo/policy.yml', import.meta.url).href), 'utf8'),
+).document!);
 const DAY = 86_400_000;
 const MINUTE = 60_000;
 
@@ -170,12 +174,49 @@ const CI_PROFILE: Record<string, { success: number; duration: number; flaky: num
 
 // ── Signals ─────────────────────────────────────────
 
-function standards(repo: Row, tidy: number) {
+/** The files a repo this tidy would have. */
+function repoPaths(tidy: number): string[] {
   const paths = ['README.md', '.gitignore'];
   if (tidy > 0.3) paths.push('LICENSE');
   if (tidy > 0.55) paths.push('.github/CODEOWNERS');
   if (tidy > 0.65) paths.push('CONTRIBUTING.md');
   if (tidy > 0.75) paths.push('SECURITY.md');
+  if (tidy < 0.25) paths.push('config/.env');
+  return paths;
+}
+
+/** The demo policy's custom checks, as the `policy` collector reports them. */
+function policyChecks(repo: Row, tidy: number) {
+  const { checks } = POLICY.health;
+  const results = runCustomChecks(checks, { paths: repoPaths(tidy), isPrivate: repo.is_private });
+  const counted = results.filter((result) => result.passed !== null);
+  return {
+    checks: results.map((result) => ({ ...result, label: checks.find((check) => check.id === result.id)!.label })),
+    passed: counted.filter((result) => result.passed).length,
+    total: counted.length,
+  };
+}
+
+const SCORECARD_CHECKS = [
+  'Branch-Protection', 'Code-Review', 'Dangerous-Workflow', 'Dependency-Update-Tool', 'License', 'Maintained',
+  'Pinned-Dependencies', 'SAST', 'Security-Policy', 'Token-Permissions', 'Vulnerabilities',
+];
+
+/** An OpenSSF Scorecard for the public repos, better the tidier the repo. */
+function scorecard(repo: Row, tidy: number, now: number) {
+  if (repo.is_private) return { enabled: true, available: false, reason: 'private' };
+  if (tidy < 0.3) return { enabled: true, available: false, reason: 'not_scanned' };
+  const rand = random(`${repo.name}:scorecard`);
+  const checks = SCORECARD_CHECKS.map((name) => {
+    const score = Math.max(0, Math.min(10, Math.round(tidy * 10 + (rand() - 0.6) * 6)));
+    return { name, score, reason: score >= 8 ? 'no problems found' : score >= 4 ? 'partially in place' : 'not in place' };
+  });
+  const score = Math.round((checks.reduce((sum, check) => sum + check.score, 0) / checks.length) * 10) / 10;
+  return { enabled: true, ...summarizeScorecard({ score, date: new Date(now - 3 * DAY).toISOString(), checks }) };
+}
+
+function standards(repo: Row, tidy: number) {
+  const paths = repoPaths(tidy).filter((path) => path !== 'config/.env');
   return analyzeStandards({
     description: tidy > 0.15 ? repo.description : null,
     topics: tidy > 0.4 ? (repo.topics?.length ? repo.topics : [String(repo.language).toLowerCase()]) : [],
@@ -304,7 +345,7 @@ function ci(repo: Row, now: number) {
 
 function config(repo: Row, tidy: number) {
   const rand = random(`${repo.name}:config`);
-  const baseline = resolveBaseline(undefined);
+  const baseline = policyBaseline(POLICY);
   const repoData: Record<string, unknown> = { archived: repo.is_archived, permissions: { admin: true } };
   for (const [key, { expected }] of Object.entries(baseline)) {
     repoData[key] = rand() < tidy ? expected : !expected;
@@ -479,6 +520,8 @@ for (const repo of file.data.repos as Row[]) {
     ci: ci(repo, now),
     config: config(repo, tidy),
     inbox: inbox(repo, now),
+    policy: policyChecks(repo, tidy),
+    scorecard: scorecard(repo, tidy, now),
   };
   for (const [kind, data] of Object.entries(byKind)) {
     signals.push({ id: signals.length + 1, full_name: repo.full_name, kind, data, checked_at: checkedAt });

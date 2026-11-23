@@ -14,7 +14,7 @@ inboxRoutes.post('/refresh', async (c) => c.json(await refreshInbox(serviceConte
 
 const MergeSchema = z.object({
   pulls: z.array(z.object({
-    repo: z.string().regex(/^[\w.-]+\/[\w.-]+$/, 'repo must be owner/name'),
+    repo: z.string().regex(/^(?!\.+\/)[\w.-]+\/(?!\.+$)[\w.-]+$/, 'repo must be owner/name'),
     number: z.number().int().positive(),
     sha: z.string().regex(/^[0-9a-f]{7,64}$/i, 'sha must be a commit hash'),
   })).min(1).max(50),

@@ -234,6 +234,11 @@ export function SettingsPage() {
                                     </p>
                                 </Section>
 
+                                <p className="text-xs text-gray-500 border-t border-gray-200 pt-4">
+                                    The settings baseline, the health score weights, checks of your own and the alert thresholds
+                                    can be kept as one document on the <a href="/policy" className="text-blue-600 hover:underline">Policy</a> page.
+                                </p>
+
                                 {settings.repoBaseline?.length > 0 && (
                                     <Section title="Repo settings baseline">
                                         <p className="text-xs text-gray-500">

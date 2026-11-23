@@ -1,6 +1,6 @@
 import type { AppContext } from '../application/context';
 import type { SignalRecord } from '../application/ports/storage';
-import { resolveBaseline } from '../domain/repo-baseline';
+import { policyBaseline, resolvePolicy } from '../domain/policy';
 import { getOctokit } from '../lib/github/client';
 import { SIGNAL_COLLECTORS, SIGNAL_KINDS, createSignalContext, type SignalKind, type SignalData } from '../lib/signals';
 
@@ -20,7 +20,11 @@ export async function syncSignals(
   kinds: SignalKind[] = SIGNAL_KINDS,
 ): Promise<SignalSyncResult[] | null> {
   const fullName = `${owner}/${repo}`;
-  const signalCtx = createSignalContext(getOctokit(ctx.config), owner, repo, resolveBaseline(ctx.config.REPO_BASELINE));
+  const policy = resolvePolicy(ctx.config);
+  const signalCtx = createSignalContext(
+    getOctokit(ctx.config), owner, repo, policyBaseline(policy),
+    { checks: policy.health.checks, scorecard: policy.signals.scorecard },
+  );
   const results: SignalSyncResult[] = [];
 
   for (const kind of kinds) {

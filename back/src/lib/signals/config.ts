@@ -1,3 +1,4 @@
+import { BASELINE_SETTINGS } from '../../domain/repo-baseline';
 import type { SignalCollector } from './types';
 import type { Baseline } from '../../domain/repo-baseline';
 
@@ -30,6 +31,8 @@ export function diffConfig(
     drift: archived ? 0 : settings.filter(s => s.drift).length,
     unknown: settings.filter(s => s.actual === null).length,
     settings,
+    // Every setting the baseline could enforce, so a change of policy can be previewed without asking GitHub again.
+    actuals: Object.fromEntries(BASELINE_SETTINGS.map(({ key }) => [key, typeof repoData[key] === 'boolean' ? repoData[key] : null])),
   };
 }
 

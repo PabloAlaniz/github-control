@@ -7,7 +7,8 @@
  *   DEMO=true       visitors can edit local data (notes, groups, priorities...)
  *   DEMO=readonly   nothing can be changed; meant for a public instance
  */
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
+import { dirname, join } from 'node:path';
 import type { AppConfig } from '../config';
 import type { Storage } from '../application/ports/storage';
 import { rebaseDates } from '../infrastructure/storage/rebase-dates';
@@ -29,8 +30,9 @@ export function demoResetMinutes(env: Record<string, string | undefined>): numbe
 }
 
 /** A complete configuration that needs nothing from the environment or the data directory. */
-export function demoConfig(mode: DemoMode, resetMinutes: number): AppConfig {
+export function demoConfig(mode: DemoMode, resetMinutes: number, policy?: string): AppConfig {
   return {
+    ...(policy && { POLICY: policy, POLICY_SOURCE: 'file' as const }),
     ENVIRONMENT: 'demo',
     STORAGE_DRIVER: 'memory',
     DATABASE_URL: '',
@@ -48,6 +50,12 @@ export function demoConfig(mode: DemoMode, resetMinutes: number): AppConfig {
     DEMO: mode,
     DEMO_RESET_MINUTES: String(resetMinutes),
   };
+}
+
+/** The demo's policy: `policy.yml` next to the dataset, when there is one. */
+export function readDemoPolicy(dataPath: string): string | undefined {
+  const path = join(dirname(dataPath), 'policy.yml');
+  return existsSync(path) ? readFileSync(path, 'utf8') : undefined;
 }
 
 interface ExportFile {

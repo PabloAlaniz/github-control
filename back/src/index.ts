@@ -29,6 +29,8 @@ import { branchesRoutes } from './routes/branches';
 import { configRoutes } from './routes/config';
 import { alertsRoutes } from './routes/alerts';
 import { inboxRoutes } from './routes/inbox';
+import { policyRoutes } from './routes/policy';
+import { createMcpRoutes } from './routes/mcp';
 import { sendDueDigests } from './services/alert.service';
 import { runScheduledChecks } from './services/service-check.service';
 import { apiKeyAuth } from './middleware/auth';
@@ -133,6 +135,9 @@ app.route('/api/settings', settingsRoutes);
 app.route('/api/traffic', trafficRoutes);
 app.route('/api/alerts', alertsRoutes);
 app.route('/api/inbox', inboxRoutes);
+app.route('/api/policy', policyRoutes);
+// MCP: the same API as tools for agents. Each tool call is a request to this app, as the caller.
+app.route('/api/mcp', createMcpRoutes((request, env) => app.fetch(request, env)));
 app.route('/api', backupRoutes);
 
 // What can be embedded elsewhere, and whether each public surface is switched on.
