@@ -2,9 +2,19 @@
 
 A self-hosted dashboard to see, organize and keep healthy **all** your GitHub repositories: yours, your collaborations and your organizations', in one place.
 
-![GitHub Control dashboard](docs/screenshot.png)
+![A tour of GitHub Control: the repo table, a repo's signals, services uptime, the dependency inventory and the dark theme](docs/demo.gif)
 
 GitHub shows you one repository at a time. GitHub Control answers the questions that span all of them: which repos have no CI or tests, which ones are stale, how each one has grown, what is deployed where, and what you decided to do next with each.
+
+## Try it in 30 seconds
+
+No GitHub token and nothing to set up: this starts the dashboard on a fictional dataset, kept in memory.
+
+```bash
+docker run --rm -p 13337:13337 -e DEMO=true ghcr.io/pabloalaniz/github-control
+```
+
+Open http://localhost:13337. From a clone, without Docker: `DEMO=true npm start`.
 
 ## Features
 
@@ -12,6 +22,7 @@ GitHub shows you one repository at a time. GitHub Control answers the questions 
 - **Health at a glance**: README, CI, tests, coverage, roadmap, docs quality and a composite health score per repo; latest CI run status.
 - **Saved views and shareable filters**: the tab and filters live in the URL; name a combination and get back to it in one click.
 - **Keyboard first**: a command palette (`Cmd/Ctrl+K`) to jump to a repo, group, view or action, and `j`/`k`/`x`/`o` to move through the table.
+- **Light and dark**: follows your system, or pick one from the header.
 - **Signals from GitHub** per repo, refreshed by every sync:
   - a *standards* checklist (description, topics, protected default branch, CODEOWNERS and, for public repos, license, security policy and contributing guide) that also counts toward the health score;
   - open *security alerts* (dependencies, code scanning, secrets) by severity;
@@ -30,6 +41,8 @@ GitHub shows you one repository at a time. GitHub Control answers the questions 
 - **API for agents and CI**: everything in the UI is available over HTTP with an API key, plus an activity log of who changed what.
 - **Your data, your storage**: SQLite, JSON files, CSV files or PostgreSQL. Switch between them with one command.
 
+![The dashboard in the dark theme, with one repo's signals open](docs/dark.png)
+
 ![Traffic history of a repository](docs/traffic.png)
 
 ## Quick start
@@ -39,6 +52,14 @@ No environment variables and no database to set up: the first time you open the 
 ### Docker
 
 With the published image (amd64 and arm64, so it runs on a Raspberry Pi with a 64-bit OS):
+
+```bash
+docker run -d --name github-control --restart unless-stopped \
+  -p 13337:13337 -v github-control-data:/data ghcr.io/pabloalaniz/github-control
+docker logs github-control      # prints the one-time setup code
+```
+
+Or with Docker Compose, which also reads a `.env` file:
 
 ```bash
 mkdir github-control && cd github-control
@@ -91,18 +112,25 @@ npm start          # builds the frontend and the server, then serves http://loca
 
 Data is kept in `back/data/` (change it with `DATA_DIR`).
 
-### Try it with demo data
+### Demo mode
 
-To look around without a GitHub token, load the bundled fictional dataset:
+`DEMO=true` starts the server on the bundled fictional dataset instead of your repositories: no setup wizard, no sign-in, no GitHub token. The data lives in memory, nothing is read from or written to the data directory, and its dates always end today.
 
 ```bash
-npm install && npm run build && npm run build:server
-cd back
-DATA_DIR=./demo-data STORAGE_DRIVER=sqlite node dist/cli.mjs storage import \
-  --in ../docs/demo/demo-data.json --rebase-dates true
-DATA_DIR=./demo-data STORAGE_DRIVER=sqlite GITHUB_TOKEN=demo DISABLE_AUTH=true \
-  SYNC_INTERVAL_HOURS=0 node dist/server.mjs
+DEMO=true npm start
 ```
+
+Visitors can edit what belongs to the dashboard (notes, priorities, groups, saved views); the dataset is reloaded every hour, so their changes go away. Whatever would need GitHub (syncing, branch cleanup, applying settings) answers that it is not available in the demo.
+
+To host a public demo, use `DEMO=readonly`: nothing can be changed at all.
+
+| Variable | Purpose | Default |
+|---|---|---|
+| `DEMO` | `true` (editable) or `readonly` | off |
+| `DEMO_RESET_MINUTES` | Minutes between reloads of the dataset; `0` never reloads | `60` |
+| `DEMO_DATA` | Path to the dataset, a file made by `storage export` | the bundled `docs/demo/demo-data.json` |
+
+To keep a copy of the demo data in a real storage instead, import it: `node back/dist/cli.mjs storage import --in docs/demo/demo-data.json --rebase-dates true`.
 
 ## Configuration
 

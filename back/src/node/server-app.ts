@@ -16,6 +16,7 @@ import {
 } from './config-store';
 import { createSetupApp, verifyGithubToken } from './setup-app';
 import { createSettingsStore } from './settings';
+import { demoConfig, demoMode, demoResetMinutes, loadDemoData, readDemoData } from './demo';
 import { CLIENT_IP_HEADER } from '../routes/auth';
 import { createStorage } from '../infrastructure/storage';
 import { getSyncStatus, isSyncDue, startFullSync } from '../services/full-sync.service';
@@ -37,12 +38,44 @@ export interface ServerOptions {
   verifyGithubToken?: (token: string) => Promise<string>;
   /** Run full syncs on a schedule (and right after setup). Off unless asked for. */
   autoSync?: boolean;
+  /** The dataset served when `DEMO` is set (docs/demo/demo-data.json). */
+  demoDataPath?: string;
   log?: (message: string) => void;
 }
 
 export function createServerApp(options: ServerOptions) {
-  const { env, dataDir, staticDir } = options;
   const log = options.log ?? console.log;
+
+  const demo = demoMode(options.env);
+  return demo ? createDemoApp(options, demo, log) : createConfiguredApp(options, log);
+}
+
+/** Demo mode: fictional data in memory. Reads no configuration and writes nothing to disk. */
+function createDemoApp(options: ServerOptions, mode: 'true' | 'readonly', log: (message: string) => void) {
+  const { env } = options;
+  if (!options.demoDataPath) throw new Error('Demo mode needs the demo dataset: set DEMO_DATA to its path.');
+  const file = readDemoData(options.demoDataPath);
+  const resetMinutes = demoResetMinutes(env);
+  const config = demoConfig(mode, resetMinutes);
+  const storage = createStorage(config);
+
+  let ready = loadDemoData(storage, file);
+  if (resetMinutes > 0) {
+    setInterval(() => {
+      ready = loadDemoData(storage, file).catch((error) => log(`Demo reset failed: ${error.message}`));
+    }, resetMinutes * 60_000).unref();
+  }
+  log(`Demo mode (${mode === 'readonly' ? 'read-only' : 'editable'}): fictional data in memory, `
+    + (resetMinutes > 0 ? `reloaded every ${resetMinutes} minutes.` : 'never reloaded.'));
+
+  return withFrontend(options, async (request) => {
+    await ready;
+    return app.fetch(request, config);
+  });
+}
+
+function createConfiguredApp(options: ServerOptions, log: (message: string) => void) {
+  const { env, dataDir } = options;
 
   let config: AppConfig | null = null;
   let setupApp: Hono | null = null;
@@ -116,6 +149,12 @@ export function createServerApp(options: ServerOptions) {
     setInterval(() => void checkServices(), SERVICE_CHECK_MINUTES * 60_000).unref();
   }
 
+  return withFrontend(options, (request) => (config ? app.fetch(request, config) : setupApp!.fetch(request)));
+}
+
+/** Routes `/api/*` to `api` and serves the built frontend for everything else. */
+function withFrontend(options: ServerOptions, api: (request: Request) => Response | Promise<Response>) {
+  const { env, staticDir } = options;
   const root = new Hono();
 
   root.all('/api/*', (c) => {
@@ -129,7 +168,7 @@ export function createServerApp(options: ServerOptions) {
     headers.delete('cf-connecting-ip');
     const request = new Request(c.req.raw, { headers });
 
-    return config ? app.fetch(request, config) : setupApp!.fetch(request);
+    return api(request);
   });
 
   if (staticDir && existsSync(join(staticDir, 'index.html'))) {

@@ -93,3 +93,20 @@ describe('apiFetch', () => {
     expect(options.headers.get('Content-Type')).toBe('application/json');
   });
 });
+
+describe('apiFetch on a demo instance', () => {
+  it('announces an action the demo refused', async () => {
+    const demo = await import('@/lib/demo');
+    const { apiFetch } = await import('@/lib/api');
+    const before = demo.getDemoBlocked();
+    globalThis.fetch = vi.fn().mockResolvedValue(new Response('{}', { status: 403 })) as any;
+
+    await apiFetch('/api/sync', { method: 'POST' });
+    expect(demo.getDemoBlocked()).toBe(before);       // not a demo: a 403 is just a 403
+
+    demo.setDemo({ readOnly: false, resetMinutes: 60 });
+    await apiFetch('/api/sync', { method: 'POST' });
+    expect(demo.getDemoBlocked()).toBe(before + 1);
+    demo.setDemo(null);
+  });
+});

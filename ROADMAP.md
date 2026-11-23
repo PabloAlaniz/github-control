@@ -19,6 +19,8 @@ Where GitHub Control is heading. Nothing here is a promise; priorities follow wh
 - Signals per repo: standards checklist, security alerts, releases, branch hygiene with cleanup, CI reliability, settings drift with a configurable baseline
 - Cross-repo dependency inventory with end-of-life runtimes
 - Uptime history for services, checked on a schedule
+- Demo mode: one variable starts the app on a fictional dataset, editable or read-only
+- Dark theme, following the system or chosen by hand
 
 ## Next
 
@@ -32,7 +34,7 @@ Where GitHub Control is heading. Nothing here is a promise; priorities follow wh
 - **AI cost attribution**: track AI coding assistant usage per repo.
 - **Search across repos.**
 - GitHub App / OAuth sign-in, multiple users.
-- Dark mode toggle, better mobile layout.
+- Better mobile layout.
 - Dependency inventory from lockfiles (resolved and transitive versions) and more ecosystems.
 
 ## Known limitations

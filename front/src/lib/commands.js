@@ -1,7 +1,8 @@
 import {
     GitBranch, Folder, Bookmark, RefreshCw, Activity, BarChart3, LogOut,
-    LayoutGrid, FlaskConical, Server, RotateCcw, Package, DownloadCloud, Settings,
+    LayoutGrid, FlaskConical, Server, RotateCcw, Package, DownloadCloud, Settings, SunMoon,
 } from 'lucide-react';
+import { nextTheme, setTheme } from './theme';
 
 /**
  * Builds the palette's command list from the dashboard state.
@@ -13,6 +14,7 @@ export function buildCommands({ repos = [], groups = [], views = [], actions }) 
         { id: 'act:refresh', section: 'Actions', icon: RefreshCw, label: 'Refresh data from GitHub', keywords: ['sync', 'reload'], run: a.refresh },
         ...(a.syncAll ? [{ id: 'act:sync', section: 'Actions', icon: DownloadCloud, label: 'Sync all repos', keywords: ['full sync', 'health', 'signals'], run: a.syncAll }] : []),
         { id: 'act:reset', section: 'Actions', icon: RotateCcw, label: 'Reset filters', keywords: ['clear'], run: a.resetFilters },
+        { id: 'act:theme', section: 'Actions', icon: SunMoon, label: 'Change theme', keywords: ['dark', 'light', 'system', 'appearance'], run: () => setTheme(nextTheme()) },
         { id: 'tab:default', section: 'Go to', icon: LayoutGrid, label: 'Default tab', keywords: ['repos', 'health'], run: () => a.setTab('default') },
         { id: 'tab:testing', section: 'Go to', icon: FlaskConical, label: 'Testing tab', keywords: ['coverage'], run: () => a.setTab('testing') },
         { id: 'tab:infrastructure', section: 'Go to', icon: Server, label: 'Infra tab', keywords: ['services', 'infrastructure'], run: () => a.setTab('infrastructure') },

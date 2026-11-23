@@ -1,13 +1,33 @@
 import { Button } from '../../atoms/Button';
 import { Text } from '../../atoms/Text';
 import { BackupMenu } from '../BackupMenu';
-import { RefreshCw, Activity, LogOut, Plus, BarChart3, Command, Package, DownloadCloud, Settings } from 'lucide-react';
+import { RefreshCw, Activity, LogOut, Plus, BarChart3, Command, Package, DownloadCloud, Settings, Sun, Moon, Monitor } from 'lucide-react';
+import { useTheme } from '../../../hooks/useTheme';
 
 const SUBTITLES = {
     default: 'Manage and monitor your repositories',
     testing: 'Test quality and coverage across repos',
     infrastructure: 'Deployed services and health monitoring',
 };
+
+const THEME_ICONS = { system: Monitor, light: Sun, dark: Moon };
+const THEME_LABELS = { system: 'System theme', light: 'Light theme', dark: 'Dark theme' };
+
+function ThemeToggle() {
+    const { theme, cycle } = useTheme();
+    const Icon = THEME_ICONS[theme];
+    return (
+        <Button
+            onClick={cycle}
+            variant="ghost"
+            className="px-2.5"
+            title={`${THEME_LABELS[theme]} (click to change)`}
+            aria-label={`${THEME_LABELS[theme]}. Change theme`}
+        >
+            <Icon size={16} />
+        </Button>
+    );
+}
 
 /** "Sync all", or the progress of the sync in flight. */
 function syncLabel({ running, progress }) {
@@ -47,8 +67,8 @@ export function HomeHeader({
         <header className="flex items-center justify-between">
             <div className="flex items-center gap-3">
                 <div>
-                    <Text variant="h2">GitHub Control</Text>
-                    <Text variant="muted">
+                    <Text variant="h2" className="whitespace-nowrap">GitHub Control</Text>
+                    <Text variant="muted" className="hidden xl:block">
                         {SUBTITLES[activeTab] || SUBTITLES.default}
                     </Text>
                 </div>
@@ -111,9 +131,10 @@ export function HomeHeader({
                         <span className="hidden lg:inline">Settings</span>
                     </Button>
                 )}
-                <Button onClick={onLogout} variant="ghost" className="gap-2">
+                <ThemeToggle />
+                <Button onClick={onLogout} variant="ghost" className="gap-2" aria-label="Logout" title="Logout">
                     <LogOut size={16} />
-                    <span className="hidden sm:inline">Logout</span>
+                    <span className="hidden 2xl:inline">Logout</span>
                 </Button>
             </div>
         </header>

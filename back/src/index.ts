@@ -27,6 +27,7 @@ import { branchesRoutes } from './routes/branches';
 import { configRoutes } from './routes/config';
 import { runScheduledChecks } from './services/service-check.service';
 import { apiKeyAuth } from './middleware/auth';
+import { demoGuard } from './middleware/demo';
 import { onError } from './lib/error-handler';
 
 const app = new Hono<HttpEnv>();
@@ -84,6 +85,10 @@ app.get('/api/setup/status', (c) => c.json({
   configured: true,
   // Lets the frontend skip its login screen when the server has auth turned off.
   authRequired: !(c.env.DISABLE_AUTH === 'true' || c.env.DISABLE_AUTH === true),
+  // Present only on a demo instance: the frontend says so and explains what resets.
+  ...(c.env.DEMO && {
+    demo: { readOnly: c.env.DEMO === 'readonly', resetMinutes: Number(c.env.DEMO_RESET_MINUTES ?? 0) },
+  }),
 }));
 
 // Public README badges (opt-in, public repos only). Mounted before the auth middleware.
@@ -94,6 +99,9 @@ app.route('/api/auth', authRoutes);
 
 // API key auth (after health check and auth routes so they stay public)
 app.use('/api/*', apiKeyAuth);
+
+// Demo instances: only reads, plus edits of local data when the demo is editable.
+app.use('/api/*', demoGuard);
 
 // Mount routes
 app.route('/api/repos', reposRoutes);

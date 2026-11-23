@@ -6,6 +6,8 @@ import { SettingsPage } from './pages/SettingsPage';
 import { ProtectedRoute } from './components/templates/ProtectedRoute';
 import { fetchSetupStatus } from './lib/setup';
 import { setAuthDisabled } from './lib/auth';
+import { setDemo } from './lib/demo';
+import { DemoBanner } from './components/molecules/DemoBanner';
 
 /** Sends the visitor to the first-run wizard while the server is not configured. */
 function useSetupRedirect() {
@@ -20,6 +22,7 @@ function useSetupRedirect() {
     let active = true;
     fetchSetupStatus().then((status) => {
       if (!active) return;
+      if (status.demo) setDemo(status.demo);
       if (!status.configured) {
         navigate('/setup', { replace: true });
       } else if (status.authRequired === false) {
@@ -39,6 +42,8 @@ function App() {
   useSetupRedirect();
 
   return (
+    <>
+    <DemoBanner />
     <Routes>
       <Route path="/setup" element={<SetupPage />} />
       <Route path="/login" element={<LoginPage />} />
@@ -51,6 +56,7 @@ function App() {
       <Route path="/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
       <Route path="/services" element={<Navigate to="/" replace />} />
     </Routes>
+    </>
   );
 }
 

@@ -118,6 +118,10 @@ PostgreSQL runs embedded in the tests (PGlite), so the SQL is really executed. A
 
 `node/config-store.ts` resolves each setting from the environment first and `<DATA_DIR>/config.json` second. If the GitHub token or the sign-in credentials are missing, `node/server-app.ts` serves the setup API (`node/setup-app.ts`) instead of the app: it requires the one-time code printed in the log, asks only for what is missing, validates the GitHub token, stores a password hash and generated secrets, and then switches to the app without a restart.
 
+### Demo mode (Node)
+
+With `DEMO` set, `node/server-app.ts` skips all of the above: `node/demo.ts` builds a complete configuration (memory storage, sign-in off, a placeholder GitHub token), loads `docs/demo/demo-data.json` with its dates moved to end today, and reloads it on a timer. Nothing touches the data directory. `middleware/demo.ts` then answers 403 to every write except edits of the instance's own data (none at all when `DEMO=readonly`), and to the few reads that call GitHub. `/api/setup/status` reports `demo`, which the frontend shows as a banner.
+
 ### Runtime settings
 
 The repo settings baseline is one of these settings: `domain/repo-baseline.ts` holds the catalog of repo settings the app can check and the defaults, and `REPO_BASELINE` (a JSON object) selects which ones are enforced.

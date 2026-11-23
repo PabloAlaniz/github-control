@@ -40,4 +40,8 @@ export type AppConfig = {
   REPO_BASELINE?: string;
   /** Hours between automatic full syncs on the Node server. '0' disables. Default 24. */
   SYNC_INTERVAL_HOURS?: string;
+  /** Set by the Node server's demo mode: 'true' (local edits allowed) or 'readonly'. See node/demo.ts. */
+  DEMO?: 'true' | 'readonly';
+  /** Minutes between reloads of the demo dataset ('0' never reloads). */
+  DEMO_RESET_MINUTES?: string;
 };
