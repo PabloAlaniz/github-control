@@ -11,6 +11,11 @@ vi.mock('@/pages', () => ({
   MetricsPage: () => <div data-testid="metrics-page">Metrics Page</div>,
   RepoMetricsPage: () => <div data-testid="repo-metrics-page">Repo Metrics Page</div>,
   DependenciesPage: () => <div data-testid="dependencies-page">Dependencies Page</div>,
+  AlertsPage: () => <div data-testid="alerts-page">Alerts Page</div>,
+  InboxPage: () => <div data-testid="inbox-page">Inbox Page</div>,
+  EmbedsPage: () => <div data-testid="embeds-page">Embeds Page</div>,
+  StatusPage: () => <div data-testid="status-page">Status Page</div>,
+  PolicyPage: () => <div data-testid="policy-page">Policy Page</div>,
 }));
 
 // Mock ProtectedRoute to render children for testing
@@ -61,6 +66,16 @@ describe('App', () => {
     
     expect(screen.getByTestId('protected-route')).toBeInTheDocument();
     expect(screen.getByTestId('activity-page')).toBeInTheDocument();
+  });
+
+  it('renders alerts page for /alerts route', () => {
+    render(
+      <MemoryRouter initialEntries={['/alerts']}>
+        <App />
+      </MemoryRouter>
+    );
+
+    expect(screen.getByTestId('alerts-page')).toBeInTheDocument();
   });
 
   it('renders dependencies page for /dependencies route', () => {

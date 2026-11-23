@@ -1,0 +1,37 @@
+# The policy of the demo instance. See "Policy" in the README.
+version: 1
+
+# Repo settings every repo is expected to have.
+baseline:
+  delete_branch_on_merge: true
+  allow_squash_merge: true
+  allow_merge_commit: false
+  allow_update_branch: true
+  has_wiki: false
+
+health:
+  # How much each category counts. Tests matter more here than the default 25.
+  weights:
+    tests: 35
+  # Checks of our own, counted in the health score.
+  checks:
+    - id: codeowners
+      label: CODEOWNERS file
+      weight: 6
+      files: [CODEOWNERS, .github/CODEOWNERS, docs/CODEOWNERS]
+    - id: no-env-file
+      label: No .env file committed
+      weight: 6
+      forbidden: ['.env', '**/.env']
+    - id: security-policy
+      label: Security policy
+      weight: 4
+      files: [SECURITY.md, .github/SECURITY.md]
+      only: public
+
+alerts:
+  stale_days: 90
+  health_below: 40
+
+signals:
+  openssf_scorecard: true

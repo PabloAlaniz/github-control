@@ -7,7 +7,8 @@ export const apiKeyAuth = createMiddleware<{ Bindings: AppConfig }>(async (c, ne
   // Skip auth for health/readiness (orchestrators) and auth routes (login)
   const path = new URL(c.req.url).pathname;
   if (path === '/api/health' || path === '/api/health/ready' || path === '/api/setup/status'
-    || path.startsWith('/api/auth') || path.startsWith('/api/badges/')) {
+    || path.startsWith('/api/auth') || path.startsWith('/api/badges/')
+    || path === '/api/status' || path === '/api/status/badge.svg') {
     await next();
     return;
   }

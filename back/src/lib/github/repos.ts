@@ -12,6 +12,25 @@ export async function getAuthenticatedUser(env: AppConfig) {
   return data;
 }
 
+const viewerLogins = new Map<string, Promise<string | null>>();
+
+/**
+ * The login the token belongs to: who "me" is in the inbox. Asked once per
+ * token and process. Null when GitHub cannot be asked.
+ */
+export function getViewerLogin(env: AppConfig): Promise<string | null> {
+  if (env.VIEWER_LOGIN) return Promise.resolve(env.VIEWER_LOGIN);
+  let cached = viewerLogins.get(env.GITHUB_TOKEN);
+  if (!cached) {
+    cached = getAuthenticatedUser(env).then((user) => user.login, () => {
+      viewerLogins.delete(env.GITHUB_TOKEN); // do not remember a failure
+      return null;
+    });
+    viewerLogins.set(env.GITHUB_TOKEN, cached);
+  }
+  return cached;
+}
+
 /** Organizations to sync in addition to the authenticated user's repos (GITHUB_ORGS). */
 export function configuredOrgs(env: AppConfig): string[] {
   return (env.GITHUB_ORGS ?? '').split(',').map((org) => org.trim()).filter(Boolean);

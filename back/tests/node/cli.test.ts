@@ -26,7 +26,7 @@ describe('cli: storage copy', () => {
 
     await run('storage', 'copy', '--from', `json:${jsonDir}`, '--to', `sqlite:${dbFile}`);
 
-    expect(lines[0]).toMatch(/^Copied 15 records \(repos: 2, groups: 1, repo_groups: 1, services: 1, repo_apps: 1/);
+    expect(lines[0]).toMatch(/^Copied 17 records \(repos: 2, groups: 1, repo_groups: 1, services: 1, repo_apps: 1/);
     expect(lines.join('\n')).toContain('set STORAGE_DRIVER');
     const copy = openTarget(`sqlite:${dbFile}`, io).storage;
     expect(json(await copy.admin.exportAll())).toEqual(json(await source.admin.exportAll()));
@@ -54,7 +54,7 @@ describe('cli: storage export / import', () => {
     await populateEverything(current);
 
     await run('storage', 'export', '--out', backup);
-    expect(lines[0]).toMatch(/^Exported 15 records .* from current \(json\) to /);
+    expect(lines[0]).toMatch(/^Exported 17 records .* from current \(json\) to /);
 
     const file = JSON.parse(readFileSync(backup, 'utf8'));
     expect(file.version).toBe(1);
@@ -62,7 +62,7 @@ describe('cli: storage export / import', () => {
 
     const restoredDir = tempDir();
     await run('storage', 'import', '--in', backup, '--to', `csv:${restoredDir}`);
-    expect(lines.at(-1)).toMatch(/^Imported 15 records .* into csv:/);
+    expect(lines.at(-1)).toMatch(/^Imported 17 records .* into csv:/);
     const restored = openTarget(`csv:${restoredDir}`, io).storage;
     expect(json(await restored.admin.exportAll())).toEqual(json(await current.admin.exportAll()));
   });

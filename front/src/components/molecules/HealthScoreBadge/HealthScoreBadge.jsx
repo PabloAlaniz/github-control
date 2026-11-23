@@ -16,6 +16,7 @@ const CATEGORY_LABELS = {
     quality: 'Quality',
     hygiene: 'Hygiene',
     freshness: 'Freshness',
+    custom: 'Policy checks',
 };
 
 function CategoryBar({ name, score, max }) {

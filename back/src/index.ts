@@ -18,15 +18,23 @@ import { repoAppsRoutes } from './routes/repo-apps';
 import { backupRoutes } from './routes/backup';
 import { syncRoutes } from './routes/sync';
 import { trafficRoutes } from './routes/traffic';
-import { badgeRoutes } from './routes/badges';
+import { badgeRoutes, BADGE_METRICS } from './routes/badges';
+import { statusRoutes } from './routes/status';
+import { CARD_THEMES } from './lib/cards';
 import { settingsRoutes } from './routes/settings';
 import { savedViewsRoutes } from './routes/saved-views';
 import { signalsRoutes } from './routes/signals';
 import { dependenciesRoutes } from './routes/dependencies';
 import { branchesRoutes } from './routes/branches';
 import { configRoutes } from './routes/config';
+import { alertsRoutes } from './routes/alerts';
+import { inboxRoutes } from './routes/inbox';
+import { policyRoutes } from './routes/policy';
+import { createMcpRoutes } from './routes/mcp';
+import { sendDueDigests } from './services/alert.service';
 import { runScheduledChecks } from './services/service-check.service';
 import { apiKeyAuth } from './middleware/auth';
+import { demoGuard } from './middleware/demo';
 import { onError } from './lib/error-handler';
 
 const app = new Hono<HttpEnv>();
@@ -84,16 +92,26 @@ app.get('/api/setup/status', (c) => c.json({
   configured: true,
   // Lets the frontend skip its login screen when the server has auth turned off.
   authRequired: !(c.env.DISABLE_AUTH === 'true' || c.env.DISABLE_AUTH === true),
+  // Present only on a demo instance: the frontend says so and explains what resets.
+  ...(c.env.DEMO && {
+    demo: { readOnly: c.env.DEMO === 'readonly', resetMinutes: Number(c.env.DEMO_RESET_MINUTES ?? 0) },
+  }),
 }));
 
 // Public README badges (opt-in, public repos only). Mounted before the auth middleware.
 app.route('/api/badges', badgeRoutes);
+
+// Public status page data (opt-in). Mounted before the auth middleware.
+app.route('/api/status', statusRoutes);
 
 // Auth routes (public, before API key middleware)
 app.route('/api/auth', authRoutes);
 
 // API key auth (after health check and auth routes so they stay public)
 app.use('/api/*', apiKeyAuth);
+
+// Demo instances: only reads, plus edits of local data when the demo is editable.
+app.use('/api/*', demoGuard);
 
 // Mount routes
 app.route('/api/repos', reposRoutes);
@@ -115,7 +133,20 @@ app.route('/api/repo-apps', repoAppsRoutes);
 app.route('/api/sync', syncRoutes);
 app.route('/api/settings', settingsRoutes);
 app.route('/api/traffic', trafficRoutes);
+app.route('/api/alerts', alertsRoutes);
+app.route('/api/inbox', inboxRoutes);
+app.route('/api/policy', policyRoutes);
+// MCP: the same API as tools for agents. Each tool call is a request to this app, as the caller.
+app.route('/api/mcp', createMcpRoutes((request, env) => app.fetch(request, env)));
 app.route('/api', backupRoutes);
+
+// What can be embedded elsewhere, and whether each public surface is switched on.
+app.get('/api/embeds', (c) => c.json({
+  badges: c.env.PUBLIC_BADGES === 'true',
+  status: c.env.PUBLIC_STATUS === 'true',
+  metrics: BADGE_METRICS,
+  themes: CARD_THEMES,
+}));
 
 // Stats endpoint
 app.get('/api/stats', async (c) => {
@@ -194,13 +225,19 @@ app.get('*', async (c) => {
 
 /**
  * Cloudflare Cron Trigger (see [triggers] in wrangler.toml): checks the active
- * services and records the result in the uptime history. The Node server runs
+ * services, records the result in the uptime history, updates the alerts and
+ * sends the digests that are due. The Node server runs
  * the same checks on its own timer.
  */
 async function scheduled(
   _event: unknown, env: HttpEnv['Bindings'], ctx: { waitUntil(promise: Promise<unknown>): void },
 ) {
-  ctx.waitUntil(runScheduledChecks({ config: env, storage: createStorage(env) }));
+  const context = { config: env, storage: createStorage(env) };
+  // The checks re-evaluate the alerts themselves; digests go out once the alerts are current.
+  ctx.waitUntil(runScheduledChecks(context).then(async (summary) => {
+    await sendDueDigests(context);
+    return summary;
+  }));
 }
 
 // The Worker exports the Hono app (fetch) plus the cron handler.

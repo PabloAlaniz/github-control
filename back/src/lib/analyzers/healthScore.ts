@@ -4,6 +4,8 @@
  * Pure function — no DB or network IO. Tests in tests/lib/analyzers/healthScore.analyzer.test.ts.
  */
 
+import { HEALTH_CATEGORIES, type HealthPolicy } from '../../domain/policy';
+
 export interface HealthScoreInput {
   // CI
   hasCi?: boolean | null;
@@ -27,6 +29,8 @@ export interface HealthScoreInput {
   hasDocstrings?: boolean | null;
   /** The repo's standards checklist (`standards` signal); null = not synced. */
   standards?: { passed: number; total: number } | null;
+  /** Results of the policy's custom checks (`policy` signal); null = not synced. */
+  custom?: { id: string; passed: boolean | null }[] | null;
   // Freshness
   lastCommitAt?: string | Date | null;
   // Context
@@ -46,6 +50,8 @@ export interface HealthCheck {
 export interface HealthCategory {
   score: number;             // sum of earned in this category
   max: number;               // sum of weight in this category
+  /** How much the category counts in the total, when a policy sets weights. */
+  weight?: number;
   checks: HealthCheck[];
 }
 
@@ -60,6 +66,8 @@ export interface HealthScoreResult {
     quality: HealthCategory;
     hygiene: HealthCategory;
     freshness: HealthCategory;
+    /** The policy's own checks; present only when the policy defines some. */
+    custom?: HealthCategory;
   };
 }
 
@@ -244,6 +252,7 @@ export function repoRowToHealthInput(row: Record<string, any>): HealthScoreInput
     hasSecurityScan: row.has_security_scan ?? row.hasSecurityScan,
     hasGitignore: row.has_gitignore ?? row.hasGitignore,
     hasDocstrings: row.has_docstrings ?? row.hasDocstrings,
+    custom: Array.isArray(row.signals?.policy?.checks) ? row.signals.policy.checks : null,
     standards: typeof row.signals?.standards?.total === 'number'
       ? { passed: Number(row.signals.standards.passed) || 0, total: row.signals.standards.total }
       : null,
@@ -252,7 +261,21 @@ export function repoRowToHealthInput(row: Record<string, any>): HealthScoreInput
   };
 }
 
-export function computeHealthScore(input: HealthScoreInput): HealthScoreResult {
+/** The policy's custom checks as a category; results come from the repo's `policy` signal. */
+function customCategory(input: HealthScoreInput, health: HealthPolicy): HealthCategory {
+  const results = new Map((input.custom ?? []).map((result) => [result.id, result.passed]));
+  return buildCategory(health.checks
+    // A check that does not apply to this repo neither adds nor costs points.
+    .filter((check) => !(results.has(check.id) && results.get(check.id) === null))
+    .map((check) => passCheck(results.has(check.id) ? results.get(check.id) : null, check.weight, `custom:${check.id}`, check.label)));
+}
+
+/**
+ * Without a policy the score is the sum of the points earned (the categories
+ * add up to 100). With one, each category counts for its weight and the total
+ * is scaled back to 0-100, so weights are relative to each other.
+ */
+export function computeHealthScore(input: HealthScoreInput, health?: HealthPolicy): HealthScoreResult {
   const ci = buildCategory([
     passCheck(input.hasCi, 15, 'hasCi', 'CI/CD configured'),
   ]);
@@ -282,12 +305,35 @@ export function computeHealthScore(input: HealthScoreInput): HealthScoreResult {
 
   const freshness = buildCategory([freshnessCheck(input.lastCommitAt)]);
 
-  const score = ci.score + tests.score + docs.score + quality.score + hygiene.score + freshness.score;
+  const breakdown: HealthScoreResult['breakdown'] = { ci, tests, docs, quality, hygiene, freshness };
+  let score = ci.score + tests.score + docs.score + quality.score + hygiene.score + freshness.score;
+
+  if (health) {
+    let earned = 0;
+    let total = 0;
+    for (const name of HEALTH_CATEGORIES) {
+      const category = breakdown[name];
+      category.weight = health.weights[name];
+      if (category.max > 0) earned += (category.score / category.max) * category.weight;
+      total += category.weight;
+    }
+    if (health.checks.length > 0) {
+      const custom = customCategory(input, health);
+      custom.weight = health.weights.custom;
+      breakdown.custom = custom;
+      // Until the checks have run for this repo, they do not count against it.
+      if (custom.max > 0 && custom.checks.some((check) => check.passed !== null)) {
+        earned += (custom.score / custom.max) * custom.weight;
+        total += custom.weight;
+      }
+    }
+    score = total > 0 ? Math.round((earned / total) * 100) : 0;
+  }
 
   return {
     score,
     grade: gradeFromScore(score),
     archived: input.isArchived === true,
-    breakdown: { ci, tests, docs, quality, hygiene, freshness },
+    breakdown,
   };
 }

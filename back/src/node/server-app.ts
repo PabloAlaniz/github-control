@@ -16,17 +16,26 @@ import {
 } from './config-store';
 import { createSetupApp, verifyGithubToken } from './setup-app';
 import { createSettingsStore } from './settings';
+import { followPolicyFile } from './policy-file';
+import { demoConfig, demoMode, demoResetMinutes, loadDemoData, readDemoData, readDemoPolicy } from './demo';
 import { CLIENT_IP_HEADER } from '../routes/auth';
 import { createStorage } from '../infrastructure/storage';
 import { getSyncStatus, isSyncDue, startFullSync } from '../services/full-sync.service';
 import { runScheduledChecks } from '../services/service-check.service';
+import { evaluateAlerts, sendDueDigests } from '../services/alert.service';
 import { sqliteAvailable } from '../infrastructure/storage/sql/sqlite-client';
 
 const DEFAULT_SYNC_INTERVAL_HOURS = 24;
 /** How often the server checks whether a sync is due. */
 const SYNC_CHECK_MINUTES = 10;
-/** How often the server health-checks the registered services (uptime history). */
-const SERVICE_CHECK_MINUTES = 15;
+/** How often the server health-checks the registered services, unless SERVICE_CHECK_MINUTES says otherwise. */
+const DEFAULT_SERVICE_CHECK_MINUTES = 15;
+
+/** Minutes between service checks: a whole number from 1 minute to a day. */
+export function serviceCheckMinutes(raw: string | undefined): number {
+  const value = Number(raw?.trim() || DEFAULT_SERVICE_CHECK_MINUTES);
+  return Number.isInteger(value) && value >= 1 && value <= 1440 ? value : DEFAULT_SERVICE_CHECK_MINUTES;
+}
 
 export interface ServerOptions {
   env: Record<string, string | undefined>;
@@ -37,12 +46,46 @@ export interface ServerOptions {
   verifyGithubToken?: (token: string) => Promise<string>;
   /** Run full syncs on a schedule (and right after setup). Off unless asked for. */
   autoSync?: boolean;
+  /** The dataset served when `DEMO` is set (docs/demo/demo-data.json). */
+  demoDataPath?: string;
   log?: (message: string) => void;
 }
 
 export function createServerApp(options: ServerOptions) {
-  const { env, dataDir, staticDir } = options;
   const log = options.log ?? console.log;
+
+  const demo = demoMode(options.env);
+  return demo ? createDemoApp(options, demo, log) : createConfiguredApp(options, log);
+}
+
+/** Demo mode: fictional data in memory. Reads no configuration and writes nothing to disk. */
+function createDemoApp(options: ServerOptions, mode: 'true' | 'readonly', log: (message: string) => void) {
+  const { env } = options;
+  if (!options.demoDataPath) throw new Error('Demo mode needs the demo dataset: set DEMO_DATA to its path.');
+  const file = readDemoData(options.demoDataPath);
+  const resetMinutes = demoResetMinutes(env);
+  const config = demoConfig(mode, resetMinutes, readDemoPolicy(options.demoDataPath));
+  const storage = createStorage(config);
+
+  // The alerts are derived from the dataset by the real rules; a demo has no channels to tell.
+  const load = () => loadDemoData(storage, file).then(() => evaluateAlerts({ config, storage }, { notify: false }));
+  let ready: Promise<unknown> = load();
+  if (resetMinutes > 0) {
+    setInterval(() => {
+      ready = load().catch((error) => log(`Demo reset failed: ${error.message}`));
+    }, resetMinutes * 60_000).unref();
+  }
+  log(`Demo mode (${mode === 'readonly' ? 'read-only' : 'editable'}): fictional data in memory, `
+    + (resetMinutes > 0 ? `reloaded every ${resetMinutes} minutes.` : 'never reloaded.'));
+
+  return withFrontend(options, async (request) => {
+    await ready;
+    return app.fetch(request, config);
+  });
+}
+
+function createConfiguredApp(options: ServerOptions, log: (message: string) => void) {
+  const { env, dataDir } = options;
 
   let config: AppConfig | null = null;
   let setupApp: Hono | null = null;
@@ -52,6 +95,9 @@ export function createServerApp(options: ServerOptions) {
     if (resolved.missing.length > 0) return resolved;
     ensureSecrets(env, dataDir);
     config = resolveConfig(env, loadConfigFile(dataDir), dataDir).config;
+    // Where the policy comes from decides whether the app may change it.
+    if (env.POLICY_FILE?.trim()) followPolicyFile(env.POLICY_FILE.trim(), config, log);
+    else config.POLICY_SOURCE = env.POLICY?.trim() ? 'env' : config.POLICY ? 'saved' : 'default';
     config.settings = createSettingsStore({
       env, dataDir, config, verifyGithubToken: options.verifyGithubToken ?? verifyGithubToken,
     });
@@ -81,7 +127,9 @@ export function createServerApp(options: ServerOptions) {
   const checkServices = async () => {
     if (!options.autoSync || !config) return;
     try {
-      await runScheduledChecks({ config, storage: createStorage(config) });
+      const ctx = { config, storage: createStorage(config) };
+      await runScheduledChecks(ctx);
+      await sendDueDigests(ctx);
     } catch (error: any) {
       log(`Service checks failed: ${error.message}`);
     }
@@ -113,9 +161,16 @@ export function createServerApp(options: ServerOptions) {
   if (options.autoSync) {
     void syncIfDue('schedule');
     setInterval(() => void syncIfDue('schedule'), SYNC_CHECK_MINUTES * 60_000).unref();
-    setInterval(() => void checkServices(), SERVICE_CHECK_MINUTES * 60_000).unref();
+    const checkMinutes = serviceCheckMinutes(mergeValues(env, loadConfigFile(dataDir)).SERVICE_CHECK_MINUTES);
+    setInterval(() => void checkServices(), checkMinutes * 60_000).unref();
   }
 
+  return withFrontend(options, (request) => (config ? app.fetch(request, config) : setupApp!.fetch(request)));
+}
+
+/** Routes `/api/*` to `api` and serves the built frontend for everything else. */
+function withFrontend(options: ServerOptions, api: (request: Request) => Response | Promise<Response>) {
+  const { env, staticDir } = options;
   const root = new Hono();
 
   root.all('/api/*', (c) => {
@@ -129,7 +184,7 @@ export function createServerApp(options: ServerOptions) {
     headers.delete('cf-connecting-ip');
     const request = new Request(c.req.raw, { headers });
 
-    return config ? app.fetch(request, config) : setupApp!.fetch(request);
+    return api(request);
   });
 
   if (staticDir && existsSync(join(staticDir, 'index.html'))) {

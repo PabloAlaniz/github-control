@@ -21,12 +21,13 @@ export function ActivityPage() {
         const fetchStats = async () => {
             try {
                 const [actorRes, dailyRes] = await Promise.all([
-                    apiFetch('/api/activity/by-actor'),
-                    apiFetch('/api/activity/by-day?days=7')
+                    apiFetch('/api/activity/stats/by-actor'),
+                    apiFetch('/api/activity/stats/by-day?days=7')
                 ]);
                 
-                if (actorRes.ok) setStats(await actorRes.json());
-                if (dailyRes.ok) setDailyStats(await dailyRes.json());
+                // The API wraps each list: { actors: [...] } and { days: [...] }.
+                if (actorRes.ok) setStats((await actorRes.json())?.actors ?? []);
+                if (dailyRes.ok) setDailyStats((await dailyRes.json())?.days ?? []);
             } catch (err) {
                 console.error('Failed to fetch stats:', err);
             } finally {

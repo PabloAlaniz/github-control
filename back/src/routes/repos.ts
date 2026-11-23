@@ -5,6 +5,7 @@ import { refreshFromGitHub } from '../services/repo-sync.service';
 import { computeHealthScore, repoRowToHealthInput } from '../lib/analyzers/healthScore';
 import { getLatestWorkflowRun, deriveCiStatus } from '../lib/github/workflows';
 import { groupSignals } from '../services/signal.service';
+import { resolvePolicy } from '../domain/policy';
 
 export const reposRoutes = new Hono<HttpEnv>();
 
@@ -54,9 +55,10 @@ reposRoutes.get('/', async (c) => {
   // Enrich repos with the summary of their cached GitHub signals (standards, security, ...).
   const signalsByRepo = groupSignals(await c.var.storage.signals.listSignals(), { summary: true });
 
+  const healthPolicy = resolvePolicy(c.env).health;
   const enriched = (rows as any[]).map(r => {
     const signals = signalsByRepo.get(r.full_name) || {};
-    const health = computeHealthScore(repoRowToHealthInput({ ...r, signals }));
+    const health = computeHealthScore(repoRowToHealthInput({ ...r, signals }), healthPolicy);
     return {
       ...r,
       signals,
@@ -211,7 +213,7 @@ reposRoutes.get('/:owner/:repo/health-score', async (c) => {
   if (!row) return c.json({ error: 'Repo not found' }, 404);
   const fullName = `${owner}/${repo}`;
   const signals = groupSignals(await c.var.storage.signals.getRepoSignals(fullName)).get(fullName) ?? {};
-  const result = computeHealthScore(repoRowToHealthInput({ ...(row as Record<string, any>), signals }));
+  const result = computeHealthScore(repoRowToHealthInput({ ...(row as Record<string, any>), signals }), resolvePolicy(c.env).health);
   return c.json({
     repo: fullName,
     ...result,

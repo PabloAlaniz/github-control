@@ -7,7 +7,7 @@ describe('createStorage', () => {
   it('defaults to the postgres adapter and exposes every store', () => {
     const storage = createStorage({ ...base });
     expect(Object.keys(storage).sort()).toEqual([
-      'activity', 'admin', 'apps', 'coverage', 'groups', 'health',
+      'activity', 'admin', 'alertChannels', 'alerts', 'apps', 'coverage', 'groups', 'health',
       'meta', 'metrics', 'repos', 'savedViews', 'serviceChecks', 'services', 'signals', 'traffic',
     ]);
     expect(typeof storage.repos.listRepos).toBe('function');

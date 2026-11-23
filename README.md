@@ -2,9 +2,19 @@
 
 A self-hosted dashboard to see, organize and keep healthy **all** your GitHub repositories: yours, your collaborations and your organizations', in one place.
 
-![GitHub Control dashboard](docs/screenshot.png)
+![A tour of GitHub Control: the repo table, a repo's signals, services uptime, the dependency inventory and the dark theme](docs/demo.gif)
 
 GitHub shows you one repository at a time. GitHub Control answers the questions that span all of them: which repos have no CI or tests, which ones are stale, how each one has grown, what is deployed where, and what you decided to do next with each.
+
+## Try it in 30 seconds
+
+No GitHub token and nothing to set up: this starts the dashboard on a fictional dataset, kept in memory.
+
+```bash
+docker run --rm -p 13337:13337 -e DEMO=true ghcr.io/pabloalaniz/github-control
+```
+
+Open http://localhost:13337. From a clone, without Docker: `DEMO=true npm start`.
 
 ## Features
 
@@ -12,6 +22,7 @@ GitHub shows you one repository at a time. GitHub Control answers the questions 
 - **Health at a glance**: README, CI, tests, coverage, roadmap, docs quality and a composite health score per repo; latest CI run status.
 - **Saved views and shareable filters**: the tab and filters live in the URL; name a combination and get back to it in one click.
 - **Keyboard first**: a command palette (`Cmd/Ctrl+K`) to jump to a repo, group, view or action, and `j`/`k`/`x`/`o` to move through the table.
+- **Light and dark**: follows your system, or pick one from the header.
 - **Signals from GitHub** per repo, refreshed by every sync:
   - a *standards* checklist (description, topics, protected default branch, CODEOWNERS and, for public repos, license, security policy and contributing guide) that also counts toward the health score;
   - open *security alerts* (dependencies, code scanning, secrets) by severity;
@@ -24,11 +35,17 @@ GitHub shows you one repository at a time. GitHub Control answers the questions 
 - **Traffic history**: GitHub only keeps 14 days of views, clones, referrers and popular paths; every sync saves them, so your history keeps growing.
 - **History**: a daily snapshot per repo (LOC, files, stars, issues, health) with charts and date-to-date comparison.
 - **Monorepo aware**: detects apps inside a repo and tracks each one's health and coverage.
-- **Services**: the deployed URLs behind your repos, health-checked every 15 minutes, with uptime, latency and incident history.
+- **Services**: the deployed URLs behind your repos, health-checked every 15 minutes (configurable), with uptime, latency and incident history.
+- **Inbox**: the open pull requests and issues of every repo in one list, with sections (needs my review, mine, assigned to me, dependency updates, stale), filters you can save, keyboard navigation and guarded bulk merge.
+- **Public surface** (opt-in): badges and cards for your READMEs, a summary card of your open source work, and a status page for your services.
+- **Alerts**: know when CI breaks, a service goes down, a serious security alert appears, a repo you care about goes stale or a health score drops, in Slack, Discord, Telegram, ntfy or any webhook, with an optional daily or weekly digest.
 - **Coverage from CI**: a workflow step reports coverage per repo or per app.
 - **AI summaries** (optional): a structured summary of a repo's README using the Claude API.
-- **API for agents and CI**: everything in the UI is available over HTTP with an API key, plus an activity log of who changed what.
+- **Policy as code**: the settings baseline, what counts for the health score, checks of your own and the alert thresholds in one YAML document, with a dry run that shows what a change would do before you apply it.
+- **API and MCP for agents and CI**: everything in the UI is available over HTTP with an API key, the dashboard is an MCP server your coding agent can use as tools, and an activity log records who changed what.
 - **Your data, your storage**: SQLite, JSON files, CSV files or PostgreSQL. Switch between them with one command.
+
+![The dashboard in the dark theme, with one repo's signals open](docs/dark.png)
 
 ![Traffic history of a repository](docs/traffic.png)
 
@@ -39,6 +56,14 @@ No environment variables and no database to set up: the first time you open the 
 ### Docker
 
 With the published image (amd64 and arm64, so it runs on a Raspberry Pi with a 64-bit OS):
+
+```bash
+docker run -d --name github-control --restart unless-stopped \
+  -p 13337:13337 -v github-control-data:/data ghcr.io/pabloalaniz/github-control
+docker logs github-control      # prints the one-time setup code
+```
+
+Or with Docker Compose, which also reads a `.env` file:
 
 ```bash
 mkdir github-control && cd github-control
@@ -91,22 +116,31 @@ npm start          # builds the frontend and the server, then serves http://loca
 
 Data is kept in `back/data/` (change it with `DATA_DIR`).
 
-### Try it with demo data
+### Demo mode
 
-To look around without a GitHub token, load the bundled fictional dataset:
+`DEMO=true` starts the server on the bundled fictional dataset instead of your repositories: no setup wizard, no sign-in, no GitHub token. The data lives in memory, nothing is read from or written to the data directory, and its dates always end today.
 
 ```bash
-npm install && npm run build && npm run build:server
-cd back
-DATA_DIR=./demo-data STORAGE_DRIVER=sqlite node dist/cli.mjs storage import \
-  --in ../docs/demo/demo-data.json --rebase-dates true
-DATA_DIR=./demo-data STORAGE_DRIVER=sqlite GITHUB_TOKEN=demo DISABLE_AUTH=true \
-  SYNC_INTERVAL_HOURS=0 node dist/server.mjs
+DEMO=true npm start
 ```
+
+Visitors can edit what belongs to the dashboard (notes, priorities, groups, saved views); the dataset is reloaded every hour, so their changes go away. Whatever would need GitHub (syncing, branch cleanup, applying settings) answers that it is not available in the demo.
+
+To host a public demo, use `DEMO=readonly`: nothing can be changed at all.
+
+| Variable | Purpose | Default |
+|---|---|---|
+| `DEMO` | `true` (editable) or `readonly` | off |
+| `DEMO_RESET_MINUTES` | Minutes between reloads of the dataset; `0` never reloads | `60` |
+| `DEMO_DATA` | Path to the dataset, a file made by `storage export` | the bundled `docs/demo/demo-data.json` |
+
+To keep a copy of the demo data in a real storage instead, import it: `node back/dist/cli.mjs storage import --in docs/demo/demo-data.json --rebase-dates true`.
 
 ## Configuration
 
 Every setting can also be given as an environment variable. Variables win over the wizard's answers, and the wizard does not ask for what the environment already provides. With `GITHUB_TOKEN`, `AUTH_USERNAME` and `AUTH_PASSWORD` set, the wizard never appears.
+
+Settings that describe what you expect of your repos (the baseline, health weights, alert thresholds) are better kept in the [policy](#policy).
 
 | Variable | Purpose | Default |
 |---|---|---|
@@ -118,15 +152,21 @@ Every setting can also be given as an environment variable. Variables win over t
 | `AUTH_USERNAME`, `AUTH_PASSWORD` | Sign-in credentials | asked by the wizard (stored hashed) |
 | `JWT_SECRET`, `API_KEY` | Session signing secret and API key | generated and saved |
 | `SYNC_INTERVAL_HOURS` | Hours between automatic full syncs; `0` disables | `24` |
-| `PUBLIC_BADGES` | `true` serves public SVG badges for public repos | off |
-| `REPO_BASELINE` | JSON object `{ "setting": true/false }`: the repo settings every repo is expected to have | a small default set |
+| `SERVICE_CHECK_MINUTES` | Minutes between service health checks (1 to 1440) | `15` |
+| `ALERT_STALE_DAYS` | Days without commits before a high or medium priority repo raises an alert; `0` turns it off | `90` |
+| `ALERT_HEALTH_BELOW` | Health score under which a repo raises an alert; `0` turns it off | `40` |
+| `PUBLIC_BADGES` | `true` serves public SVG badges and cards for public repos | off |
+| `PUBLIC_STATUS` | `true` serves the public status page of your services at `/status` | off |
+| `POLICY_FILE` | Path to the policy document (YAML). The file is then the source of truth | none |
+| `POLICY` | The policy document itself (YAML or JSON) | none |
+| `REPO_BASELINE` | JSON object `{ "setting": true/false }`: the repo settings every repo is expected to have. Superseded by the policy's `baseline` | a small default set |
 | `ANTHROPIC_API_KEY` | Enables AI summaries | off |
 | `CI_COVERAGE_TOKEN` | Token CI uses to report coverage | off |
 | `DATA_DIR`, `PORT`, `HOST` | Where data lives and where to listen | `./data`, `13337`, `0.0.0.0` |
 | `TRUST_PROXY` | `true` to take the client address from `X-Forwarded-For` | off |
 | `DISABLE_AUTH` | `true` turns sign-in off. Local use only. | off |
 
-The GitHub token, organizations, sync interval, badges, the repo settings baseline and your password can also be changed later from the **Settings** page (settings given as environment variables appear there as locked).
+The GitHub token, organizations, sync interval, badges, the status page, the repo settings baseline and your password can also be changed later from the **Settings** page (settings given as environment variables appear there as locked).
 
 See [`.env.example`](.env.example).
 
@@ -157,7 +197,7 @@ A target is `current` (the configured storage), `sqlite:<file>`, `json:<dir>`, `
 
 A **full sync** refreshes the repository list from GitHub and then updates health, code metrics, the daily snapshot, monorepo apps, CI status, traffic and signals for every active repo. Traffic is only available for repositories your token has push access to.
 
-Signals degrade gracefully with the token's permissions: security alerts need read access to them, deleting branches needs write access to the repository, and reading or changing repo settings needs admin access. Without a permission, that signal is shown as not available instead of failing the sync.
+Signals degrade gracefully with the token's permissions: security alerts need read access to them, deleting branches and merging pull requests need write access to the repository, and reading or changing repo settings needs admin access. Without a permission, that signal is shown as not available instead of failing the sync.
 
 - On the Node server it runs automatically every `SYNC_INTERVAL_HOURS`, and right after setup.
 - Start one by hand with `POST /api/sync`; follow it with `GET /api/sync/status`.
@@ -166,20 +206,151 @@ Signals degrade gracefully with the token's permissions: security alerts need re
 
 ### What changes on GitHub
 
-Almost everything is read-only. Two actions write to GitHub, both only when you ask and both recorded in the activity log:
+Almost everything is read-only. Three actions write to GitHub, all only when you ask and all recorded in the activity log:
 
 - **Branch cleanup** deletes the branches you select. The server re-checks each one first and never deletes the default branch, a protected branch, or a branch that moved since it was listed.
+- **Merging pull requests** from the inbox. The server re-checks each one first and skips it if it is closed, a draft, has new commits since it was listed, or has failing or running checks. GitHub's own rules (required reviews, conflicts, branch protection) still apply.
 - **Applying the settings baseline** changes only the settings that differ. Review the baseline in **Settings** before applying it in bulk.
 
-## Badges
+## Policy
 
-With `PUBLIC_BADGES=true`, the server exposes SVG badges you can embed in a README. They need no authentication, so they only exist for **public** repositories; a private repo answers like one that does not exist.
+![The policy document on the left and, on the right, the preview of a change: what changes and how scores move](docs/policy.png)
+
+What you expect of every repo lives in one YAML document, on the **Policy** page:
+
+```yaml
+version: 1
+
+baseline:                 # repo settings every repo must have (drift is shown per repo and can be fixed in bulk)
+  delete_branch_on_merge: true
+  allow_merge_commit: false
+  has_wiki: false
+
+health:
+  weights:                # how much each category counts; relative to each other
+    tests: 35             # ci, tests, docs, quality, hygiene, freshness, custom
+    freshness: 10
+  checks:                 # checks of your own, counted in the health score
+    - id: codeowners
+      label: CODEOWNERS file
+      weight: 6
+      files: [CODEOWNERS, .github/CODEOWNERS]     # passes when one exists
+    - id: no-env-file
+      label: No .env file committed
+      weight: 6
+      forbidden: ['.env', '**/.env']              # passes when none exists
+      only: public                                # or: private
+
+alerts:
+  stale_days: 90
+  health_below: 40
+
+signals:
+  openssf_scorecard: true   # fetch the OpenSSF Scorecard of public repos
+```
+
+Every section is optional; what you leave out keeps its default. A complete example is in [`docs/demo/policy.yml`](docs/demo/policy.yml).
+
+**Preview changes** is a dry run: it validates the document and shows what it changes, how the health score of each repo would move, how many settings would be out of line and how many alerts would be open, all computed from what the last sync stored. Nothing changes until you press **Apply**. New checks and newly enforced settings are read from GitHub at the next sync.
+
+To keep the policy **under version control**, put it in a file and point `POLICY_FILE` at it (for example a file from a repo, mounted into the container). The file is then the only way to change the policy: the server re-reads it within seconds of a change, ignores an edit that is not valid, and the page becomes preview-only. `POLICY` takes the document itself as an environment variable (the way to set it on Cloudflare Workers).
+
+The OpenSSF Scorecard is off unless the policy turns it on. When on, each sync asks `api.securityscorecards.dev` about your **public** repos (their names are sent to that service; private repos are never asked about) and shows the score and its weakest checks on the repo.
+
+## MCP server
+
+GitHub Control is also an [MCP](https://modelcontextprotocol.io) server, so a coding agent can ask it about your repos instead of you copying things over. It speaks the Streamable HTTP transport at `/api/mcp`, authenticated with the API key. Any MCP client that supports that transport can connect with the URL and an `Authorization: Bearer <API_KEY>` header; for example, with Claude Code:
+
+```bash
+claude mcp add --transport http github-control https://your-server.example/api/mcp \
+  --header "Authorization: Bearer $API_KEY"
+```
+
+| Tool | What it does |
+|---|---|
+| `list_repos` | Repos with health, CI, priority and last commit; filter by text, priority, language, CI state or health |
+| `get_repo` | One repo in full: metadata, notes, health breakdown and signals |
+| `list_alerts` | Open (or resolved) alerts |
+| `get_inbox` | Open pull requests and issues; filter by type, repo or requested reviewer |
+| `list_dependencies` | Packages and versions across repos, diverging majors, end-of-life runtimes |
+| `list_services` | Services with their state and uptime |
+| `get_policy`, `plan_policy` | The policy in force, and a dry run of a new one |
+| `update_repo` | Set a repo's priority, next action or notes in the dashboard |
+
+The tools read what the dashboard already knows; none of them calls GitHub, and only `update_repo` changes anything (the dashboard's own notes, never GitHub). Each call goes through the same API as everything else, so it is logged in the activity log as an agent.
+
+## Inbox
+
+![The inbox on the dependency updates section, grouped by repo, with four pull requests selected](docs/inbox.png)
+
+The **Inbox** lists the open pull requests and issues of all your active repos. Every sync reads them, and **Refresh** reads them again on demand; opening the page costs no GitHub calls.
+
+- **Sections** are ready-made questions: what needs my review, my pull requests, what is assigned to me, dependency updates (Dependabot, Renovate), pull requests nobody touched in 30 days, all pull requests, all issues. "Me" is the account the GitHub token belongs to.
+- **Filters** by text, repo, label and draft state live in the URL. Name a combination to keep it under *Saved views*.
+- **Keyboard**: `j`/`k` to move, `x` to select, `o` or `Enter` to open on GitHub, `/` to search.
+- **Merge** the selected pull requests in one go: dependency updates are grouped by repo so a whole repo can be selected at once.
+
+It keeps the 100 most recently updated open items of each repo.
+
+## Alerts
+
+![Open alerts and the channels they are sent to](docs/alerts.png)
+
+After every sync and every round of service checks, GitHub Control compares what it knows with the alerts that are open. An alert opens when one of these starts to hold, and is resolved when it stops:
+
+| Alert | Opens when |
+|---|---|
+| CI failing | the latest workflow run on the default branch failed |
+| Service down | a service's health check found it down |
+| Security alerts | a repo has open alerts of critical or high severity; it speaks again when there are more |
+| Repo went stale | a repo with high or medium priority has had no commits for `ALERT_STALE_DAYS` days (default 90) |
+| Low health score | a repo's health score is under `ALERT_HEALTH_BELOW` (default 40) |
+
+Archived and paused repos never raise alerts. Open and recently resolved alerts are listed on the **Alerts** page (the bell in the header) whether or not anything is sent anywhere.
+
+To be told, add a **channel** on that page: Slack, Discord, Telegram, ntfy or a generic webhook that receives JSON. Each channel chooses which kinds of alert it gets, and can also get a daily or weekly digest of what is open. A channel hears when an alert opens or gets worse, and when CI or a service recovers. What was already wrong when you add a channel is not sent: only what changes from then on.
+
+```json
+{ "source": "github-control", "event": "opened", "kind": "ci_failing", "entity": "acme/api",
+  "title": "CI is failing on acme/api", "url": "https://github.com/acme/api/actions/runs/1",
+  "level": 0, "detail": { "branch": "main" }, "at": "2026-01-01T00:00:00.000Z", "text": "..." }
+```
+
+`event` is `opened`, `worsened`, `resolved`, `digest` or `test`.
+
+Service checks run every 15 minutes; set `SERVICE_CHECK_MINUTES` to check more often (an outage shorter than the interval can go unnoticed). On Cloudflare Workers the interval is the Cron Trigger in `back/wrangler.toml`, which also drives alerts and digests.
+
+## Badges and cards
+
+With `PUBLIC_BADGES=true`, the server exposes SVG images you can embed in a README. They need no authentication, so they only exist for **public** repositories; a private repo answers like one that does not exist, and the summary counts public repos only.
+
+![A summary card: public repos, stars, lines of code, views, release downloads and average health](docs/summary-card.svg)
+
+![A repo card: name, description, language, stars, health, coverage and latest release](docs/repo-card.svg)
 
 ```markdown
 ![views](https://your-server.example/api/badges/OWNER/REPO/views.svg)
+![OWNER/REPO](https://your-server.example/api/badges/OWNER/REPO/card.svg)
+![Open source at a glance](https://your-server.example/api/badges/summary.svg)
 ```
 
-Available: `stars`, `views` and `clones` (last 14 days), `loc`, `coverage`, `health`.
+- **Badges**: `stars`, `views` and `clones` (last 14 days), `loc`, `coverage`, `health`, `ci`, `release`, `downloads` (of the files attached to releases). `?label=` replaces the left text and `?style=flat-square` removes the rounded corners.
+- **Cards**: `card.svg` for one repo and `summary.svg` for all of them. `?theme=light` or `?theme=dark` fixes the colors; by default a card follows the reader's system theme. The summary also takes `?title=`.
+
+The **Badges and embeds** page (command palette, or the *Badges* link on a public repo) previews each one and gives you the Markdown to copy.
+
+## Status page
+
+![The public status page: overall state and 90 days of history per service](docs/status.png)
+
+With `PUBLIC_STATUS=true`, `/status` is a page anyone can open, without signing in: whether everything is up, and for each active service its current state and 90 days of history. It shows names and states only, never URLs, providers or repos. Deactivate a service to keep it off the page.
+
+```markdown
+[![status](https://your-server.example/api/status/badge.svg)](https://your-server.example/status)
+![uptime](https://your-server.example/api/status/badge.svg?service=SLUG)
+```
+
+`GET /api/status` returns the same data as JSON. Both switches are also on the **Settings** page.
 
 ## API
 
@@ -203,6 +374,11 @@ curl -X POST -H "Authorization: Bearer $API_KEY" http://localhost:13337/api/sync
 | Traffic | `GET /api/traffic/summary`, `/api/traffic/repo/:owner/:repo`, `POST /api/traffic/repo/:owner/:repo/sync` |
 | Signals | `GET /api/repos/:owner/:repo/signals`, `POST .../signals/sync?kinds=`, `POST .../branches/delete`, `POST .../config/apply` |
 | Dependencies | `GET /api/dependencies` |
+| Public (no sign-in, opt-in) | `GET /api/badges/:owner/:repo/:metric.svg`, `.../card.svg`, `/api/badges/summary.svg`, `GET /api/status`, `/api/status/badge.svg` |
+| Policy | `GET /api/policy`, `POST /api/policy/plan`, `PUT /api/policy` |
+| MCP | `POST /api/mcp` |
+| Inbox | `GET /api/inbox`, `POST /api/inbox/refresh`, `POST /api/inbox/merge` |
+| Alerts | `GET /api/alerts?status={open,resolved,all}`, `POST /api/alerts/evaluate`, `GET/POST /api/alerts/channels`, `PUT/DELETE /api/alerts/channels/:id`, `POST /api/alerts/channels/:id/test` |
 | Saved views | `GET/POST /api/saved-views`, `DELETE /api/saved-views/:id` |
 | Services & apps | `/api/services`, `GET /api/services/uptime`, `/api/repo-apps` |
 | Activity | `GET /api/activity`, `/api/activity/stats/by-actor`, `/api/activity/stats/by-day` |
@@ -242,6 +418,7 @@ npm run test:all     # frontend and backend tests
 
 - Sign-in passwords set through the wizard are stored hashed (PBKDF2-SHA256). Repeated failed sign-ins are rate limited per client.
 - `config.json` holds your GitHub token in plain text with owner-only permissions. Protect the data directory like any other secret.
+- Alert channel destinations (webhook URLs, bot tokens) are kept in the storage. The API and the UI only show their last characters, but they are in the database and in `storage export` files: treat both as secrets.
 - An unconfigured instance can be claimed by whoever reaches it first, which is why setup requires the code printed in the server log. Finish setup before exposing the server.
 - Put a TLS-terminating reverse proxy in front of the server for anything beyond localhost.
 

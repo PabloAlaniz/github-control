@@ -23,7 +23,7 @@ flowchart LR
 ```
 back/src/
   config.ts                 AppConfig: settings, whatever their source
-  domain/                   Pure rules: repo views, activity vocabulary, service derivation, repo settings baseline
+  domain/                   Pure rules: repo views, activity vocabulary, service derivation, repo settings baseline, alert rules
   application/
     ports/storage.ts        What the app needs from persistence (interfaces only)
     context.ts              AppContext = { config, storage }
@@ -44,7 +44,7 @@ back/src/
 
 ## Storage
 
-`application/ports/storage.ts` defines fourteen stores (repos, groups, meta, health, apps, coverage, metrics, services, activity, traffic, savedViews, signals, serviceChecks, admin) grouped in `Storage`.
+`application/ports/storage.ts` defines sixteen stores (repos, groups, meta, health, apps, coverage, metrics, services, activity, traffic, savedViews, signals, serviceChecks, alerts, alertChannels, admin) grouped in `Storage`.
 
 | Adapter | Location | Used by drivers |
 |---|---|---|
@@ -118,6 +118,10 @@ PostgreSQL runs embedded in the tests (PGlite), so the SQL is really executed. A
 
 `node/config-store.ts` resolves each setting from the environment first and `<DATA_DIR>/config.json` second. If the GitHub token or the sign-in credentials are missing, `node/server-app.ts` serves the setup API (`node/setup-app.ts`) instead of the app: it requires the one-time code printed in the log, asks only for what is missing, validates the GitHub token, stores a password hash and generated secrets, and then switches to the app without a restart.
 
+### Demo mode (Node)
+
+With `DEMO` set, `node/server-app.ts` skips all of the above: `node/demo.ts` builds a complete configuration (memory storage, sign-in off, a placeholder GitHub token), loads `docs/demo/demo-data.json` with its dates moved to end today, and reloads it on a timer. Nothing touches the data directory. `middleware/demo.ts` then answers 403 to every write except edits of the instance's own data (none at all when `DEMO=readonly`), and to the few reads that call GitHub. `/api/setup/status` reports `demo`, which the frontend shows as a banner.
+
 ### Runtime settings
 
 The repo settings baseline is one of these settings: `domain/repo-baseline.ts` holds the catalog of repo settings the app can check and the defaults, and `REPO_BASELINE` (a JSON object) selects which ones are enforced.
@@ -134,15 +138,37 @@ The repo settings baseline is one of these settings: `domain/repo-baseline.ts` h
 
 A signal is data about one repo that is fetched from GitHub and cached: one record per repo and kind in the `repo_signals` collection, with the processed result as JSON. Each kind has a collector in `lib/signals/` (a function from a `SignalContext` to plain data) registered in `SIGNAL_COLLECTORS`; adding a kind is adding an entry there and the UI for it. The context memoizes the repo metadata and file tree, so the collectors of one sync share those calls.
 
-Current kinds: `standards`, `dependencies`, `security`, `release`, `branches`, `ci`, `config`.
+Current kinds: `standards`, `dependencies`, `security`, `release`, `branches`, `ci`, `config`, `inbox`, `policy`, `scorecard`.
 
 `services/signal.service.ts` runs the collectors and stores the results; kinds fail independently, so a missing permission on one does not lose the others. By convention a signal keeps its long detail under `items`: `GET /api/repos` attaches only the summary of each signal to a repo, and `GET /api/repos/:owner/:repo/signals` returns everything. Cross-repo questions (`services/dependency.service.ts`) are answered in application code from the stored signals, so they work the same on every storage.
 
-Two routes act on GitHub from what a signal showed: `routes/branches.ts` (delete branches) and `routes/config.ts` (apply the settings baseline). Both re-read the current state from GitHub before changing anything and log every change.
+The inbox is a signal like the others: each repo's open pull requests and issues are one `inbox` record, and `services/inbox.service.ts` flattens the records of the active repos into one list. Sections and filters are the frontend's (`front/src/lib/inbox.js`); a saved inbox view is a saved view whose query starts with `inbox=1`.
+
+Three routes act on GitHub from what a signal showed: `routes/branches.ts` (delete branches), `routes/config.ts` (apply the settings baseline) and `routes/inbox.ts` (merge pull requests). All re-read the current state from GitHub before changing anything and log every change.
 
 ### Service checks
 
 `services/service-check.service.ts` probes a service, updates its latest status and appends the result to the `service_checks` collection. The same function serves the manual check, the Node timer and the Worker's `scheduled` handler. `GET /api/services/uptime` turns that history into uptime, mean latency, incidents (transitions into "down") and a per-day series.
+
+### Policy
+
+`domain/policy.ts` turns one YAML document into the `Policy` everything else reads: the settings baseline, the health score weights and custom checks, the alert thresholds and optional signals. Sections a document leaves out fall back to the defaults (or the older single-purpose settings), and a document that does not parse is ignored rather than fatal. The document reaches the configuration as `POLICY` from one of three places: a file followed by `node/policy-file.ts` (`POLICY_FILE`), the environment, or the settings store when it is applied from the app.
+
+`services/policy.service.ts` plans a change without making it: it builds the candidate policy and recomputes scores, settings drift and alert conditions from stored data under both policies. For that the `config` signal keeps the actual value of every setting the baseline could enforce, not only those it enforces today. Custom checks run in the `policy` signal collector against the repo's file tree, so their results are stored like any other signal.
+
+### MCP
+
+`routes/mcp.ts` implements the stateless part of MCP's Streamable HTTP transport by hand (JSON-RPC over POST, JSON answers). A tool does not touch storage: it sends a request to the app's own routes with the caller's credentials. Authentication, validation, the activity log and the demo restrictions therefore apply to an agent exactly as to any other client, and a tool can never do more than the HTTP API allows.
+
+### Public surface
+
+Two groups of routes answer without authentication, each behind its own switch and mounted before the auth middleware: `routes/badges.ts` (`PUBLIC_BADGES`: badges and cards, public repos only) and `routes/status.ts` (`PUBLIC_STATUS`: the names, states and uptime of active services). Both render from stored data, so a request never reaches GitHub. `lib/badge.ts` and `lib/cards.ts` build the SVG by hand; anything a caller can supply (`label`, `title`) is escaped and length-limited.
+
+### Alerts
+
+`domain/alerts.ts` is the rule book: a pure function from the stored state (repos, services, signals) to the conditions that hold right now, each with a stable key such as `ci_failing:acme/api`. `services/alert.service.ts` compares them with the open records of the `alerts` collection and opens, updates or resolves accordingly, so there is no event to miss: whatever changed the data, the next evaluation sees the result. It runs at the end of a full sync and of every round of service checks, one evaluation at a time per storage.
+
+What changed is sent to the `alert_channels` that asked for that kind. A channel type (`lib/alerts/channels.ts`) is a function from a message to one HTTP request, which is why the same code delivers from Node and from the Worker; adding a type is adding an entry to `CHANNEL_TYPES`. Destinations are secrets: the API returns them masked, and an edit that leaves a secret empty keeps the stored one. Digests are sent by the same scheduler that runs the service checks.
 
 ## Authentication
 

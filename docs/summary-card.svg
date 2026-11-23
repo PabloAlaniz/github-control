@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="480" height="178" viewBox="0 0 480 178" role="img" aria-label="Acme open source: 7 public repos, 2.8k stars, 121.8k lines of code, 6.8k views (14d), 27.7k release downloads, 56/100 average health">
+  <title>Acme open source: 7 public repos, 2.8k stars, 121.8k lines of code, 6.8k views (14d), 27.7k release downloads, 56/100 average health</title>
+  <style>text{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif}.bg{fill:#ffffff;stroke:#d0d7de}.title{fill:#0969da}.text{fill:#1f2328}.muted{fill:#59636e}@media(prefers-color-scheme:dark){.bg{fill:#0d1117;stroke:#30363d}.title{fill:#58a6ff}.text{fill:#e6edf3}.muted{fill:#9198a1}}</style>
+  <rect class="bg" x="0.5" y="0.5" width="479" height="177" rx="6"/>
+  <text class="title" x="24" y="38" font-size="16" font-weight="600">Acme open source</text>
+  <text class="text" x="24" y="82" font-size="22" font-weight="600">7</text>
+  <text class="muted" x="24" y="100" font-size="12">public repos</text>
+  <text class="text" x="176" y="82" font-size="22" font-weight="600">2.8k</text>
+  <text class="muted" x="176" y="100" font-size="12">stars</text>
+  <text class="text" x="328" y="82" font-size="22" font-weight="600">121.8k</text>
+  <text class="muted" x="328" y="100" font-size="12">lines of code</text>
+  <text class="text" x="24" y="140" font-size="22" font-weight="600">6.8k</text>
+  <text class="muted" x="24" y="158" font-size="12">views (14d)</text>
+  <text class="text" x="176" y="140" font-size="22" font-weight="600">27.7k</text>
+  <text class="muted" x="176" y="158" font-size="12">release downloads</text>
+  <text class="text" x="328" y="140" font-size="22" font-weight="600">56/100</text>
+  <text class="muted" x="328" y="158" font-size="12">average health</text>
+</svg>

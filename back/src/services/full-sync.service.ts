@@ -12,6 +12,7 @@ import { syncRepoHealth } from './health-sync.service';
 import { refreshFromGitHub } from './repo-sync.service';
 import { syncRepoTraffic } from './traffic.service';
 import { syncSignals } from './signal.service';
+import { evaluateAlertsQuietly } from './alert.service';
 
 export interface SyncProgress {
   phase: 'refreshing' | 'syncing';
@@ -41,7 +42,7 @@ export interface SyncOptions {
 const MAX_REPORTED_ERRORS = 20;
 
 /** Runs `worker` over `items`, at most `limit` at a time. */
-async function mapLimit<T>(items: T[], limit: number, worker: (item: T) => Promise<void>): Promise<void> {
+export async function mapLimit<T>(items: T[], limit: number, worker: (item: T) => Promise<void>): Promise<void> {
   let next = 0;
   const lanes = Array.from({ length: Math.max(1, Math.min(limit, items.length)) }, async () => {
     while (next < items.length) await worker(items[next++]);
@@ -94,6 +95,9 @@ export async function runFullSync(ctx: AppContext, options: SyncOptions = {}): P
   } catch (error: any) {
     summary.error = error.message;
   }
+
+  // The data is fresh: open, update or resolve alerts and tell the channels.
+  if (!summary.error) await evaluateAlertsQuietly(ctx);
 
   summary.finishedAt = new Date().toISOString();
   await ctx.storage.activity.logActivity({

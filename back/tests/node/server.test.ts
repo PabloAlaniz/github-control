@@ -172,7 +172,7 @@ describe('node server: settings', () => {
     const settings = await read();
     expect(settings).toEqual({
       editable: true, storageDriver: 'json', username: 'admin', githubTokenSet: true,
-      githubOrgs: ['acme-org'], syncIntervalHours: 24, publicBadges: false, locked: [],
+      githubOrgs: ['acme-org'], syncIntervalHours: 24, publicBadges: false, publicStatus: false, locked: [],
       repoBaseline: expect.any(Array),
     });
     // Unset baseline: the defaults are enforced, the rest of the catalog is not.

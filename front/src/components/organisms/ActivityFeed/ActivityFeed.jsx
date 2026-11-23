@@ -52,10 +52,10 @@ export function ActivityFeed({
 
     const fetchStats = async () => {
         try {
-            const response = await apiFetch('/api/activity/by-actor');
+            const response = await apiFetch('/api/activity/stats/by-actor');
             if (response.ok) {
                 const data = await response.json();
-                setStats(data);
+                setStats(data?.actors ?? []);
             }
         } catch (err) {
             console.error('Failed to fetch activity stats:', err);

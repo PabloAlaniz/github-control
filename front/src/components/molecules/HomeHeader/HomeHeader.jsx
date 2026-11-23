@@ -1,13 +1,33 @@
 import { Button } from '../../atoms/Button';
 import { Text } from '../../atoms/Text';
 import { BackupMenu } from '../BackupMenu';
-import { RefreshCw, Activity, LogOut, Plus, BarChart3, Command, Package, DownloadCloud, Settings } from 'lucide-react';
+import { RefreshCw, Activity, LogOut, Plus, BarChart3, Command, Package, DownloadCloud, Settings, Sun, Moon, Monitor, Bell, Inbox } from 'lucide-react';
+import { useTheme } from '../../../hooks/useTheme';
 
 const SUBTITLES = {
     default: 'Manage and monitor your repositories',
     testing: 'Test quality and coverage across repos',
     infrastructure: 'Deployed services and health monitoring',
 };
+
+const THEME_ICONS = { system: Monitor, light: Sun, dark: Moon };
+const THEME_LABELS = { system: 'System theme', light: 'Light theme', dark: 'Dark theme' };
+
+function ThemeToggle() {
+    const { theme, cycle } = useTheme();
+    const Icon = THEME_ICONS[theme];
+    return (
+        <Button
+            onClick={cycle}
+            variant="ghost"
+            className="px-2.5"
+            title={`${THEME_LABELS[theme]} (click to change)`}
+            aria-label={`${THEME_LABELS[theme]}. Change theme`}
+        >
+            <Icon size={16} />
+        </Button>
+    );
+}
 
 /** "Sync all", or the progress of the sync in flight. */
 function syncLabel({ running, progress }) {
@@ -34,6 +54,9 @@ export function HomeHeader({
     onActivity,
     onMetrics,
     onDependencies,
+    onInbox,
+    onAlerts,
+    alertCount,
     onSettings,
     onLogout,
     onImportSuccess,
@@ -44,16 +67,16 @@ export function HomeHeader({
     const isServiceTab = activeTab === 'infrastructure';
 
     return (
-        <header className="flex items-center justify-between">
+        <header className="flex items-center justify-between gap-2">
             <div className="flex items-center gap-3">
                 <div>
-                    <Text variant="h2">GitHub Control</Text>
-                    <Text variant="muted">
+                    <Text variant="h2" className="whitespace-nowrap">GitHub Control</Text>
+                    <Text variant="muted" className="hidden xl:block">
                         {SUBTITLES[activeTab] || SUBTITLES.default}
                     </Text>
                 </div>
             </div>
-            <div className="flex items-center gap-2 whitespace-nowrap">
+            <div className="flex items-center gap-1.5 whitespace-nowrap">
                 {onOpenPalette && (
                     <Button
                         onClick={onOpenPalette}
@@ -90,30 +113,53 @@ export function HomeHeader({
                         <span className="hidden sm:inline">Add Service</span>
                     </Button>
                 )}
-                <Button onClick={onActivity} variant="ghost" className="gap-2">
+                {onInbox && (
+                    <Button onClick={onInbox} variant="ghost" className="gap-2 px-2.5" title="Open pull requests and issues across repos">
+                        <Inbox size={16} />
+                        <span className="hidden min-[1440px]:inline">Inbox</span>
+                    </Button>
+                )}
+                <Button onClick={onActivity} variant="ghost" className="gap-2 px-2.5" title="Activity" aria-label="Activity">
                     <Activity size={16} />
-                    <span className="hidden sm:inline">Activity</span>
+                    <span className="hidden min-[1440px]:inline">Activity</span>
                 </Button>
-                <Button onClick={onMetrics} variant="ghost" className="gap-2">
+                <Button onClick={onMetrics} variant="ghost" className="gap-2 px-2.5" title="Metrics" aria-label="Metrics">
                     <BarChart3 size={16} />
-                    <span className="hidden sm:inline">Metrics</span>
+                    <span className="hidden min-[1440px]:inline">Metrics</span>
                 </Button>
                 {onDependencies && (
-                    <Button onClick={onDependencies} variant="ghost" className="gap-2">
+                    <Button onClick={onDependencies} variant="ghost" className="gap-2 px-2.5" title="Dependencies" aria-label="Dependencies">
                         <Package size={16} />
-                        <span className="hidden sm:inline">Deps</span>
+                        <span className="hidden min-[1440px]:inline">Deps</span>
+                    </Button>
+                )}
+                {onAlerts && (
+                    <Button
+                        onClick={onAlerts}
+                        variant="ghost"
+                        className="relative px-2.5"
+                        title={alertCount ? `${alertCount} open alert${alertCount === 1 ? '' : 's'}` : 'Alerts'}
+                        aria-label={alertCount ? `Alerts: ${alertCount} open` : 'Alerts'}
+                    >
+                        <Bell size={16} />
+                        {alertCount > 0 && (
+                            <span className="absolute -right-0.5 -top-0.5 min-w-[1.1rem] rounded-full bg-red-600 px-1 text-center text-[10px] font-semibold leading-[1.1rem] text-white">
+                                {alertCount > 99 ? '99+' : alertCount}
+                            </span>
+                        )}
                     </Button>
                 )}
                 <BackupMenu onImportSuccess={onImportSuccess} />
                 {onSettings && (
-                    <Button onClick={onSettings} variant="ghost" className="gap-2" aria-label="Settings">
+                    <Button onClick={onSettings} variant="ghost" className="gap-2" aria-label="Settings" title="Settings">
                         <Settings size={16} />
-                        <span className="hidden lg:inline">Settings</span>
+                        <span className="hidden 2xl:inline">Settings</span>
                     </Button>
                 )}
-                <Button onClick={onLogout} variant="ghost" className="gap-2">
+                <ThemeToggle />
+                <Button onClick={onLogout} variant="ghost" className="gap-2" aria-label="Logout" title="Logout">
                     <LogOut size={16} />
-                    <span className="hidden sm:inline">Logout</span>
+                    <span className="hidden 2xl:inline">Logout</span>
                 </Button>
             </div>
         </header>

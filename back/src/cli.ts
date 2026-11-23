@@ -16,7 +16,7 @@ import { resolve } from 'node:path';
 import type { AppConfig, StorageDriver } from './config';
 import type { Storage } from './application/ports/storage';
 import { createStorage } from './infrastructure/storage';
-import { COLLECTIONS, columnType, type CollectionName } from './infrastructure/storage/schema';
+import { rebaseDates } from './infrastructure/storage/rebase-dates';
 import './infrastructure/storage/node';
 import { loadConfigFile, resolveConfig } from './node/config-store';
 
@@ -77,24 +77,7 @@ function countRecords(dump: Record<string, unknown[]>): string {
   return `${total} records${parts.length ? ` (${parts.join(', ')})` : ''}`;
 }
 
-/** Shifts every date and timestamp by whole days so that `exportedAt` lands on today. */
-export function rebaseDates(data: Record<string, Record<string, unknown>[]>, exportedAt: string, now = new Date()): void {
-  const utcDay = (date: Date) => Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate());
-  const days = Math.round((utcDay(now) - utcDay(new Date(exportedAt))) / 86_400_000);
-  if (!Number.isFinite(days) || days === 0) return;
-  for (const [collection, rows] of Object.entries(data)) {
-    if (!(collection in COLLECTIONS)) continue;
-    for (const row of rows) {
-      for (const [column, value] of Object.entries(row)) {
-        if (typeof value !== 'string') continue;
-        const type = columnType(collection as CollectionName, column);
-        if (type !== 'timestamp' && type !== 'date') continue;
-        const shifted = new Date(new Date(value).getTime() + days * 86_400_000).toISOString();
-        row[column] = type === 'date' ? shifted.slice(0, 10) : shifted;
-      }
-    }
-  }
-}
+export { rebaseDates };
 
 export async function runCli(argv: string[], io: CliIo): Promise<void> {
   const [command, sub, ...rest] = argv;

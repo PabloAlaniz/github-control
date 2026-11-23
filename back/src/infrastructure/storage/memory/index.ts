@@ -10,6 +10,7 @@ import type { Row, Storage } from '../../../application/ports/storage';
 import { COLLECTIONS, NOW, type CollectionName } from '../schema';
 import { createTrafficStore } from './traffic-store';
 import { createSavedViewStore, createServiceCheckStore, createSignalStore } from './extra-stores';
+import { createAlertChannelStore, createAlertStore } from './alert-stores';
 import { MemoryDb, clone, emptyState, type MemoryOptions, type MemoryState } from './db';
 import { createGroupStore, createHealthStore, createMetaStore, createRepoStore } from './repo-stores';
 import {
@@ -36,6 +37,8 @@ export function createMemoryStorage(state: MemoryState = emptyState(), options: 
     savedViews: createSavedViewStore(db),
     signals: createSignalStore(db),
     serviceChecks: createServiceCheckStore(db),
+    alerts: createAlertStore(db),
+    alertChannels: createAlertChannelStore(db),
     admin: {
       async exportAll() {
         const dump: Record<string, Row[]> = {};

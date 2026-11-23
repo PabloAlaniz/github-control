@@ -898,6 +898,115 @@ export function describeStorageContract(name: string, harness: StorageHarness) {
       });
     });
 
+    // ── Alerts ────────────────────────────────────────
+    describe('alerts', () => {
+      const input = (key: string, extra: Record<string, unknown> = {}) => ({
+        key, kind: key.split(':')[0], entity: key.split(':')[1], title: `Title of ${key}`,
+        detail: { note: 'has, "quotes"', nested: { n: 1 } }, url: null, level: 0, ...extra,
+      });
+
+      it('opens, updates and resolves alerts, newest first', async () => {
+        const first = await s.alerts.openAlert(input('ci_failing:acme/a', { url: 'https://example.com/run/1' }));
+        const second = await s.alerts.openAlert(input('security:acme/b', { level: 2 }));
+
+        expect(json(first)).toMatchObject({
+          id: expect.any(Number), key: 'ci_failing:acme/a', kind: 'ci_failing', entity: 'acme/a',
+          title: 'Title of ci_failing:acme/a', detail: { note: 'has, "quotes"', nested: { n: 1 } },
+          url: 'https://example.com/run/1', level: 0, status: 'open', resolved_at: null,
+        });
+        expect(isIsoTimestamp(first.opened_at)).toBe(true);
+        expect(json(await s.alerts.listAlerts()).map((a: any) => a.id)).toEqual([second.id, first.id]);
+
+        await s.alerts.updateAlert(second.id, { title: 'Worse', detail: { critical: 3 }, url: 'https://example.com/s', level: 3 });
+        await s.alerts.resolveAlert(first.id);
+
+        const open = json(await s.alerts.listAlerts({ status: 'open' }));
+        expect(open).toEqual([expect.objectContaining({
+          id: second.id, title: 'Worse', detail: { critical: 3 }, url: 'https://example.com/s', level: 3,
+        })]);
+        const [resolved] = await s.alerts.listAlerts({ status: 'resolved' });
+        expect(resolved).toMatchObject({ id: first.id, status: 'resolved' });
+        expect(isIsoTimestamp(resolved.resolved_at)).toBe(true);
+      });
+
+      it('allows a condition to open again after it was resolved, and limits the listing', async () => {
+        const first = await s.alerts.openAlert(input('service_down:api'));
+        await s.alerts.resolveAlert(first.id);
+        const again = await s.alerts.openAlert(input('service_down:api'));
+
+        expect(again.id).not.toBe(first.id);
+        expect(await s.alerts.listAlerts()).toHaveLength(2);
+        expect(await s.alerts.listAlerts({ limit: 1 })).toHaveLength(1);
+        // Resolving twice keeps the first resolution.
+        const before = (await s.alerts.listAlerts({ status: 'resolved' }))[0].resolved_at;
+        await s.alerts.resolveAlert(first.id);
+        expect((await s.alerts.listAlerts({ status: 'resolved' }))[0].resolved_at).toBe(before);
+      });
+
+      it('prunes alerts resolved long ago, never open ones', async () => {
+        const row = (id: number, status: string, days: number) => ({
+          id, ...input(`ci_failing:acme/r${id}`), status,
+          opened_at: `${daysAgo(days + 1)}T00:00:00.000Z`,
+          resolved_at: status === 'resolved' ? `${daysAgo(days)}T00:00:00.000Z` : null,
+        });
+        await s.admin.importAll({ alerts: [row(1, 'resolved', 100), row(2, 'resolved', 5), row(3, 'open', 200)] });
+
+        await s.alerts.pruneResolved(90);
+
+        expect(json(await s.alerts.listAlerts()).map((a: any) => a.id).sort()).toEqual([2, 3]);
+      });
+    });
+
+    describe('alert channels', () => {
+      const slack = {
+        name: 'Team chat', type: 'slack', config: { url: 'https://hooks.example.com/T1/B2?a=1&b="x"' },
+        kinds: ['ci_failing', 'service_down'], is_enabled: true, digest: 'daily' as const,
+      };
+
+      it('creates, lists oldest first, replaces and deletes channels', async () => {
+        const created = await s.alertChannels.createChannel(slack);
+        const other = await s.alertChannels.createChannel({
+          name: 'Ops', type: 'telegram', config: { botToken: '123:abc', chatId: '-100' }, kinds: [], is_enabled: false, digest: 'off',
+        });
+
+        expect(json(created)).toMatchObject({
+          id: expect.any(Number), ...slack, last_sent_at: null, last_error: null, last_digest_at: null,
+        });
+        expect(isIsoTimestamp(created.created_at)).toBe(true);
+        expect(json(await s.alertChannels.listChannels()).map((c: any) => c.name)).toEqual(['Team chat', 'Ops']);
+        expect(json(await s.alertChannels.getChannel(other.id))).toMatchObject({
+          config: { botToken: '123:abc', chatId: '-100' }, kinds: [], is_enabled: false,
+        });
+
+        const updated = await s.alertChannels.updateChannel(created.id, { ...slack, name: 'Renamed', kinds: [], is_enabled: false, digest: 'weekly' });
+        expect(json(updated)).toMatchObject({ id: created.id, name: 'Renamed', kinds: [], is_enabled: false, digest: 'weekly' });
+        expect(await s.alertChannels.updateChannel(9999, slack)).toBeNull();
+        expect(await s.alertChannels.getChannel(9999)).toBeNull();
+
+        expect(await s.alertChannels.deleteChannel(created.id)).toBe(true);
+        expect(await s.alertChannels.deleteChannel(created.id)).toBe(false);
+        expect(await s.alertChannels.listChannels()).toHaveLength(1);
+      });
+
+      it('records the outcome of deliveries', async () => {
+        const { id } = await s.alertChannels.createChannel(slack);
+
+        await s.alertChannels.recordDelivery(id, { error: 'HTTP 404' });
+        let channel = (await s.alertChannels.getChannel(id))!;
+        expect(channel).toMatchObject({ last_error: 'HTTP 404', last_sent_at: null, last_digest_at: null });
+
+        await s.alertChannels.recordDelivery(id, { error: null });
+        channel = (await s.alertChannels.getChannel(id))!;
+        expect(channel.last_error).toBeNull();
+        expect(isIsoTimestamp(channel.last_sent_at)).toBe(true);
+        expect(channel.last_digest_at).toBeNull();
+
+        await s.alertChannels.recordDelivery(id, { error: null, digest: true });
+        channel = (await s.alertChannels.getChannel(id))!;
+        expect(isIsoTimestamp(channel.last_digest_at)).toBe(true);
+      });
+    });
+
     // ── Whole-storage export / import ─────────────────
     describe('admin', () => {
       it('exports everything and imports it back unchanged, ids included', async () => {
@@ -905,7 +1014,7 @@ export function describeStorageContract(name: string, harness: StorageHarness) {
         const dump = json(await s.admin.exportAll());
 
         expect(Object.keys(dump).sort()).toEqual([
-          'activity_log', 'coverage_reports', 'groups', 'repo_apps', 'repo_groups',
+          'activity_log', 'alert_channels', 'alerts', 'coverage_reports', 'groups', 'repo_apps', 'repo_groups',
           'repo_metrics_history', 'repo_signals', 'repo_traffic_daily', 'repo_traffic_sources', 'repos',
           'saved_views', 'service_checks', 'services',
         ]);
@@ -973,6 +1082,15 @@ export async function populateEverything(s: Storage) {
   await s.metrics.upsertSnapshot(snapshotInput(plain!.id, 'acme/plain'));
   await s.traffic.upsertDaily('acme/plain', [{ day: today(), views: 12, views_unique: 5, clones: 3, clones_unique: 2 }]);
   await s.savedViews.upsertSavedView('Stale, "quoted"', 'stale=1&q=a%2Cb');
+  const alert = await s.alerts.openAlert({
+    key: 'ci_failing:acme/tricky', kind: 'ci_failing', entity: 'acme/tricky', title: 'CI is failing, "again"',
+    detail: { workflow: 'CI', attempts: [1, 2] }, url: 'https://example.com/run?a=1,2', level: 0,
+  });
+  await s.alerts.resolveAlert(alert.id);
+  await s.alertChannels.createChannel({
+    name: 'Chat, "main"', type: 'slack', config: { url: 'https://hooks.example.com/a,b' },
+    kinds: ['ci_failing'], is_enabled: true, digest: 'weekly',
+  });
   await s.signals.upsertSignal('acme/tricky', 'standards', {
     passed: 1, total: 2, checks: [{ key: 'license', label: 'License, "MIT"', passed: null }],
   });

@@ -83,6 +83,14 @@ for (const format of ['json', 'csv'] as FileFormat[]) {
       await s.signals.upsertSignal('acme/tricky', 'standards', { passed: 0, total: 2, checks: [{ label: 'a, "b"\nc', passed: null }] });
       await s.serviceChecks.recordCheck('svc', 'down', null, null);
       await s.serviceChecks.recordCheck('svc', 'healthy', 0, 200);
+      await s.alerts.openAlert({
+        key: 'service_down:svc', kind: 'service_down', entity: 'svc', title: 'svc is down, "again"',
+        detail: { httpCode: null, tags: ['a,b'] }, url: null, level: 0,
+      });
+      await s.alertChannels.createChannel({
+        name: 'Chat, "main"', type: 'slack', config: { url: 'https://hooks.example.com/a,b' },
+        kinds: ['service_down'], is_enabled: false, digest: 'off',
+      });
       return s;
     }
 
@@ -94,6 +102,8 @@ for (const format of ['json', 'csv'] as FileFormat[]) {
         edges: await s.groups.listAllRepoGroupEdges(),
         services: await s.services.listServices({}),
         apps: await s.apps.listApps(),
+        alerts: await s.alerts.listAlerts(),
+        channels: await s.alertChannels.listChannels(),
         coverage: await s.coverage.listCoverageReports('acme/plain'),
         metrics: await s.metrics.getSnapshot(new Date().toISOString().slice(0, 10)),
         activity: await s.activity.listActivities({ limit: 10, offset: 0 }),

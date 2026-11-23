@@ -72,6 +72,66 @@ function StandardsCard({ data }) {
     );
 }
 
+/** The policy's own checks (see the Policy page). */
+function PolicyCard({ data }) {
+    return (
+        <SignalCard title="Policy checks" summary={`${data.passed}/${data.total}`}>
+            <ul className="space-y-1">
+                {data.checks.map(check => (
+                    <li key={check.id} className="flex items-start gap-2 text-xs">
+                        <span className="mt-0.5"><CheckIcon check={{ ...check, applicable: check.passed !== null }} /></span>
+                        <span className={cn(check.passed === null ? 'text-gray-400' : 'text-gray-700')}>
+                            {check.label}
+                            {check.passed === null && <span className="italic"> — n/a</span>}
+                        </span>
+                    </li>
+                ))}
+            </ul>
+        </SignalCard>
+    );
+}
+
+const scorecardTone = (score) => (score >= 7 ? 'text-green-700' : score >= 4 ? 'text-amber-700' : 'text-red-700');
+
+/** OpenSSF Scorecard of a public repo, when the policy asks for it. */
+function ScorecardCard({ data, repoFullName }) {
+    if (!data.available) {
+        return (
+            <SignalCard title="OpenSSF Scorecard">
+                <p className="text-xs text-gray-400 italic">
+                    {data.reason === 'private' ? 'Only for public repos' : 'Not scanned by the Scorecard project yet'}
+                </p>
+            </SignalCard>
+        );
+    }
+    return (
+        <SignalCard title="OpenSSF Scorecard" summary={data.date ? new Date(data.date).toLocaleDateString() : undefined}>
+            <div className="text-xs text-gray-700 space-y-1.5">
+                <div>
+                    <span className={cn('text-base font-semibold tabular-nums', scorecardTone(data.score ?? 0))}>{data.score ?? '–'}</span>
+                    <span className="text-gray-500"> / 10</span>
+                </div>
+                {data.weakest?.length > 0 && (
+                    <ul className="space-y-0.5">
+                        {data.weakest.map(check => (
+                            <li key={check.name} className="flex justify-between gap-2" title={check.reason || undefined}>
+                                <span className="truncate">{check.name}</span>
+                                <span className={cn('tabular-nums font-medium', scorecardTone(check.score))}>{check.score}</span>
+                            </li>
+                        ))}
+                    </ul>
+                )}
+                <a
+                    href={`https://scorecard.dev/viewer/?uri=github.com/${repoFullName}`}
+                    target="_blank" rel="noopener noreferrer" className="inline-block text-blue-600 hover:underline"
+                >
+                    Full report
+                </a>
+            </div>
+        </SignalCard>
+    );
+}
+
 const SEVERITY_TONE = {
     critical: 'text-red-700 bg-red-50 border-red-200',
     high: 'text-orange-700 bg-orange-50 border-orange-200',
@@ -150,6 +210,12 @@ function ReleaseCard({ data }) {
                             ? <span className="text-green-700">default branch is released</span>
                             : <span className="font-medium">{data.unreleasedCommits} commits not released yet</span>}
                 </div>
+                {data.downloads > 0 && (
+                    <div className="text-gray-500">
+                        {data.downloads.toLocaleString('en-US')} downloads
+                        {data.latestDownloads > 0 && ` (${data.latestDownloads.toLocaleString('en-US')} of ${data.tag})`}
+                    </div>
+                )}
             </div>
         </SignalCard>
     );
@@ -402,6 +468,11 @@ export function RepoSignals({ repo, onSync, syncing = false, onCleanupBranches, 
                         {syncing ? 'Syncing...' : 'Sync signals'}
                     </button>
                 )}
+                {repo.isPrivate === false && repo.fullName && (
+                    <a href={`/embeds?repo=${encodeURIComponent(repo.fullName)}`} className="text-xs text-blue-600 hover:underline">
+                        Badges
+                    </a>
+                )}
             </div>
             {hasAny ? (
                 <div className="flex flex-wrap gap-3">
@@ -412,6 +483,8 @@ export function RepoSignals({ repo, onSync, syncing = false, onCleanupBranches, 
                     {signals.branches && <BranchesCard data={signals.branches} onCleanup={onCleanupBranches} />}
                     {signals.config && <ConfigCard data={signals.config} onApply={onApplyConfig} applying={applyingConfig} />}
                     {signals.dependencies && <DependenciesCard data={signals.dependencies} />}
+                    {signals.policy?.checks?.length > 0 && <PolicyCard data={signals.policy} />}
+                    {signals.scorecard?.enabled && <ScorecardCard data={signals.scorecard} repoFullName={repo.fullName} />}
                 </div>
             ) : (
                 <p className="text-xs text-gray-400 italic">

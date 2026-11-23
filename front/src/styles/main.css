@@ -1,11 +1,19 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 @import "tailwindcss";
+@import "./dark.css";
 
 @theme {
     --font-sans: 'Inter', system-ui, sans-serif;
     --font-display: 'Inter', system-ui, sans-serif;
 }
 
+:root {
+    /* Cards and panels. The dark theme (dark.css) replaces it. */
+    --surface: #ffffff;
+}
+
 body {
     font-family: 'Inter', system-ui, sans-serif;
+    background-color: var(--color-gray-50);
+    color: var(--color-gray-900);
 }

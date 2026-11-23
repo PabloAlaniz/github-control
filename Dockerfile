@@ -29,6 +29,8 @@ ENV NODE_ENV=production \
 
 COPY --from=build /app/back/dist/server.mjs /app/back/dist/cli.mjs ./back/dist/
 COPY --from=build /app/front/dist ./front/dist
+# The fictional dataset served by demo mode (DEMO=true).
+COPY --from=build /app/docs/demo/demo-data.json /app/docs/demo/policy.yml ./docs/demo/
 
 # config.json and the file storage live here: mount a volume to keep them.
 RUN mkdir /data && chown node:node /data

@@ -4,6 +4,8 @@ export interface SetupStatus {
   configured: boolean;
   /** False when the server runs with sign-in turned off. */
   authRequired?: boolean;
+  /** Present when the server is a demo instance with fictional data. */
+  demo?: { readOnly: boolean; resetMinutes: number };
   /** Which sections the wizard has to ask for (absent once configured). */
   needs?: { storage: boolean; github: boolean; admin: boolean };
   storageOptions?: { id: string; label: string; description: string }[];
@@ -26,7 +28,7 @@ export async function fetchSetupStatus(): Promise<SetupStatus> {
     if (!res.ok) return { configured: true, authRequired: true };
     const status = await res.json();
     if (status?.configured === false) return status;
-    return { configured: true, authRequired: status?.authRequired !== false };
+    return { configured: true, authRequired: status?.authRequired !== false, demo: status?.demo };
   } catch {
     return { configured: true, authRequired: true };
   }

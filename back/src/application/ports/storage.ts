@@ -409,6 +409,91 @@ export interface ServiceCheckStore {
   getIncidents(days: number): Promise<IncidentRow[]>;
 }
 
+// ── Alerts ──────────────────────────────────────────
+
+export type AlertStatus = 'open' | 'resolved';
+
+/** One occurrence of a condition that needs attention. */
+export interface Alert {
+  id: number;
+  /** Identifies the condition, e.g. `ci_failing:acme/api`. At most one open alert per key. */
+  key: string;
+  kind: string;
+  /** The repo (`owner/name`) or service slug it is about. */
+  entity: string;
+  title: string;
+  detail: Record<string, any>;
+  url: string | null;
+  /** How bad it is, for conditions that can get worse while open (0 otherwise). */
+  level: number;
+  status: AlertStatus;
+  opened_at: string;
+  resolved_at: string | null;
+}
+
+export interface AlertInput {
+  key: string;
+  kind: string;
+  entity: string;
+  title: string;
+  detail: Record<string, unknown>;
+  url: string | null;
+  level: number;
+}
+
+export interface AlertStore {
+  /** Most recently opened first. */
+  listAlerts(options?: { status?: AlertStatus; limit?: number }): Promise<Alert[]>;
+  openAlert(input: AlertInput): Promise<Alert>;
+  /** Refreshes what an open alert says. */
+  updateAlert(id: number, fields: Pick<AlertInput, 'title' | 'detail' | 'url' | 'level'>): Promise<void>;
+  resolveAlert(id: number): Promise<void>;
+  /** Deletes alerts resolved more than `keepDays` days ago. */
+  pruneResolved(keepDays: number): Promise<void>;
+}
+
+export type AlertDigest = 'off' | 'daily' | 'weekly';
+
+/** A destination for alerts. */
+export interface AlertChannel {
+  id: number;
+  name: string;
+  type: string;
+  /** Destination (URL, token, chat). Secret: never returned by the API as is. */
+  config: Record<string, string>;
+  /** Alert kinds it receives; empty means all. */
+  kinds: string[];
+  is_enabled: boolean;
+  digest: AlertDigest;
+  last_sent_at: string | null;
+  /** Why the last delivery failed; null when it worked. */
+  last_error: string | null;
+  last_digest_at: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface AlertChannelInput {
+  name: string;
+  type: string;
+  config: Record<string, string>;
+  kinds: string[];
+  is_enabled: boolean;
+  digest: AlertDigest;
+}
+
+export interface AlertChannelStore {
+  /** Oldest first. */
+  listChannels(): Promise<AlertChannel[]>;
+  getChannel(id: number): Promise<AlertChannel | null>;
+  createChannel(input: AlertChannelInput): Promise<AlertChannel>;
+  /** Null when no channel has that id. */
+  updateChannel(id: number, input: AlertChannelInput): Promise<AlertChannel | null>;
+  deleteChannel(id: number): Promise<boolean>;
+  /** Records the outcome of a delivery; `digest` also marks the digest as sent. */
+  recordDelivery(id: number, outcome: { error: string | null; digest?: boolean }): Promise<void>;
+}
+
 export type StorageDump = Record<string, Row[]>;
 
 export interface AdminStore {
@@ -434,5 +519,7 @@ export interface Storage {
   savedViews: SavedViewStore;
   signals: SignalStore;
   serviceChecks: ServiceCheckStore;
+  alerts: AlertStore;
+  alertChannels: AlertChannelStore;
   admin: AdminStore;
 }

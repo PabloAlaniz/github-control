@@ -9,7 +9,7 @@ import type { Row } from '../../../application/ports/storage';
 import { sqliteDialect, type SqlClient, type Statement } from './client';
 
 /** List/object columns are stored as JSON text; these names are parsed back on read. */
-const JSON_COLUMNS = new Set(['blockers', 'topics', 'production_urls', 'summary', 'metadata', 'groups', 'data']);
+const JSON_COLUMNS = new Set(['blockers', 'topics', 'production_urls', 'summary', 'metadata', 'groups', 'data', 'detail', 'config', 'kinds']);
 const BOOLEAN_COLUMN = /^(is|has)_/;
 
 // Loaded through require so bundlers and test runners that predate

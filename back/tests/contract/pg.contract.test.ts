@@ -89,8 +89,8 @@ describe('migrations', () => {
     const client = createPgClient(url(PORT + 1));
     try {
       // The baseline is adopted as-is; only the later migrations run.
-      expect(await migrate(client)).toEqual([2, 3, 4]);
-      expect(await client.query('SELECT version FROM schema_migrations ORDER BY version')).toEqual([{ version: 1 }, { version: 2 }, { version: 3 }, { version: 4 }]);
+      expect(await migrate(client)).toEqual([2, 3, 4, 5]);
+      expect(await client.query('SELECT version FROM schema_migrations ORDER BY version')).toEqual([{ version: 1 }, { version: 2 }, { version: 3 }, { version: 4 }, { version: 5 }]);
       await client.query(`INSERT INTO repos (full_name, owner, name, ci_status) VALUES ('a/b', 'a', 'b', 'success')`);
     } finally {
       await client.close();
