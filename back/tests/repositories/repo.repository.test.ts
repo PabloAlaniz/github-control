@@ -3,7 +3,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 const mockQuery = vi.fn();
 const mockQueryOne = vi.fn();
 const mockTransaction = vi.fn();
-const mockDbFn = Object.assign(vi.fn(), { transaction: mockTransaction });
+const mockDbFn = Object.assign(vi.fn(), { transaction: mockTransaction, query: vi.fn() });
 const mockGetDb = vi.fn(() => mockDbFn);
 vi.mock('@back/infrastructure/storage/sql/neon', () => ({
   query: (...args: any[]) => mockQuery(...args),
@@ -23,7 +23,7 @@ describe('repo.repository', () => {
     mockQueryOne.mockReset();
     mockTransaction.mockReset();
     mockDbFn.mockReset();
-    Object.assign(mockDbFn, { transaction: mockTransaction });
+    Object.assign(mockDbFn, { transaction: mockTransaction, query: vi.fn() });
   });
 
   // ── Mutations ─────────────────────────────────
