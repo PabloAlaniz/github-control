@@ -11,7 +11,7 @@ export function createNeonClient(config: AppConfig): SqlClient {
     async batch(statements) {
       const db = getDb(config);
       // Neon's HTTP transactions are non-interactive: all statements go in one request.
-      const results = await db.transaction(statements.map(({ sql, params = [] }) => db(sql, params)));
+      const results = await db.transaction(statements.map(({ sql, params = [] }) => db.query(sql, params)));
       return results as Record<string, any>[][];
     },
   };
