@@ -6,6 +6,9 @@ updates:
       interval: monthly
     open-pull-requests-limit: 5
     groups:
+      # react and react-dom must always move together (a 18/19 mix breaks rendering).
+      react:
+        patterns: ['react', 'react-dom', '@types/react', '@types/react-dom']
       minor-and-patch:
         update-types: [minor, patch]
 
