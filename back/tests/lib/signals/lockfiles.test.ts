@@ -108,6 +108,55 @@ go.uber.org/zap v1.27.0/go.mod h1:ghi=
     expect(rows('go.sum', sum)).toEqual(['go:github.com/go-chi/chi/v5@v5.2.1', 'go:go.uber.org/zap@v1.27.0']);
   });
 
+  it('reads Gemfile.lock specs, not their requirements, without the platform', () => {
+    const lock = `GIT
+  remote: https://github.com/acme/widgets.git
+  specs:
+    widgets (0.3.0)
+
+GEM
+  remote: https://rubygems.org/
+  specs:
+    actionpack (7.1.3.4)
+      rack (>= 2.2.4)
+    nokogiri (1.16.5-x86_64-linux)
+    nokogiri (1.16.5-arm64-darwin)
+    rack (3.1.3)
+
+PLATFORMS
+  x86_64-linux
+
+DEPENDENCIES
+  rails (~> 7.1.3)
+
+BUNDLED WITH
+   2.5.9
+`;
+    expect(rows('Gemfile.lock', lock)).toEqual(['rubygems:actionpack@7.1.3.4', 'rubygems:nokogiri@1.16.5', 'rubygems:rack@3.1.3', 'rubygems:widgets@0.3.0']);
+  });
+
+  it('reads gradle.lockfile entries', () => {
+    const lock = `# This is a Gradle generated file for dependency locking.
+com.google.guava:guava:33.2.1-jre=compileClasspath,runtimeClasspath
+org.slf4j:slf4j-api:2.0.13=runtimeClasspath
+empty=annotationProcessor
+`;
+    expect(rows('gradle.lockfile', lock)).toEqual(['maven:com.google.guava:guava@33.2.1-jre', 'maven:org.slf4j:slf4j-api@2.0.13']);
+  });
+
+  it('reads packages.lock.json across target frameworks, without project references', () => {
+    const lock = JSON.stringify({ version: 1, dependencies: {
+      'net8.0': {
+        'Newtonsoft.Json': { type: 'Direct', requested: '[13.0.3, )', resolved: '13.0.3' },
+        'System.Memory': { type: 'Transitive', resolved: '4.5.5' },
+        core: { type: 'Project' },
+      },
+      'net6.0': { 'Newtonsoft.Json': { type: 'Direct', resolved: '13.0.3' }, 'System.Memory': { type: 'Transitive', resolved: '4.5.4' } },
+    } });
+    expect(rows('src/Api/packages.lock.json', lock)).toEqual(['nuget:Newtonsoft.Json@13.0.3', 'nuget:System.Memory@4.5.4', 'nuget:System.Memory@4.5.5']);
+    expect(rows('packages.lock.json', '{}')).toEqual([]);
+  });
+
   it('yields nothing for a broken lockfile or a file it does not know', () => {
     expect(rows('package-lock.json', '{ not json')).toEqual([]);
     expect(rows('pnpm-lock.yaml', 'packages: [1')).toEqual([]);

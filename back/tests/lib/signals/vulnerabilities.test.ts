@@ -51,6 +51,9 @@ describe('describeFinding', () => {
     expect(describeFinding(advisory({ database_specific: { severity: 'weird' } }), lodash).severity).toBe('unknown');
     const yaml = advisory({ summary: '', details: 'First line\nmore', affected: [{ package: { name: 'pyyaml', ecosystem: 'PyPI' }, ranges: [{ type: 'ECOSYSTEM', events: [{ fixed: '5.4' }] }] }] });
     expect(describeFinding(yaml, { ecosystem: 'pypi', name: 'PyYAML', version: '5.1' })).toMatchObject({ fixed: '5.4', summary: 'First line' });
+    const json = advisory({ affected: [{ package: { name: 'Newtonsoft.Json', ecosystem: 'NuGet' }, ranges: [{ type: 'ECOSYSTEM', events: [{ fixed: '13.0.1' }] }] }] });
+    expect(describeFinding(json, { ecosystem: 'nuget', name: 'newtonsoft.json', version: '12.0.3' }).fixed).toBe('13.0.1');
+    expect(describeFinding(json, { ecosystem: 'maven', name: 'Newtonsoft.Json', version: '12.0.3' }).fixed).toBeNull();
   });
 });
 

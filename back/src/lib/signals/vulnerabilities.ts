@@ -14,7 +14,9 @@ const TOP = 6;
 const CONCURRENCY = 8;
 
 /** How the vulnerability database names each ecosystem. */
-const ECOSYSTEMS: Record<LockedPackage['ecosystem'], string> = { npm: 'npm', pypi: 'PyPI', go: 'Go', cargo: 'crates.io' };
+const ECOSYSTEMS: Record<LockedPackage['ecosystem'], string> = {
+  npm: 'npm', pypi: 'PyPI', go: 'Go', cargo: 'crates.io', rubygems: 'RubyGems', maven: 'Maven', nuget: 'NuGet',
+};
 
 export const SEVERITIES = ['critical', 'high', 'moderate', 'low', 'unknown'] as const;
 export type Severity = (typeof SEVERITIES)[number];
@@ -49,7 +51,8 @@ export function compareVersions(a: string, b: string): number {
 }
 
 const samePackage = (ecosystem: string, a: string, b: string) =>
-  (ecosystem === 'pypi' ? a.toLowerCase().replace(/[-_.]+/g, '-') === b.toLowerCase().replace(/[-_.]+/g, '-') : a === b);
+  (ecosystem === 'pypi' ? a.toLowerCase().replace(/[-_.]+/g, '-') === b.toLowerCase().replace(/[-_.]+/g, '-')
+    : ecosystem === 'nuget' ? a.toLowerCase() === b.toLowerCase() : a === b);
 
 function severityOf(advisory: any): Severity {
   const label = String(advisory?.database_specific?.severity ?? '').toLowerCase();

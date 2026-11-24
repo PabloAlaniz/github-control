@@ -31,7 +31,7 @@ Open http://localhost:13337. From a clone, without Docker: `DEMO=true npm start`
   - *branch hygiene*: merged-but-not-deleted and stale branches and idle pull requests, with a guarded cleanup;
   - *CI reliability*: success rate, duration and flaky commits per workflow;
   - *settings drift* against a baseline you define, fixable per repo or in bulk.
-- **Dependency inventory**: which repos use each package and at what version, declared and resolved from lockfiles, diverging major versions, runtimes past their end of life, and a finder that tells you every repo a package is in, even as a transitive dependency.
+- **Dependency inventory** (npm, PyPI, Go, Cargo, RubyGems, Maven, NuGet): which repos use each package and at what version, declared and resolved from lockfiles, diverging major versions, runtimes past their end of life, and a finder that tells you every repo a package is in, even as a transitive dependency.
 - **Known vulnerabilities** (opt-in): the versions your lockfiles pin, looked up in the OSV database, with the fix and the repos affected.
 - **Organize your way**: groups with colors, priorities (high / medium / low / paused), status, notes, next action and blockers, with bulk actions.
 - **Traffic history**: GitHub only keeps 14 days of views, clones, referrers and popular paths; every sync saves them, so your history keeps growing.

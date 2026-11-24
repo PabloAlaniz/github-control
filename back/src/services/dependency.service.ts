@@ -5,8 +5,9 @@ interface Usage { repo: string; version: string; major: string | null; scope: st
 
 type LockRow = [ecosystem: string, name: string, version: string];
 
-/** Python package names are compared ignoring case and `-`/`_`/`.` (PEP 503); the rest are exact. */
-const normalize = (ecosystem: string, name: string) => (ecosystem === 'pypi' ? name.toLowerCase().replace(/[-_.]+/g, '-') : name);
+/** Python package names are compared ignoring case and `-`/`_`/`.` (PEP 503), NuGet ones ignoring case; the rest are exact. */
+const normalize = (ecosystem: string, name: string) =>
+  (ecosystem === 'pypi' ? name.toLowerCase().replace(/[-_.]+/g, '-') : ecosystem === 'nuget' ? name.toLowerCase() : name);
 
 /** `repo \n ecosystem \n name` → the versions that repo's lockfiles pin for it. */
 function resolvedVersions(locks: SignalRecord[]): Map<string, string[]> {
