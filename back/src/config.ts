@@ -48,6 +48,8 @@ export type AppConfig = {
   ALERT_STALE_DAYS?: string;
   /** Health score under which a repo raises an alert. '0' turns it off. Default 40. */
   ALERT_HEALTH_BELOW?: string;
+  /** Shared secret GitHub signs webhook deliveries with. Unset = the webhook endpoint does not exist. */
+  GITHUB_WEBHOOK_SECRET?: string;
   /** The policy document (YAML): settings baseline, health weights and checks, alert thresholds. See domain/policy.ts. */
   POLICY?: string;
   /** Where POLICY comes from: a file (POLICY_FILE), the environment, or saved from the app. Not a stored value. */

@@ -29,6 +29,7 @@ Where GitHub Control is heading. Nothing here is a promise; priorities follow wh
 - MCP server: the dashboard as tools for coding agents
 - Alerts for failing CI, services down, serious security alerts, stale repos and low health, sent to Slack, Discord, Telegram, ntfy, email or a webhook, with daily or weekly digests
 - One navigation for every page, and a layout that works on a phone
+- Real-time updates from GitHub webhooks, verified by signature
 - Code search across all tracked repos
 - Alert rules of your own in the policy (coverage, CI reliability, unreleased commits, settings drift, Scorecard, end-of-life runtimes, custom checks)
 - Check and review state of each pull request in the inbox, and a "ready to merge" section
@@ -55,5 +56,5 @@ Where GitHub Control is heading. Nothing here is a promise; priorities follow wh
 - Custom checks look at file paths only (does a file exist, or not), not at file contents.
 - The MCP server is stateless: one JSON answer per request, no streaming or server-initiated messages.
 - Uptime is computed from periodic checks (every 15 minutes unless `SERVICE_CHECK_MINUTES` says otherwise), so an outage shorter than the interval can go unnoticed.
-- Alerts are evaluated after a sync or a round of service checks, not when something changes on GitHub: a broken build is noticed at the next sync. A failed delivery to a channel is recorded but not retried.
+- Without a GitHub webhook, alerts are evaluated after a sync or a round of service checks: a broken build is noticed at the next sync. With one, pushes still do not update a repo (last commit, code metrics) until the next sync. A failed delivery to a channel is recorded but not retried.
 - The standalone sync scripts under `back/scripts/` support PostgreSQL only.

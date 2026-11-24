@@ -8,7 +8,9 @@ export const apiKeyAuth = createMiddleware<{ Bindings: AppConfig }>(async (c, ne
   const path = new URL(c.req.url).pathname;
   if (path === '/api/health' || path === '/api/health/ready' || path === '/api/setup/status'
     || path.startsWith('/api/auth') || path.startsWith('/api/badges/')
-    || path === '/api/status' || path === '/api/status/badge.svg') {
+    || path === '/api/status' || path === '/api/status/badge.svg'
+    // Signed by GitHub with the webhook secret instead (see routes/webhooks.ts).
+    || (path === '/api/webhooks/github' && c.req.method === 'POST')) {
     await next();
     return;
   }

@@ -40,6 +40,7 @@ Open http://localhost:13337. From a clone, without Docker: `DEMO=true npm start`
 - **Code search**: look for a word, a function or a config key in the code of all your repos at once.
 - **Inbox**: the open pull requests and issues of every repo in one list, with sections (needs my review, mine, assigned to me, dependency updates, stale), filters you can save, keyboard navigation and guarded bulk merge.
 - **Public surface** (opt-in): badges and cards for your READMEs, a summary card of your open source work, and a status page for your services.
+- **Real time** (optional): with a GitHub webhook, a failed build, a new pull request or a security alert shows up as it happens instead of at the next sync.
 - **Alerts**: know when CI breaks, a service goes down, a serious security alert appears, a repo you care about goes stale or a health score drops, in Slack, Discord, Telegram, ntfy or any webhook, with an optional daily or weekly digest.
 - **Coverage from CI**: a workflow step reports coverage per repo or per app.
 - **AI summaries** (optional): a structured summary of a repo's README using the Claude API.
@@ -154,6 +155,7 @@ Settings that describe what you expect of your repos (the baseline, health weigh
 | `AUTH_USERNAME`, `AUTH_PASSWORD` | Sign-in credentials | asked by the wizard (stored hashed) |
 | `JWT_SECRET`, `API_KEY` | Session signing secret and API key | generated and saved |
 | `SYNC_INTERVAL_HOURS` | Hours between automatic full syncs; `0` disables | `24` |
+| `GITHUB_WEBHOOK_SECRET` | Secret GitHub signs webhook deliveries with (20+ characters). Turns on `/api/webhooks/github` | off |
 | `SERVICE_CHECK_MINUTES` | Minutes between service health checks (1 to 1440) | `15` |
 | `ALERT_STALE_DAYS` | Days without commits before a high or medium priority repo raises an alert; `0` turns it off | `90` |
 | `ALERT_HEALTH_BELOW` | Health score under which a repo raises an alert; `0` turns it off | `40` |
@@ -168,7 +170,7 @@ Settings that describe what you expect of your repos (the baseline, health weigh
 | `TRUST_PROXY` | `true` to take the client address from `X-Forwarded-For` | off |
 | `DISABLE_AUTH` | `true` turns sign-in off. Local use only. | off |
 
-The GitHub token, organizations, sync interval, badges, the status page, the repo settings baseline and your password can also be changed later from the **Settings** page (settings given as environment variables appear there as locked).
+The GitHub token, organizations, sync interval, the webhook secret, badges, the status page, the repo settings baseline and your password can also be changed later from the **Settings** page (settings given as environment variables appear there as locked).
 
 See [`.env.example`](.env.example).
 
@@ -205,6 +207,25 @@ Signals degrade gracefully with the token's permissions: security alerts need re
 - Start one by hand with `POST /api/sync`; follow it with `GET /api/sync/status`.
 - The **Sync all** button in the dashboard does the same and shows progress; **Refresh** only refreshes the repository list.
 - The signals of one repo (or of the selected repos) can be refreshed on their own from the dashboard, or with `POST /api/repos/:owner/:repo/signals/sync`.
+
+### Real time with a GitHub webhook
+
+Between syncs the dashboard does not know what happens on GitHub. A webhook closes that gap: GitHub tells the server about each event and the affected repo is updated at once, alerts included.
+
+1. In **Settings**, under *Real time*, press **Generate** and copy the secret (or set `GITHUB_WEBHOOK_SECRET` yourself, 20 characters or more), then save.
+2. On GitHub, open the settings of your organization (or of a repo), then *Webhooks*, *Add webhook*.
+3. Payload URL: `https://your-server.example/api/webhooks/github`. Content type: `application/json`. Secret: the one from step 1.
+4. Select individual events: Workflow runs, Pull requests, Pull request reviews, Issues, Check suites, Releases, Dependabot alerts, Code scanning alerts, Secret scanning alerts, Repositories, Branch protection rules.
+
+| Event | What it updates |
+|---|---|
+| Workflow run on the default branch | CI status (straight from the delivery) and CI reliability |
+| Pull request, review, issue, check suite of a pull request | The inbox |
+| Release | Latest release and downloads |
+| Dependabot, code scanning and secret scanning alerts | Security alerts |
+| Repository and branch protection changes | Standards and settings drift |
+
+The endpoint takes no API key, because GitHub cannot send one. Instead every delivery must be signed with the secret; without a secret configured the endpoint answers 404. Deliveries for repos the dashboard does not track are acknowledged and ignored. The server must be reachable from GitHub, so this does not work on a machine behind a firewall; the scheduled sync keeps working either way.
 
 ### What changes on GitHub
 
@@ -408,6 +429,7 @@ curl -X POST -H "Authorization: Bearer $API_KEY" http://localhost:13337/api/sync
 | Traffic | `GET /api/traffic/summary`, `/api/traffic/repo/:owner/:repo`, `POST /api/traffic/repo/:owner/:repo/sync` |
 | Signals | `GET /api/repos/:owner/:repo/signals`, `POST .../signals/sync?kinds=`, `POST .../branches/delete`, `POST .../config/apply` |
 | Dependencies | `GET /api/dependencies` |
+| Webhooks | `POST /api/webhooks/github` (signed by GitHub, no API key), `GET /api/webhooks` |
 | Public (no sign-in, opt-in) | `GET /api/badges/:owner/:repo/:metric.svg`, `.../card.svg`, `/api/badges/summary.svg`, `GET /api/status`, `/api/status/badge.svg` |
 | Search | `GET /api/search/code?q=&repo=&language=` |
 | Policy | `GET /api/policy`, `POST /api/policy/plan`, `PUT /api/policy` |

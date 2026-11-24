@@ -38,6 +38,13 @@ const choicesOf = (options = []) => Object.fromEntries(options.map((option) => [
 
 const parseOrgs = (text) => text.split(',').map((o) => o.trim()).filter(Boolean);
 
+/** A secret GitHub can sign with: 40 hex characters from the browser's random source. */
+function randomSecret() {
+    return [...crypto.getRandomValues(new Uint8Array(20))].map((byte) => byte.toString(16).padStart(2, '0')).join('');
+}
+
+const WEBHOOK_EVENTS = 'Workflow runs, Pull requests, Pull request reviews, Issues, Check suites, Releases, Dependabot alerts, Code scanning alerts, Secret scanning alerts, Repositories, Branch protection rules';
+
 /** Change the server's settings without editing its config file. */
 export function SettingsPage() {
     const navigate = useNavigate();
@@ -48,6 +55,7 @@ export function SettingsPage() {
     const [interval, setIntervalHours] = useState('24');
     const [badges, setBadges] = useState(false);
     const [statusPage, setStatusPage] = useState(false);
+    const [webhookSecret, setWebhookSecret] = useState('');
     const [baseline, setBaseline] = useState({});
     const [currentPassword, setCurrentPassword] = useState('');
     const [newPassword, setNewPassword] = useState('');
@@ -65,6 +73,7 @@ export function SettingsPage() {
         setStatusPage(!!next.publicStatus);
         setBaseline(choicesOf(next.repoBaseline));
         setToken('');
+        setWebhookSecret('');
         setCurrentPassword('');
         setNewPassword('');
         setConfirmPassword('');
@@ -99,6 +108,7 @@ export function SettingsPage() {
         if (JSON.stringify(toBaseline(baseline)) !== JSON.stringify(toBaseline(choicesOf(settings.repoBaseline)))) {
             patch.repoBaseline = toBaseline(baseline);
         }
+        if (webhookSecret.trim()) patch.webhookSecret = webhookSecret.trim();
         if (newPassword || currentPassword) {
             if (newPassword !== confirmPassword) {
                 setError('The new passwords do not match');
@@ -202,6 +212,31 @@ export function SettingsPage() {
                                             onChange={(e) => setIntervalHours(e.target.value)}
                                         />
                                     </Field>
+                                </Section>
+
+                                <Section title="Real time (GitHub webhooks)">
+                                    <p className="text-xs text-gray-500">
+                                        Without a webhook, a failed build or a new pull request shows up at the next sync. With one, GitHub tells
+                                        this server as it happens. {settings.webhookSecretSet
+                                            ? <span className="font-medium text-green-700">A secret is configured: webhooks are on.</span>
+                                            : <span className="font-medium text-gray-700">No secret yet: webhooks are off.</span>}
+                                    </p>
+                                    <Field id="webhook-secret" label={settings.webhookSecretSet ? 'Replace the secret' : 'Secret'} locked={isLocked('webhookSecret')}
+                                        hint="At least 20 characters. It is shown only now: copy it into the webhook on GitHub before saving.">
+                                        <div className="flex gap-2">
+                                            <Input id="webhook-secret" value={webhookSecret} disabled={isLocked('webhookSecret')} autoComplete="off"
+                                                onChange={(e) => setWebhookSecret(e.target.value)} placeholder={settings.webhookSecretSet ? 'Leave empty to keep the current one' : ''} />
+                                            <Button type="button" variant="outline" disabled={isLocked('webhookSecret')} onClick={() => setWebhookSecret(randomSecret())}>
+                                                Generate
+                                            </Button>
+                                        </div>
+                                    </Field>
+                                    <ol className="list-decimal space-y-1 pl-5 text-xs text-gray-600">
+                                        <li>On GitHub, open the organization&apos;s (or a repo&apos;s) Settings, then Webhooks, then Add webhook.</li>
+                                        <li>Payload URL: <code className="break-all">{window.location.origin}/api/webhooks/github</code> (it must be reachable from GitHub).</li>
+                                        <li>Content type: <code>application/json</code>. Secret: the one above.</li>
+                                        <li>Choose &quot;Let me select individual events&quot;: {WEBHOOK_EVENTS}.</li>
+                                    </ol>
                                 </Section>
 
                                 <Section title="Public pages">

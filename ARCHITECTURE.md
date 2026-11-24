@@ -160,6 +160,10 @@ Three routes act on GitHub from what a signal showed: `routes/branches.ts` (dele
 
 `routes/mcp.ts` implements the stateless part of MCP's Streamable HTTP transport by hand (JSON-RPC over POST, JSON answers). A tool does not touch storage: it sends a request to the app's own routes with the caller's credentials. Authentication, validation, the activity log and the demo restrictions therefore apply to an agent exactly as to any other client, and a tool can never do more than the HTTP API allows.
 
+### Webhooks
+
+`routes/webhooks.ts` receives GitHub deliveries. It is mounted before the auth middleware and trusts nothing but the HMAC signature of the raw body under `GITHUB_WEBHOOK_SECRET` (`lib/github/webhook.ts`, Web Crypto, so it runs on both runtimes). `planWebhook` is a pure function from an event to what it makes stale: the CI status it carries and the signals to read again. `services/webhook.service.ts` applies that for tracked repos only, reads each signal at most once per burst of deliveries, and evaluates the alerts.
+
 ### Code search
 
 `services/search.service.ts` is the one place that asks GitHub at request time rather than reading stored data. It scopes the query to the owners of the tracked repos (qualifiers in the user's text that would move the search elsewhere are dropped) and keeps only results from repos the dashboard tracks.

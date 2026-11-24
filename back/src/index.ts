@@ -31,6 +31,7 @@ import { alertsRoutes } from './routes/alerts';
 import { inboxRoutes } from './routes/inbox';
 import { policyRoutes } from './routes/policy';
 import { searchRoutes } from './routes/search';
+import { webhookInfoRoutes, webhookRoutes } from './routes/webhooks';
 import { createMcpRoutes } from './routes/mcp';
 import { sendDueDigests } from './services/alert.service';
 import { runScheduledChecks } from './services/service-check.service';
@@ -105,6 +106,9 @@ app.route('/api/badges', badgeRoutes);
 // Public status page data (opt-in). Mounted before the auth middleware.
 app.route('/api/status', statusRoutes);
 
+// GitHub webhook deliveries: no API key, each one is verified by its signature.
+app.route('/api/webhooks', webhookRoutes);
+
 // Auth routes (public, before API key middleware)
 app.route('/api/auth', authRoutes);
 
@@ -138,6 +142,7 @@ app.route('/api/alerts', alertsRoutes);
 app.route('/api/inbox', inboxRoutes);
 app.route('/api/policy', policyRoutes);
 app.route('/api/search', searchRoutes);
+app.route('/api/webhooks', webhookInfoRoutes);
 // MCP: the same API as tools for agents. Each tool call is a request to this app, as the caller.
 app.route('/api/mcp', createMcpRoutes((request, env) => app.fetch(request, env)));
 app.route('/api', backupRoutes);
