@@ -114,11 +114,16 @@ describe('demo mode: server', () => {
     const { send } = start({ DEMO: 'true' });
 
     const { signals } = await (await send('GET', '/api/repos/acme/billing-worker/signals')).json();
-    expect(Object.keys(signals).sort()).toEqual(['branches', 'ci', 'config', 'dependencies', 'inbox', 'policy', 'release', 'scorecard', 'security', 'standards']);
+    expect(Object.keys(signals).sort()).toEqual(['branches', 'ci', 'config', 'dependencies', 'inbox', 'lockfile', 'policy', 'release', 'scorecard', 'security', 'standards']);
 
     const inventory = await (await send('GET', '/api/dependencies')).json();
     expect(inventory.packages.length).toBeGreaterThan(10);
     expect(inventory.runtimes.some((runtime: any) => runtime.eol)).toBe(true);
+
+    expect(inventory.locked.repos).toBeGreaterThan(5);
+    const located = await (await send('GET', '/api/dependencies/locate?name=lodash')).json();
+    expect(located.exact).toBe(true);
+    expect(located.locations.every((location: any) => location.direct === false)).toBe(true);
 
     const uptime = await (await send('GET', '/api/services/uptime')).json();
     expect(uptime.services.storefront.checks).toBeGreaterThan(100);
@@ -130,6 +135,9 @@ describe('demo mode: server', () => {
     const { alerts, open } = await (await send('GET', '/api/alerts')).json();
     expect(open).toBeGreaterThan(2);
     expect(alerts.map((alert: any) => alert.key)).toContain('ci_failing:acme/billing-worker');
+    // The demo policy has rules of its own.
+    expect(alerts.map((alert: any) => alert.key)).toContain('rule:eol-runtime:acme/billing-worker');
+    expect(alerts.filter((alert: any) => alert.kind === 'custom').length).toBeGreaterThan(1);
     expect((await (await send('GET', '/api/alerts/channels')).json()).channels).toEqual([]);
 
     // A channel would make the server call a URL of the visitor's choosing.
@@ -148,6 +156,14 @@ describe('demo mode: server', () => {
 
     expect((await send('POST', '/api/inbox/refresh')).status).toBe(403);
     expect((await send('POST', '/api/inbox/merge', { pulls: [] })).status).toBe(403);
+    expect((await send('GET', '/api/inbox/item?repo=acme/api&number=1')).status).toBe(403);
+    expect((await send('POST', '/api/inbox/review', { repo: 'acme/api', number: 1, event: 'approve' })).status).toBe(403);
+    expect((await send('POST', '/api/inbox/comment', { repo: 'acme/api', number: 1, body: 'hi' })).status).toBe(403);
+
+    const report = await (await send('GET', '/api/report')).json();
+    expect(report.days).toBe(7);
+    expect(report.repos.total).toBeGreaterThan(5);
+    expect(report.highlights.length).toBeGreaterThan(0);
   });
 
   it('shows the public surfaces: cards, badges and the status page', async () => {

@@ -1,6 +1,6 @@
 import {
     GitBranch, Folder, Bookmark, RefreshCw, Activity, BarChart3, LogOut,
-    LayoutGrid, FlaskConical, Server, RotateCcw, Package, DownloadCloud, Settings, SunMoon, Bell, Inbox, BadgeCheck, ScrollText,
+    LayoutGrid, FlaskConical, Server, RotateCcw, Package, DownloadCloud, Settings, SunMoon, Bell, Inbox, BadgeCheck, ScrollText, FileSearch, Newspaper,
 } from 'lucide-react';
 import { isInboxView } from './inbox';
 import { nextTheme, setTheme } from './theme';
@@ -22,6 +22,8 @@ export function buildCommands({ repos = [], groups = [], views = [], actions }) 
         { id: 'nav:activity', section: 'Go to', icon: Activity, label: 'Activity', keywords: ['log'], run: () => a.navigate('/activity') },
         { id: 'nav:dependencies', section: 'Go to', icon: Package, label: 'Dependencies', keywords: ['packages', 'runtimes', 'versions'], run: () => a.navigate('/dependencies') },
         { id: 'nav:inbox', section: 'Go to', icon: Inbox, label: 'Inbox', keywords: ['pull requests', 'prs', 'issues', 'reviews', 'dependabot', 'merge'], run: () => a.navigate('/inbox') },
+        { id: 'nav:report', section: 'Go to', icon: Newspaper, label: 'Report', keywords: ['weekly', 'summary', 'digest', 'changes', 'what changed'], run: () => a.navigate('/report') },
+        { id: 'nav:search', section: 'Go to', icon: FileSearch, label: 'Search code', keywords: ['grep', 'find', 'files', 'text', 'source'], run: () => a.navigate('/search') },
         { id: 'nav:alerts', section: 'Go to', icon: Bell, label: 'Alerts', keywords: ['notifications', 'channels', 'slack', 'webhook', 'digest'], run: () => a.navigate('/alerts') },
         { id: 'nav:embeds', section: 'Go to', icon: BadgeCheck, label: 'Badges and embeds', keywords: ['badge', 'card', 'svg', 'readme', 'status page', 'snippet', 'markdown'], run: () => a.navigate('/embeds') },
         { id: 'nav:policy', section: 'Go to', icon: ScrollText, label: 'Policy', keywords: ['baseline', 'weights', 'checks', 'yaml', 'standards', 'rules', 'dry run'], run: () => a.navigate('/policy') },

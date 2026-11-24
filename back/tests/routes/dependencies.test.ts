@@ -60,8 +60,8 @@ describe('dependencies', () => {
         {
           ecosystem: 'npm', name: 'react', repo_count: 2, majors: ['17', '18'], divergent: true,
           usages: [
-            { repo: 'acme/a', version: '^17.0.2', major: '17', scope: 'prod', manifest: 'package.json' },
-            { repo: 'acme/b', version: '^18.2.0', major: '18', scope: 'prod', manifest: 'package.json' },
+            { repo: 'acme/a', version: '^17.0.2', major: '17', scope: 'prod', manifest: 'package.json', resolved: [] },
+            { repo: 'acme/b', version: '^18.2.0', major: '18', scope: 'prod', manifest: 'package.json', resolved: [] },
           ],
         },
         expect.objectContaining({ name: 'vite', repo_count: 1, majors: [], divergent: false }),
@@ -72,7 +72,7 @@ describe('dependencies', () => {
     });
 
     it('returns empty lists when nothing was synced', async () => {
-      expect(await (await request('/api/dependencies')).json()).toEqual({ repos_synced: 0, packages: [], runtimes: [] });
+      expect(await (await request('/api/dependencies')).json()).toEqual({ repos_synced: 0, locked: { repos: 0, packages: 0 }, packages: [], runtimes: [] });
     });
 
     it('counts a package once per repo and tolerates signals without lists', async () => {

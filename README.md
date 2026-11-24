@@ -22,7 +22,8 @@ Open http://localhost:13337. From a clone, without Docker: `DEMO=true npm start`
 - **Health at a glance**: README, CI, tests, coverage, roadmap, docs quality and a composite health score per repo; latest CI run status.
 - **Saved views and shareable filters**: the tab and filters live in the URL; name a combination and get back to it in one click.
 - **Keyboard first**: a command palette (`Cmd/Ctrl+K`) to jump to a repo, group, view or action, and `j`/`k`/`x`/`o` to move through the table.
-- **Light and dark**: follows your system, or pick one from the header.
+- **Light and dark**: follows your system, or pick one from the navigation.
+- **Works on a phone**: the same pages, with the navigation and the filters behind a menu.
 - **Signals from GitHub** per repo, refreshed by every sync:
   - a *standards* checklist (description, topics, protected default branch, CODEOWNERS and, for public repos, license, security policy and contributing guide) that also counts toward the health score;
   - open *security alerts* (dependencies, code scanning, secrets) by severity;
@@ -30,14 +31,17 @@ Open http://localhost:13337. From a clone, without Docker: `DEMO=true npm start`
   - *branch hygiene*: merged-but-not-deleted and stale branches and idle pull requests, with a guarded cleanup;
   - *CI reliability*: success rate, duration and flaky commits per workflow;
   - *settings drift* against a baseline you define, fixable per repo or in bulk.
-- **Dependency inventory**: which repos use each package and at what version, diverging major versions, and runtimes past their end of life.
+- **Dependency inventory**: which repos use each package and at what version, declared and resolved from lockfiles, diverging major versions, runtimes past their end of life, and a finder that tells you every repo a package is in, even as a transitive dependency.
 - **Organize your way**: groups with colors, priorities (high / medium / low / paused), status, notes, next action and blockers, with bulk actions.
 - **Traffic history**: GitHub only keeps 14 days of views, clones, referrers and popular paths; every sync saves them, so your history keeps growing.
 - **History**: a daily snapshot per repo (LOC, files, stars, issues, health) with charts and date-to-date comparison.
 - **Monorepo aware**: detects apps inside a repo and tracks each one's health and coverage.
 - **Services**: the deployed URLs behind your repos, health-checked every 15 minutes (configurable), with uptime, latency and incident history.
-- **Inbox**: the open pull requests and issues of every repo in one list, with sections (needs my review, mine, assigned to me, dependency updates, stale), filters you can save, keyboard navigation and guarded bulk merge.
+- **Code search**: look for a word, a function or a config key in the code of all your repos at once.
+- **Inbox**: the open pull requests and issues of every repo in one list, with sections (needs my review, mine, assigned to me, dependency updates, stale), filters you can save, keyboard navigation, guarded bulk merge, and review or comment without leaving the page.
+- **Report**: what changed in the last week (or 14 or 30 days) in a few sentences, then the detail: growth, releases, alerts, pull requests, CI and services.
 - **Public surface** (opt-in): badges and cards for your READMEs, a summary card of your open source work, and a status page for your services.
+- **Real time** (optional): with a GitHub webhook, a failed build, a new pull request or a security alert shows up as it happens instead of at the next sync.
 - **Alerts**: know when CI breaks, a service goes down, a serious security alert appears, a repo you care about goes stale or a health score drops, in Slack, Discord, Telegram, ntfy or any webhook, with an optional daily or weekly digest.
 - **Coverage from CI**: a workflow step reports coverage per repo or per app.
 - **AI summaries** (optional): a structured summary of a repo's README using the Claude API.
@@ -152,6 +156,7 @@ Settings that describe what you expect of your repos (the baseline, health weigh
 | `AUTH_USERNAME`, `AUTH_PASSWORD` | Sign-in credentials | asked by the wizard (stored hashed) |
 | `JWT_SECRET`, `API_KEY` | Session signing secret and API key | generated and saved |
 | `SYNC_INTERVAL_HOURS` | Hours between automatic full syncs; `0` disables | `24` |
+| `GITHUB_WEBHOOK_SECRET` | Secret GitHub signs webhook deliveries with (20+ characters). Turns on `/api/webhooks/github` | off |
 | `SERVICE_CHECK_MINUTES` | Minutes between service health checks (1 to 1440) | `15` |
 | `ALERT_STALE_DAYS` | Days without commits before a high or medium priority repo raises an alert; `0` turns it off | `90` |
 | `ALERT_HEALTH_BELOW` | Health score under which a repo raises an alert; `0` turns it off | `40` |
@@ -166,7 +171,7 @@ Settings that describe what you expect of your repos (the baseline, health weigh
 | `TRUST_PROXY` | `true` to take the client address from `X-Forwarded-For` | off |
 | `DISABLE_AUTH` | `true` turns sign-in off. Local use only. | off |
 
-The GitHub token, organizations, sync interval, badges, the status page, the repo settings baseline and your password can also be changed later from the **Settings** page (settings given as environment variables appear there as locked).
+The GitHub token, organizations, sync interval, the webhook secret, badges, the status page, the repo settings baseline and your password can also be changed later from the **Settings** page (settings given as environment variables appear there as locked).
 
 See [`.env.example`](.env.example).
 
@@ -204,12 +209,32 @@ Signals degrade gracefully with the token's permissions: security alerts need re
 - The **Sync all** button in the dashboard does the same and shows progress; **Refresh** only refreshes the repository list.
 - The signals of one repo (or of the selected repos) can be refreshed on their own from the dashboard, or with `POST /api/repos/:owner/:repo/signals/sync`.
 
+### Real time with a GitHub webhook
+
+Between syncs the dashboard does not know what happens on GitHub. A webhook closes that gap: GitHub tells the server about each event and the affected repo is updated at once, alerts included.
+
+1. In **Settings**, under *Real time*, press **Generate** and copy the secret (or set `GITHUB_WEBHOOK_SECRET` yourself, 20 characters or more), then save.
+2. On GitHub, open the settings of your organization (or of a repo), then *Webhooks*, *Add webhook*.
+3. Payload URL: `https://your-server.example/api/webhooks/github`. Content type: `application/json`. Secret: the one from step 1.
+4. Select individual events: Workflow runs, Pull requests, Pull request reviews, Issues, Check suites, Releases, Dependabot alerts, Code scanning alerts, Secret scanning alerts, Repositories, Branch protection rules.
+
+| Event | What it updates |
+|---|---|
+| Workflow run on the default branch | CI status (straight from the delivery) and CI reliability |
+| Pull request, review, issue, check suite of a pull request | The inbox |
+| Release | Latest release and downloads |
+| Dependabot, code scanning and secret scanning alerts | Security alerts |
+| Repository and branch protection changes | Standards and settings drift |
+
+The endpoint takes no API key, because GitHub cannot send one. Instead every delivery must be signed with the secret; without a secret configured the endpoint answers 404. Deliveries for repos the dashboard does not track are acknowledged and ignored. The server must be reachable from GitHub, so this does not work on a machine behind a firewall; the scheduled sync keeps working either way.
+
 ### What changes on GitHub
 
-Almost everything is read-only. Three actions write to GitHub, all only when you ask and all recorded in the activity log:
+Almost everything is read-only. Four actions write to GitHub, all only when you ask and all recorded in the activity log:
 
 - **Branch cleanup** deletes the branches you select. The server re-checks each one first and never deletes the default branch, a protected branch, or a branch that moved since it was listed.
 - **Merging pull requests** from the inbox. The server re-checks each one first and skips it if it is closed, a draft, has new commits since it was listed, or has failing or running checks. GitHub's own rules (required reviews, conflicts, branch protection) still apply.
+- **Reviewing and commenting** from the inbox: approve, request changes or comment on a pull request, and comment on an issue, as the account the token belongs to. A review is refused if the pull request was closed or got new commits since you opened it.
 - **Applying the settings baseline** changes only the settings that differ. Review the baseline in **Settings** before applying it in bulk.
 
 ## Policy
@@ -244,10 +269,33 @@ health:
 alerts:
   stale_days: 90
   health_below: 40
+  rules:                    # alerts of your own: one per repo where the condition holds
+    - id: low-coverage
+      label: Coverage under 70%
+      when: { coverage_below: 70 }
+      priority: [high]      # optional: high, medium, low, none
+    - id: missing-codeowners
+      label: No CODEOWNERS
+      when: { check: codeowners }
+      only: public          # optional: public or private
 
 signals:
   openssf_scorecard: true   # fetch the OpenSSF Scorecard of public repos
 ```
+
+A rule watches exactly one condition:
+
+| Condition | Holds when |
+|---|---|
+| `check: <id>` | that custom check fails |
+| `coverage_below: N` | test coverage is under N % |
+| `ci_success_below: N` | CI passes less than N % of the time |
+| `unreleased_commits_over: N` | more than N commits are not in the latest release |
+| `settings_drift_over: N` | more than N settings differ from the baseline |
+| `scorecard_below: N` | the OpenSSF Scorecard is under N (0 to 10) |
+| `eol_runtime: true` | the repo declares a runtime past its end of life |
+
+Rule alerts show up with the others, as the kind "Policy rule", and go to the same channels.
 
 Every section is optional; what you leave out keeps its default. A complete example is in [`docs/demo/policy.yml`](docs/demo/policy.yml).
 
@@ -273,11 +321,20 @@ claude mcp add --transport http github-control https://your-server.example/api/m
 | `list_alerts` | Open (or resolved) alerts |
 | `get_inbox` | Open pull requests and issues; filter by type, repo or requested reviewer |
 | `list_dependencies` | Packages and versions across repos, diverging majors, end-of-life runtimes |
+| `find_package` | Every repo a package is in, transitive dependencies included, with the pinned versions |
 | `list_services` | Services with their state and uptime |
+| `get_report` | What changed in the last days: highlights, growth, releases, alerts, CI, services |
+| `search_code` | Search the code of the tracked repos on GitHub |
 | `get_policy`, `plan_policy` | The policy in force, and a dry run of a new one |
 | `update_repo` | Set a repo's priority, next action or notes in the dashboard |
 
-The tools read what the dashboard already knows; none of them calls GitHub, and only `update_repo` changes anything (the dashboard's own notes, never GitHub). Each call goes through the same API as everything else, so it is logged in the activity log as an agent.
+The tools read what the dashboard already knows without calling GitHub, except `search_code`, which searches on GitHub live. Only `update_repo` changes anything (the dashboard's own notes, never GitHub). Each call goes through the same API as everything else, so it is logged in the activity log as an agent.
+
+## Code search
+
+**Search code** (under the repo search box, or from the command palette) looks for text in the default branch of every repo on the dashboard and shows the files and lines that match, grouped by repo. It can be narrowed to one repo or one language, and GitHub's qualifiers work too: `"exact phrase"`, `path:src`, `filename:Dockerfile`, `extension:yml`.
+
+This is the one page that asks GitHub when you use it, because code is not something a sync can cache. It uses GitHub's code search, which allows about 10 searches a minute and returns the first 50 files. Repos you archived, paused or do not track are left out of the results.
 
 ## Inbox
 
@@ -285,12 +342,20 @@ The tools read what the dashboard already knows; none of them calls GitHub, and 
 
 The **Inbox** lists the open pull requests and issues of all your active repos. Every sync reads them, and **Refresh** reads them again on demand; opening the page costs no GitHub calls.
 
-- **Sections** are ready-made questions: what needs my review, my pull requests, what is assigned to me, dependency updates (Dependabot, Renovate), pull requests nobody touched in 30 days, all pull requests, all issues. "Me" is the account the GitHub token belongs to.
+- **Sections** are ready-made questions: what needs my review, my pull requests, what is assigned to me, what is ready to merge (green checks, no review pending), dependency updates (Dependabot, Renovate), pull requests nobody touched in 30 days, all pull requests, all issues. "Me" is the account the GitHub token belongs to.
 - **Filters** by text, repo, label and draft state live in the URL. Name a combination to keep it under *Saved views*.
-- **Keyboard**: `j`/`k` to move, `x` to select, `o` or `Enter` to open on GitHub, `/` to search.
+- **Keyboard**: `j`/`k` to move, `x` to select, `r` to review or answer, `o` or `Enter` to open on GitHub, `/` to search.
 - **Merge** the selected pull requests in one go: dependency updates are grouped by repo so a whole repo can be selected at once.
 
-It keeps the 100 most recently updated open items of each repo.
+- **Review** opens a pull request in place, with its description and the files it changes, to approve it, request changes or comment. **Answer** does the same for an issue, with a comment. The fine-grained token needs *Pull requests* and *Issues* set to read and write for this.
+
+Each pull request shows whether its checks pass, fail or are still running, and where its review stands. It keeps the 100 most recently updated open items of each repo.
+
+## Report
+
+The **Report** page answers "what happened while I was not looking" for the last 7, 14 or 30 days. It opens with a few sentences (CI that is failing, services that went down, alerts opened and resolved, releases, pull requests ready to merge) and then gives the detail: stars and lines of code gained per repo, views against the period before, releases published, open alerts, and uptime and incidents per service.
+
+It is built from what the dashboard already stores, so it costs no GitHub calls. Agents get the same through the `get_report` MCP tool.
 
 ## Alerts
 
@@ -308,7 +373,7 @@ After every sync and every round of service checks, GitHub Control compares what
 
 Archived and paused repos never raise alerts. Open and recently resolved alerts are listed on the **Alerts** page (the bell in the header) whether or not anything is sent anywhere.
 
-To be told, add a **channel** on that page: Slack, Discord, Telegram, ntfy or a generic webhook that receives JSON. Each channel chooses which kinds of alert it gets, and can also get a daily or weekly digest of what is open. A channel hears when an alert opens or gets worse, and when CI or a service recovers. What was already wrong when you add a channel is not sent: only what changes from then on.
+To be told, add a **channel** on that page: Slack, Discord, Telegram, ntfy, email over SMTP, or a generic webhook that receives JSON. Each channel chooses which kinds of alert it gets, and can also get a daily or weekly digest of what is open. A channel hears when an alert opens or gets worse, and when CI or a service recovers. What was already wrong when you add a channel is not sent: only what changes from then on.
 
 ```json
 { "source": "github-control", "event": "opened", "kind": "ci_failing", "entity": "acme/api",
@@ -317,6 +382,8 @@ To be told, add a **channel** on that page: Slack, Discord, Telegram, ntfy or a 
 ```
 
 `event` is `opened`, `worsened`, `resolved`, `digest` or `test`.
+
+Email needs an SMTP server: host, port (587 by default, 465 for implicit TLS), an optional username and password, a sender and up to 20 recipients. It is available on the Node server and Docker, not on Cloudflare Workers, which cannot open SMTP connections.
 
 Service checks run every 15 minutes; set `SERVICE_CHECK_MINUTES` to check more often (an outage shorter than the interval can go unnoticed). On Cloudflare Workers the interval is the Cron Trigger in `back/wrangler.toml`, which also drives alerts and digests.
 
@@ -373,11 +440,14 @@ curl -X POST -H "Authorization: Bearer $API_KEY" http://localhost:13337/api/sync
 | Metrics | `GET /api/metrics/{aggregate,latest,compare}`, `/api/metrics/repo/:owner/:repo`, `/api/metrics/snapshot/:date` |
 | Traffic | `GET /api/traffic/summary`, `/api/traffic/repo/:owner/:repo`, `POST /api/traffic/repo/:owner/:repo/sync` |
 | Signals | `GET /api/repos/:owner/:repo/signals`, `POST .../signals/sync?kinds=`, `POST .../branches/delete`, `POST .../config/apply` |
-| Dependencies | `GET /api/dependencies` |
+| Dependencies | `GET /api/dependencies`, `GET /api/dependencies/locate?name=` |
+| Webhooks | `POST /api/webhooks/github` (signed by GitHub, no API key), `GET /api/webhooks` |
 | Public (no sign-in, opt-in) | `GET /api/badges/:owner/:repo/:metric.svg`, `.../card.svg`, `/api/badges/summary.svg`, `GET /api/status`, `/api/status/badge.svg` |
+| Search | `GET /api/search/code?q=&repo=&language=` |
 | Policy | `GET /api/policy`, `POST /api/policy/plan`, `PUT /api/policy` |
 | MCP | `POST /api/mcp` |
-| Inbox | `GET /api/inbox`, `POST /api/inbox/refresh`, `POST /api/inbox/merge` |
+| Inbox | `GET /api/inbox`, `POST /api/inbox/refresh`, `POST /api/inbox/merge`, `GET /api/inbox/item?repo=&number=`, `POST /api/inbox/review`, `POST /api/inbox/comment` |
+| Report | `GET /api/report?days=` |
 | Alerts | `GET /api/alerts?status={open,resolved,all}`, `POST /api/alerts/evaluate`, `GET/POST /api/alerts/channels`, `PUT/DELETE /api/alerts/channels/:id`, `POST /api/alerts/channels/:id/test` |
 | Saved views | `GET/POST /api/saved-views`, `DELETE /api/saved-views/:id` |
 | Services & apps | `/api/services`, `GET /api/services/uptime`, `/api/repo-apps` |

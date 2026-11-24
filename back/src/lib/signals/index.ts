@@ -9,6 +9,7 @@ import { collectConfig } from './config';
 import { collectInbox } from './inbox';
 import { collectPolicy } from './policy';
 import { collectScorecard } from './scorecard';
+import { collectLockfile } from './lockfile';
 
 export * from './types';
 
@@ -24,6 +25,7 @@ export const SIGNAL_COLLECTORS = {
   inbox: collectInbox,
   policy: collectPolicy,
   scorecard: collectScorecard,
+  lockfile: collectLockfile,
 } satisfies Record<string, SignalCollector>;
 
 export type SignalKind = keyof typeof SIGNAL_COLLECTORS;

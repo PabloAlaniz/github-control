@@ -169,6 +169,16 @@ export const TOOLS: Tool[] = [
     },
   },
   {
+    name: 'find_package',
+    description: 'Find where a package is across all repositories, including as a transitive dependency, with the versions each repository pins in its lockfiles. Use it when a package turns out to be vulnerable or deprecated.',
+    readOnly: true,
+    inputSchema: { type: 'object', properties: { name: { type: 'string', description: 'Package name, e.g. "lodash"' } }, required: ['name'] },
+    async run(args, api) {
+      if (typeof args.name !== 'string' || args.name.trim().length < 2) throw new ToolError('"name" must be a package name');
+      return ask(api, 'GET', `/api/dependencies/locate?name=${encodeURIComponent(args.name.trim())}`);
+    },
+  },
+  {
     name: 'list_services',
     description: 'The deployed services behind the repositories with their current state and 30-day uptime.',
     readOnly: true,
@@ -182,6 +192,37 @@ export const TOOLS: Tool[] = [
         uptime_pct: uptime.services?.[service.slug]?.uptimePct ?? null,
         incidents: uptime.services?.[service.slug]?.incidents ?? 0,
       }));
+    },
+  },
+  {
+    name: 'get_report',
+    description: 'What changed across the repositories and services over the last days: a few highlights, stars and code growth, releases, alerts opened and resolved, open pull requests and issues, failing CI, service uptime and traffic.',
+    readOnly: true,
+    inputSchema: { type: 'object', properties: { days: { type: 'number', description: 'How many days back (default 7, at most 90)' } } },
+    async run(args, api) {
+      const days = Number.isInteger(args.days) && args.days >= 1 && args.days <= 90 ? args.days : 7;
+      return ask(api, 'GET', `/api/report?days=${days}`);
+    },
+  },
+  {
+    name: 'search_code',
+    description: 'Search the code of the tracked repositories on GitHub and get the files and lines that match. Unlike the other tools this asks GitHub live, which allows about 10 searches a minute. Supports GitHub code search qualifiers such as path:, extension: and filename:.',
+    readOnly: true,
+    inputSchema: {
+      type: 'object',
+      properties: {
+        query: { type: 'string', description: 'Words to look for, e.g. "createStorage" or "TODO path:src"' },
+        repo: repoArg,
+        language: { type: 'string', description: 'Only files in this language, e.g. "typescript"' },
+      },
+      required: ['query'],
+    },
+    async run(args, api) {
+      if (typeof args.query !== 'string' || !args.query.trim()) throw new ToolError('"query" must be the words to look for');
+      const params = new URLSearchParams({ q: args.query });
+      if (args.repo) params.set('repo', repoPath(args.repo));
+      if (typeof args.language === 'string' && args.language) params.set('language', args.language);
+      return ask(api, 'GET', `/api/search/code?${params}`);
     },
   },
   {
@@ -233,7 +274,9 @@ export const TOOLS: Tool[] = [
 ];
 
 const describeTool = ({ name, description, inputSchema, readOnly }: Tool) => ({
-  name, description, inputSchema, annotations: { readOnlyHint: readOnly, destructiveHint: false, openWorldHint: false },
+  name, description, inputSchema,
+  // search_code is the one tool that reaches outside the dashboard's own data.
+  annotations: { readOnlyHint: readOnly, destructiveHint: false, openWorldHint: name === 'search_code' },
 });
 
 const rpcError = (id: unknown, code: number, message: string) => ({ jsonrpc: '2.0', id: id ?? null, error: { code, message } });
@@ -254,7 +297,7 @@ export async function handleMessage(message: any, api: Api): Promise<Json | null
         protocolVersion: PROTOCOL_VERSIONS.includes(asked) ? asked : PROTOCOL_VERSIONS[0],
         capabilities: { tools: {} },
         serverInfo: SERVER_INFO,
-        instructions: 'GitHub Control: a dashboard over all of the user\'s GitHub repositories. Tools read what it already knows (health, CI, alerts, pull requests, dependencies, services); they do not query GitHub live.',
+        instructions: 'GitHub Control: a dashboard over all of the user\'s GitHub repositories. Tools read what it already knows (health, CI, alerts, pull requests, dependencies, services) without querying GitHub; only search_code asks GitHub live.',
       });
     }
     case 'ping':

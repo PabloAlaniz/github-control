@@ -3,7 +3,7 @@
  * that own their configuration (the Node server); absent where configuration
  * is fixed at deploy time (Cloudflare Workers).
  */
-export type SettingName = 'githubToken' | 'githubOrgs' | 'syncIntervalHours' | 'publicBadges' | 'publicStatus' | 'repoBaseline' | 'policy' | 'password';
+export type SettingName = 'githubToken' | 'githubOrgs' | 'syncIntervalHours' | 'publicBadges' | 'publicStatus' | 'repoBaseline' | 'policy' | 'webhookSecret' | 'password';
 
 /** One repo setting the baseline can enforce. `expected` is null when it is not enforced. */
 export interface BaselineOption {
@@ -20,6 +20,8 @@ export interface SettingsView {
   syncIntervalHours: number;
   publicBadges: boolean;
   publicStatus: boolean;
+  /** Whether a GitHub webhook secret is configured (the secret itself is never returned). */
+  webhookSecretSet: boolean;
   /** Every repo setting the app can check, with the value expected of it (if any). */
   repoBaseline: BaselineOption[];
   /** Settings fixed by an environment variable: shown, but not editable. */
@@ -34,6 +36,8 @@ export interface SettingsPatch {
   publicStatus?: boolean;
   /** `{ setting: expected }` for the settings to enforce; settings left out are not checked. */
   repoBaseline?: Record<string, boolean>;
+  /** The secret GitHub signs webhook deliveries with. Empty turns webhooks off. */
+  webhookSecret?: string;
   /** The policy document (YAML), already validated. Empty removes it. */
   policy?: string;
   password?: { current: string; next: string };

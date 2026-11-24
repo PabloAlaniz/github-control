@@ -66,6 +66,29 @@ describe('InboxPage', () => {
         expect(within(nav).getByRole('button', { name: /^Everything/ })).toHaveTextContent('6');
     });
 
+    it('shows the checks and the review of a pull request, and what is ready to merge', async () => {
+        mockApi({ data: { ...inbox, items: [
+            item(1, { title: 'Green and approved', checks: 'success', review: 'approved' }),
+            item(2, { title: 'Red', checks: 'failure', review: 'changes_requested' }),
+            item(3, { title: 'Running', checks: 'pending', review: 'review_required' }),
+            item(4, { title: 'No checks' }),
+        ] } });
+        render(<InboxPage />);
+        await screen.findByRole('navigation', { name: 'Inbox sections' });
+        pickSection('All pull requests');
+
+        const row = (title) => screen.getByText(title).closest('li');
+        expect(within(row('Green and approved')).getByLabelText('Checks pass')).toBeInTheDocument();
+        expect(row('Green and approved')).toHaveTextContent('approved');
+        expect(within(row('Red')).getByLabelText('Checks fail')).toBeInTheDocument();
+        expect(row('Red')).toHaveTextContent('changes requested');
+        expect(within(row('Running')).getByLabelText('Checks are running')).toBeInTheDocument();
+        expect(within(row('No checks')).queryByLabelText(/Checks/)).not.toBeInTheDocument();
+
+        pickSection('Ready to merge');
+        expect(titles()).toEqual(['Green and approved']);
+    });
+
     it('switches section and keeps it in the URL', async () => {
         mockApi();
         render(<InboxPage />);
@@ -217,6 +240,88 @@ describe('InboxPage', () => {
         fireEvent.keyDown(window, { key: 'Escape' });
         expect(screen.getByLabelText('Select me/api#5')).not.toBeChecked();
         open.mockRestore();
+    });
+
+    describe('answering an item', () => {
+        const pr = {
+            type: 'pr', repo: 'me/api', number: 1, title: 'New cart flow', body: 'Rewrites the cart.', bodyTruncated: false,
+            headRef: 'b1', baseRef: 'main', headSha: 'abc1234', additions: 40, deletions: 2, changedFiles: 3, mergeable: false, draft: false,
+            files: [{ path: 'src/cart.js', status: 'added', additions: 40, deletions: 0 }, { path: 'old.js', status: 'removed', additions: 0, deletions: 2 }],
+        };
+        const detail = (body, write = () => respond({ ok: true })) => (path, options) => {
+            if (path.startsWith('/api/inbox/item')) return respond(body);
+            if (options.method === 'POST') return write(path);
+            return null;
+        };
+
+        it('shows a pull request and approves the commit it showed', async () => {
+            mockApi({ extra: detail(pr) });
+            render(<InboxPage />);
+            await screen.findByText('New cart flow');
+            fireEvent.click(screen.getByRole('button', { name: 'Review me/api#1' }));
+
+            const dialog = await screen.findByRole('dialog', { name: 'me/api#1' });
+            expect(await within(dialog).findByText('Rewrites the cart.')).toBeInTheDocument();
+            expect(within(dialog).getByText('src/cart.js')).toBeInTheDocument();
+            expect(within(dialog).getByText('has conflicts')).toBeInTheDocument();
+            expect(within(dialog).getByText('…and 1 more files')).toBeInTheDocument();
+            expect(api.apiFetch).toHaveBeenCalledWith('/api/inbox/item?repo=me%2Fapi&number=1');
+            // Asking for changes or commenting needs words; approving does not.
+            expect(within(dialog).getByRole('button', { name: 'Request changes' })).toBeDisabled();
+            expect(within(dialog).getByRole('button', { name: 'Comment' })).toBeDisabled();
+
+            fireEvent.click(within(dialog).getByRole('button', { name: 'Approve' }));
+            expect(await within(dialog).findByText('Approved.')).toBeInTheDocument();
+            expect(JSON.parse(calls('POST', '/api/inbox/review')[0][1].body)).toEqual({ repo: 'me/api', number: 1, event: 'approve', body: '', sha: 'abc1234' });
+
+            fireEvent.change(within(dialog).getByLabelText('Review comment'), { target: { value: 'Split this up' } });
+            fireEvent.click(within(dialog).getByRole('button', { name: 'Request changes' }));
+            expect(await within(dialog).findByText('Changes requested.')).toBeInTheDocument();
+            expect(JSON.parse(calls('POST', '/api/inbox/review')[1][1].body)).toMatchObject({ event: 'request_changes', body: 'Split this up' });
+
+            fireEvent.click(within(dialog).getAllByRole('button', { name: 'Close' })[1]);
+            expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+        });
+
+        it('says why a review was refused', async () => {
+            mockApi({ extra: detail(pr, () => respond({ error: 'The pull request changed since you opened it' }, false, 409)) });
+            render(<InboxPage />);
+            await screen.findByText('New cart flow');
+            fireEvent.keyDown(window, { key: 'j' });
+            fireEvent.keyDown(window, { key: 'r' });
+
+            const dialog = await screen.findByRole('dialog');
+            await within(dialog).findByText('Rewrites the cart.');
+            fireEvent.click(within(dialog).getByRole('button', { name: 'Approve' }));
+            expect(await within(dialog).findByRole('alert')).toHaveTextContent('changed since you opened it');
+
+            fireEvent.keyDown(window, { key: 'Escape' });
+            expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+        });
+
+        it('comments on an issue', async () => {
+            mockApi({ extra: detail({ type: 'issue', repo: 'me/api', number: 3, title: 'Crash on start', body: '', bodyTruncated: false }) });
+            render(<InboxPage />);
+            await screen.findByText('New cart flow');
+            pickSection('Assigned to me');
+            fireEvent.click(screen.getByRole('button', { name: 'Answer me/api#3' }));
+
+            const dialog = await screen.findByRole('dialog');
+            expect(await within(dialog).findByText('No description.')).toBeInTheDocument();
+            expect(within(dialog).queryByRole('button', { name: 'Approve' })).not.toBeInTheDocument();
+            fireEvent.change(within(dialog).getByLabelText('Comment'), { target: { value: 'Looking into it' } });
+            fireEvent.click(within(dialog).getByRole('button', { name: 'Comment' }));
+            expect(await within(dialog).findByText('Comment sent.')).toBeInTheDocument();
+            expect(JSON.parse(calls('POST', '/api/inbox/comment')[0][1].body)).toEqual({ repo: 'me/api', number: 3, body: 'Looking into it' });
+        });
+
+        it('says when the item cannot be read', async () => {
+            mockApi({ extra: (path) => (path.startsWith('/api/inbox/item') ? respond({ error: 'Not found on GitHub' }, false, 404) : null) });
+            render(<InboxPage />);
+            await screen.findByText('New cart flow');
+            fireEvent.click(screen.getByRole('button', { name: 'Review me/api#1' }));
+            expect(await within(await screen.findByRole('dialog')).findByRole('alert')).toHaveTextContent('Not found on GitHub');
+        });
     });
 
     it('lists only the inbox views, applies one and saves the current filters', async () => {

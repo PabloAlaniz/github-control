@@ -65,7 +65,7 @@ export function BackupMenu({ onImportSuccess }) {
         <div className="relative">
             <Button onClick={() => setOpen(o => !o)} variant="ghost" className="gap-2" disabled={busy}>
                 {busy ? <Loader2 size={16} className="animate-spin" /> : <Database size={16} />}
-                <span className="hidden 2xl:inline">Backup</span>
+                <span className="hidden sm:inline">Backup</span>
             </Button>
 
             {open && (

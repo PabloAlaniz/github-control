@@ -138,13 +138,15 @@ The repo settings baseline is one of these settings: `domain/repo-baseline.ts` h
 
 A signal is data about one repo that is fetched from GitHub and cached: one record per repo and kind in the `repo_signals` collection, with the processed result as JSON. Each kind has a collector in `lib/signals/` (a function from a `SignalContext` to plain data) registered in `SIGNAL_COLLECTORS`; adding a kind is adding an entry there and the UI for it. The context memoizes the repo metadata and file tree, so the collectors of one sync share those calls.
 
-Current kinds: `standards`, `dependencies`, `security`, `release`, `branches`, `ci`, `config`, `inbox`, `policy`, `scorecard`.
+Current kinds: `standards`, `dependencies`, `security`, `release`, `branches`, `ci`, `config`, `inbox`, `policy`, `scorecard`, `lockfile`.
+
+The `lockfile` signal can hold thousands of entries per repo, so its `items` are compact `[ecosystem, name, version]` rows rather than objects. `services/dependency.service.ts` joins them with the declared dependencies to show resolved versions, and scans them to locate a package across repos.
 
 `services/signal.service.ts` runs the collectors and stores the results; kinds fail independently, so a missing permission on one does not lose the others. By convention a signal keeps its long detail under `items`: `GET /api/repos` attaches only the summary of each signal to a repo, and `GET /api/repos/:owner/:repo/signals` returns everything. Cross-repo questions (`services/dependency.service.ts`) are answered in application code from the stored signals, so they work the same on every storage.
 
 The inbox is a signal like the others: each repo's open pull requests and issues are one `inbox` record, and `services/inbox.service.ts` flattens the records of the active repos into one list. Sections and filters are the frontend's (`front/src/lib/inbox.js`); a saved inbox view is a saved view whose query starts with `inbox=1`.
 
-Three routes act on GitHub from what a signal showed: `routes/branches.ts` (delete branches), `routes/config.ts` (apply the settings baseline) and `routes/inbox.ts` (merge pull requests). All re-read the current state from GitHub before changing anything and log every change.
+Three routes act on GitHub from what a signal showed: `routes/branches.ts` (delete branches), `routes/config.ts` (apply the settings baseline) and `routes/inbox.ts` (merge pull requests, submit reviews, post comments). All re-read the current state from GitHub before changing anything and log every change.
 
 ### Service checks
 
@@ -160,15 +162,25 @@ Three routes act on GitHub from what a signal showed: `routes/branches.ts` (dele
 
 `routes/mcp.ts` implements the stateless part of MCP's Streamable HTTP transport by hand (JSON-RPC over POST, JSON answers). A tool does not touch storage: it sends a request to the app's own routes with the caller's credentials. Authentication, validation, the activity log and the demo restrictions therefore apply to an agent exactly as to any other client, and a tool can never do more than the HTTP API allows.
 
+### Webhooks
+
+`routes/webhooks.ts` receives GitHub deliveries. It is mounted before the auth middleware and trusts nothing but the HMAC signature of the raw body under `GITHUB_WEBHOOK_SECRET` (`lib/github/webhook.ts`, Web Crypto, so it runs on both runtimes). `planWebhook` is a pure function from an event to what it makes stale: the CI status it carries and the signals to read again. `services/webhook.service.ts` applies that for tracked repos only, reads each signal at most once per burst of deliveries, and evaluates the alerts.
+
+### Code search
+
+`services/report.service.ts` builds the report from stored data only (metric trends, the `release` and `inbox` signals, alerts, service checks, traffic); it never calls GitHub.
+
+Two places ask GitHub at request time rather than reading stored data: `services/search.service.ts`, and the inbox when it opens one pull request or issue (`getItemDetail`). The search service scopes the query to the owners of the tracked repos (qualifiers in the user's text that would move the search elsewhere are dropped) and keeps only results from repos the dashboard tracks.
+
 ### Public surface
 
 Two groups of routes answer without authentication, each behind its own switch and mounted before the auth middleware: `routes/badges.ts` (`PUBLIC_BADGES`: badges and cards, public repos only) and `routes/status.ts` (`PUBLIC_STATUS`: the names, states and uptime of active services). Both render from stored data, so a request never reaches GitHub. `lib/badge.ts` and `lib/cards.ts` build the SVG by hand; anything a caller can supply (`label`, `title`) is escaped and length-limited.
 
 ### Alerts
 
-`domain/alerts.ts` is the rule book: a pure function from the stored state (repos, services, signals) to the conditions that hold right now, each with a stable key such as `ci_failing:acme/api`. `services/alert.service.ts` compares them with the open records of the `alerts` collection and opens, updates or resolves accordingly, so there is no event to miss: whatever changed the data, the next evaluation sees the result. It runs at the end of a full sync and of every round of service checks, one evaluation at a time per storage.
+`domain/alerts.ts` is the rule book: a pure function from the stored state (repos, services, signals) to the conditions that hold right now, each with a stable key such as `ci_failing:acme/api`. `services/alert.service.ts` compares them with the open records of the `alerts` collection and opens, updates or resolves accordingly, so there is no event to miss: whatever changed the data, the next evaluation sees the result. It runs at the end of a full sync and of every round of service checks, one evaluation at a time per storage. The policy's own rules are evaluated in the same pass: each is one condition over a repo's stored fields and signals, and opens alerts of the kind `custom`.
 
-What changed is sent to the `alert_channels` that asked for that kind. A channel type (`lib/alerts/channels.ts`) is a function from a message to one HTTP request, which is why the same code delivers from Node and from the Worker; adding a type is adding an entry to `CHANNEL_TYPES`. Destinations are secrets: the API returns them masked, and an edit that leaves a secret empty keeps the stored one. Digests are sent by the same scheduler that runs the service checks.
+What changed is sent to the `alert_channels` that asked for that kind. A channel type (`lib/alerts/channels.ts`) is a function from a message to one HTTP request, which is why the same code delivers from Node and from the Worker; adding a type is adding an entry to `CHANNEL_TYPES`. Email is the exception: SMTP needs a socket, so `node/email-channel.ts` implements `send` and registers the type from the Node entry only, the same way Node-only storage drivers are registered. Destinations are secrets: the API returns them masked, and an edit that leaves a secret empty keeps the stored one. Digests are sent by the same scheduler that runs the service checks.
 
 ## Authentication
 

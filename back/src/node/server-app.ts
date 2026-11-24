@@ -9,6 +9,7 @@ import { Hono } from 'hono';
 import { serveStatic } from '@hono/node-server/serve-static';
 import app from '../index';
 import '../infrastructure/storage/node';
+import './email-channel';
 import type { AppConfig } from '../config';
 import { randomSecret } from '../lib/password';
 import {

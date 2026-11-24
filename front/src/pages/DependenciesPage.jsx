@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Package, GitFork, AlertTriangle, ChevronDown, ChevronRight } from 'lucide-react';
+import { ArrowLeft, Package, GitFork, AlertTriangle, ChevronDown, ChevronRight, Lock, Loader2, Search } from 'lucide-react';
+import { Input } from '../components/atoms/Input';
 import { DashboardLayout } from '../components/templates/DashboardLayout';
 import { Card } from '../components/atoms/Card';
 import { Text } from '../components/atoms/Text';
@@ -70,6 +71,82 @@ function RuntimeTable({ runtimes }) {
     );
 }
 
+/** Looks for a package in every repo's lockfiles: the direct dependencies and everything they bring along. */
+function PackageFinder() {
+    const [name, setName] = useState('');
+    const [result, setResult] = useState(null);
+    const [error, setError] = useState('');
+    const [searching, setSearching] = useState(false);
+
+    const find = async (event) => {
+        event.preventDefault();
+        if (name.trim().length < 2) return;
+        setSearching(true);
+        setError('');
+        try {
+            const res = await apiFetch(`/api/dependencies/locate?name=${encodeURIComponent(name.trim())}`);
+            const body = await res.json().catch(() => ({}));
+            if (!res.ok) throw new Error(body.error || `Request failed (${res.status})`);
+            setResult(body);
+        } catch (err) {
+            setResult(null);
+            setError(err.message);
+        } finally {
+            setSearching(false);
+        }
+    };
+
+    return (
+        <Card className="overflow-hidden">
+            <div className="px-4 py-3 border-b border-gray-100">
+                <h3 className="text-sm font-semibold text-gray-900">Find a package anywhere</h3>
+                <Text variant="muted" className="text-xs">In every repo&apos;s lockfile, including packages that only come along with others. For when one turns out to be vulnerable.</Text>
+            </div>
+            <form onSubmit={find} className="flex flex-wrap items-center gap-3 px-4 py-3" role="search" aria-label="Find a package">
+                <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="lodash, urllib3, golang.org/x/crypto..." aria-label="Package name" className="w-80 max-w-full" maxLength={200} />
+                <Button type="submit" variant="outline" disabled={searching || name.trim().length < 2} className="gap-2">
+                    {searching ? <Loader2 size={16} className="animate-spin" /> : <Search size={16} />}
+                    Find
+                </Button>
+            </form>
+            {error && <p role="alert" className="px-4 pb-3 text-sm text-red-600">{error}</p>}
+            {result && (result.locations.length === 0 ? (
+                <p className="px-4 pb-4 text-sm text-gray-500" role="status">“{result.query}” is not in any lockfile.</p>
+            ) : (
+                <>
+                    <p className="px-4 pb-2 text-xs text-gray-500" role="status">
+                        {result.exact ? `“${result.query}” is in ${result.repos} repo${result.repos === 1 ? '' : 's'}.` : `No package is called exactly “${result.query}”. Names that contain it:`}
+                    </p>
+                    <table className="w-full text-sm">
+                        <thead className="bg-gray-50 text-xs uppercase tracking-wider text-gray-500">
+                            <tr>
+                                <th className="px-4 py-2 text-left font-semibold">Repo</th>
+                                <th className="px-4 py-2 text-left font-semibold">Package</th>
+                                <th className="px-4 py-2 text-left font-semibold">Pinned versions</th>
+                                <th className="px-4 py-2 text-left font-semibold">How</th>
+                            </tr>
+                        </thead>
+                        <tbody className="divide-y divide-gray-100">
+                            {result.locations.map((location) => (
+                                <tr key={`${location.repo}:${location.ecosystem}:${location.name}`}>
+                                    <td className="px-4 py-2 text-gray-900">{location.repo}</td>
+                                    <td className="px-4 py-2 text-gray-700">{location.name} <span className="text-gray-400">· {location.ecosystem}</span></td>
+                                    <td className="px-4 py-2 font-mono text-xs text-gray-700">{location.versions.join(', ')}</td>
+                                    <td className="px-4 py-2 text-xs">
+                                        {location.direct
+                                            ? <span className="text-gray-700">declared</span>
+                                            : <span className="text-gray-500">transitive</span>}
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </>
+            ))}
+        </Card>
+    );
+}
+
 function PackageRow({ pkg, open, onToggle }) {
     return (
         <>
@@ -101,6 +178,9 @@ function PackageRow({ pkg, open, onToggle }) {
                                 <li key={`${u.repo}:${u.manifest}:${u.scope}`} className="flex flex-wrap items-baseline gap-x-3 text-xs">
                                     <span className="text-gray-900">{u.repo}</span>
                                     <span className="font-mono text-gray-700">{u.version}</span>
+                                    {u.resolved?.length > 0 && (
+                                        <span className="font-mono text-gray-500" title="Version pinned in the lockfile">→ {u.resolved.join(', ')}</span>
+                                    )}
                                     <span className="text-gray-400">{u.scope} · {u.manifest}</span>
                                 </li>
                             ))}
@@ -159,19 +239,20 @@ export function DependenciesPage() {
         <DashboardLayout
             stats={
                 <div className="space-y-4">
-                    <header className="flex items-center gap-4">
+                    <header className="flex flex-wrap items-center gap-x-4 gap-y-2">
                         <Button variant="ghost" onClick={() => navigate('/')} className="gap-2">
                             <ArrowLeft size={16} />
                             Back
                         </Button>
-                        <div className="flex-1">
+                        <div className="min-w-48 flex-1">
                             <Text variant="h2">Dependencies</Text>
                             <Text variant="muted">Direct dependencies and runtimes declared across your repos</Text>
                         </div>
                     </header>
-                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
                         <Stat icon={GitFork} label="Repos synced" value={data ? data.repos_synced : '-'} />
                         <Stat icon={Package} label="Packages" value={data ? packages.length : '-'} tone="text-indigo-600 bg-indigo-100" />
+                        <Stat icon={Lock} label="Pinned in lockfiles" value={data ? (data.locked?.packages ?? 0).toLocaleString('en-US') : '-'} tone="text-teal-700 bg-teal-100" />
                         <Stat icon={AlertTriangle} label="Divergent majors" value={data ? packages.filter(p => p.divergent).length : '-'} tone="text-amber-600 bg-amber-100" />
                         <Stat icon={AlertTriangle} label="EOL runtimes" value={data ? runtimes.filter(r => r.eol).length : '-'} tone="text-red-600 bg-red-100" />
                     </div>
@@ -190,6 +271,7 @@ export function DependenciesPage() {
             ) : (
                 <div className="space-y-6">
                     <RuntimeTable runtimes={runtimes} />
+                    {data.locked?.repos > 0 && <PackageFinder />}
 
                     <Card className="overflow-hidden">
                         <div className="flex flex-wrap items-center gap-3 px-4 py-3 border-b border-gray-100">

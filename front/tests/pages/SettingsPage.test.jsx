@@ -98,6 +98,43 @@ describe('SettingsPage', () => {
         expect(screen.queryByRole('status')).not.toBeInTheDocument();
     });
 
+    describe('webhooks', () => {
+        it('explains the setup with this server\'s payload URL and says whether they are on', async () => {
+            mockApiFetch.mockResolvedValue(ok(current({ webhookSecretSet: false })));
+            renderPage();
+
+            expect(await screen.findByText('No secret yet: webhooks are off.')).toBeInTheDocument();
+            expect(screen.getByText(`${window.location.origin}/api/webhooks/github`)).toBeInTheDocument();
+            expect(screen.getByLabelText('Secret')).toHaveValue('');
+        });
+
+        it('generates a secret and saves it', async () => {
+            const user = userEvent.setup();
+            mockApiFetch.mockResolvedValue(ok(current({ webhookSecretSet: false })));
+            renderPage();
+            await screen.findByText('No secret yet: webhooks are off.');
+
+            await user.click(screen.getByRole('button', { name: 'Generate' }));
+            const secret = screen.getByLabelText('Secret').value;
+            expect(secret).toMatch(/^[0-9a-f]{40}$/);
+
+            mockApiFetch.mockResolvedValue(ok(current({ webhookSecretSet: true })));
+            await user.click(screen.getByRole('button', { name: /Save/ }));
+            await waitFor(() => expect(lastPatch()).toEqual({ webhookSecret: secret }));
+
+            expect(await screen.findByText('A secret is configured: webhooks are on.')).toBeInTheDocument();
+            // The saved secret is not shown again.
+            expect(screen.getByLabelText('Replace the secret')).toHaveValue('');
+        });
+
+        it('cannot be changed when the environment sets the secret', async () => {
+            mockApiFetch.mockResolvedValue(ok(current({ webhookSecretSet: true, locked: ['webhookSecret'] })));
+            renderPage();
+            expect(await screen.findByLabelText('Replace the secret')).toBeDisabled();
+            expect(screen.getByRole('button', { name: 'Generate' })).toBeDisabled();
+        });
+    });
+
     it('disables what the environment locks', async () => {
         mockApiFetch.mockResolvedValue(ok(current({ locked: ['githubToken', 'syncIntervalHours', 'password'] })));
         renderPage();

@@ -11,6 +11,8 @@ const PatchSchema = z.object({
   syncIntervalHours: z.number().int().min(0).max(24 * 30),
   publicBadges: z.boolean(),
   publicStatus: z.boolean(),
+  // Long enough not to be guessable; empty turns webhooks off.
+  webhookSecret: z.string().max(200).refine((value) => value === '' || value.length >= 20, 'The webhook secret must be at least 20 characters'),
   repoBaseline: z.record(z.string().max(60), z.boolean()),
   password: z.object({
     current: z.string().min(1),

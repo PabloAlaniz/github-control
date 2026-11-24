@@ -45,7 +45,7 @@ export function ActivityPage() {
         <DashboardLayout
             stats={
                 <div className="space-y-4">
-                    <header className="flex items-center gap-4">
+                    <header className="flex flex-wrap items-center gap-x-4 gap-y-2">
                         <Button 
                             variant="ghost" 
                             onClick={() => navigate('/')}

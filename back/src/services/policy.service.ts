@@ -63,6 +63,8 @@ export function diffPolicies(current: Policy, next: Policy): Change[] {
   // Named as in the document, so a change reads like the line that caused it.
   const alerts = (policy: Policy) => ({ stale_days: policy.alerts.staleDays, health_below: policy.alerts.healthBelow });
   compare('alerts', alerts(current), alerts(next));
+  const rulesById = (policy: Policy) => Object.fromEntries(policy.alerts.rules.map((rule) => [rule.id, rule]));
+  compare('alerts.rules', rulesById(current), rulesById(next));
   compare('signals', { openssf_scorecard: current.signals.scorecard }, { openssf_scorecard: next.signals.scorecard });
   return changes;
 }
@@ -111,7 +113,8 @@ export async function planPolicy(ctx: AppContext, text: string): Promise<PlanRes
   });
 
   const alertCount = (policy: Policy) => evaluateConditions({
-    repos, services, signals, now: new Date(), options: { ...policy.alerts, health: policy.health },
+    repos, services, signals, now: new Date(),
+    options: { staleDays: policy.alerts.staleDays, healthBelow: policy.alerts.healthBelow, rules: policy.alerts.rules, health: policy.health },
   }).length;
 
   const notes: string[] = [];

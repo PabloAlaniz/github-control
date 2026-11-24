@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import {
     DEFAULT_INBOX_FILTERS, availableSections, filterInbox, groupByRepo, inboxViewQuery, isDependencyUpdate, isInboxView,
-    isMergeable, parseInboxFilters, resolveSection, sectionCounts, serializeInboxFilters,
+    isMergeable, isReadyToMerge, parseInboxFilters, resolveSection, sectionCounts, serializeInboxFilters,
 } from '@/lib/inbox';
 
 const NOW = new Date('2026-06-01T00:00:00Z').getTime();
@@ -28,6 +28,7 @@ describe('inbox sections', () => {
         expect(numbers({ section: 'mine' })).toEqual([2]);
         expect(numbers({ section: 'assigned' })).toEqual([3]);
         expect(numbers({ section: 'deps' })).toEqual([4]);
+        expect(numbers({ section: 'ready' })).toEqual([]);
         expect(numbers({ section: 'stale' })).toEqual([5]);
         expect(numbers({ section: 'prs' })).toEqual([1, 2, 4, 5]);
         expect(numbers({ section: 'issues' })).toEqual([3, 6]);
@@ -35,12 +36,12 @@ describe('inbox sections', () => {
     });
 
     it('counts every section before the extra filters', () => {
-        expect(sectionCounts(items, context)).toEqual({ review: 1, mine: 1, assigned: 1, deps: 1, stale: 1, prs: 4, issues: 2, all: 6 });
+        expect(sectionCounts(items, context)).toEqual({ review: 1, mine: 1, assigned: 1, ready: 0, deps: 1, stale: 1, prs: 4, issues: 2, all: 6 });
     });
 
     it('hides the "my" sections when the viewer is unknown', () => {
-        expect(availableSections(null).map((s) => s.id)).toEqual(['deps', 'stale', 'prs', 'issues', 'all']);
-        expect(availableSections('alice')).toHaveLength(8);
+        expect(availableSections(null).map((s) => s.id)).toEqual(['ready', 'deps', 'stale', 'prs', 'issues', 'all']);
+        expect(availableSections('alice')).toHaveLength(9);
         expect(resolveSection('review', null)).toBe('prs');
         expect(resolveSection('review', 'alice')).toBe('review');
         expect(resolveSection('deps', null)).toBe('deps');
@@ -88,6 +89,20 @@ describe('inbox filters', () => {
         expect(isInboxView({ query: 'health=needs-ci' })).toBe(false);
         expect(isInboxView({ query: 'q=inbox%3D1' })).toBe(false);
         expect(isInboxView({})).toBe(false);
+    });
+});
+
+describe('ready to merge', () => {
+    it('needs green checks and no review in the way', () => {
+        expect(isReadyToMerge(item({ checks: 'success', review: 'approved' }))).toBe(true);
+        expect(isReadyToMerge(item({ checks: 'success', review: null }))).toBe(true);
+        expect(isReadyToMerge(item({ checks: 'success', review: 'review_required' }))).toBe(false);
+        expect(isReadyToMerge(item({ checks: 'success', review: 'changes_requested' }))).toBe(false);
+        expect(isReadyToMerge(item({ checks: 'pending', review: 'approved' }))).toBe(false);
+        expect(isReadyToMerge(item({ checks: 'failure' }))).toBe(false);
+        expect(isReadyToMerge(item({ checks: null }))).toBe(false);
+        expect(isReadyToMerge(item({ checks: 'success', draft: true }))).toBe(false);
+        expect(isReadyToMerge(item({ type: 'issue', checks: 'success' }))).toBe(false);
     });
 });
 

@@ -25,6 +25,7 @@ const ENV_KEYS: Record<SettingName, string[]> = {
   publicStatus: ['PUBLIC_STATUS'],
   repoBaseline: ['REPO_BASELINE'],
   policy: ['POLICY', 'POLICY_FILE'],
+  webhookSecret: ['GITHUB_WEBHOOK_SECRET'],
   password: ['AUTH_PASSWORD', 'AUTH_PASSWORD_HASH', 'DISABLE_AUTH'],
 };
 
@@ -59,6 +60,7 @@ export function createSettingsStore({ env, dataDir, config, verifyGithubToken }:
     syncIntervalHours: Number(config.SYNC_INTERVAL_HOURS ?? DEFAULT_SYNC_INTERVAL_HOURS),
     publicBadges: config.PUBLIC_BADGES === 'true',
     publicStatus: config.PUBLIC_STATUS === 'true',
+    webhookSecretSet: !!config.GITHUB_WEBHOOK_SECRET,
     repoBaseline: baselineOptions(JSON.stringify(resolvePolicy(config).baseline)),
     locked: lockedNow(),
   });
@@ -94,6 +96,8 @@ export function createSettingsStore({ env, dataDir, config, verifyGithubToken }:
         // Stored even when empty: '{}' means "enforce nothing", unlike an unset value (the defaults).
         values.REPO_BASELINE = JSON.stringify(patch.repoBaseline);
       }
+
+      if (patch.webhookSecret !== undefined) values.GITHUB_WEBHOOK_SECRET = patch.webhookSecret;
 
       if (patch.policy !== undefined) {
         const { errors } = parsePolicyDocument(patch.policy);

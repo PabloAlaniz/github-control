@@ -32,6 +32,18 @@ health:
 alerts:
   stale_days: 90
   health_below: 40
+  # Alerts of our own, one per repo where the condition holds.
+  rules:
+    - id: low-coverage
+      label: Coverage under 70%
+      when: { coverage_below: 70 }
+      priority: [high]
+    - id: eol-runtime
+      label: Runtime past end of life
+      when: { eol_runtime: true }
+    - id: release-overdue
+      label: Release overdue
+      when: { unreleased_commits_over: 40 }
 
 signals:
   openssf_scorecard: true

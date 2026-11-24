@@ -1,11 +1,12 @@
 import { useEffect, useRef } from 'react';
 import { Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom';
-import { HomePage, ActivityPage, LoginPage, MetricsPage, RepoMetricsPage, DependenciesPage, AlertsPage, InboxPage, EmbedsPage, StatusPage, PolicyPage } from './pages';
+import { HomePage, ActivityPage, LoginPage, MetricsPage, RepoMetricsPage, DependenciesPage, AlertsPage, InboxPage, EmbedsPage, StatusPage, PolicyPage, SearchPage, ReportPage } from './pages';
 import { SetupPage } from './pages/SetupPage';
 import { SettingsPage } from './pages/SettingsPage';
 import { ProtectedRoute } from './components/templates/ProtectedRoute';
 import { fetchSetupStatus } from './lib/setup';
-import { setAuthDisabled } from './lib/auth';
+import { isAuthenticated, setAuthDisabled } from './lib/auth';
+import { AppNav } from './components/organisms/AppNav';
 import { setDemo } from './lib/demo';
 import { DemoBanner } from './components/molecules/DemoBanner';
 
@@ -38,12 +39,16 @@ function useSetupRedirect() {
   }, []);
 }
 
+/** Pages that stand alone: before signing in, and the public status page. */
+const BARE_PATHS = ['/login', '/setup', '/status'];
+
 function App() {
   useSetupRedirect();
+  const { pathname } = useLocation();
+  // The shell (navigation) wraps every page a signed-in person uses.
+  const shell = !BARE_PATHS.includes(pathname) && isAuthenticated();
 
-  return (
-    <>
-    <DemoBanner />
+  const routes = (
     <Routes>
       <Route path="/setup" element={<SetupPage />} />
       <Route path="/login" element={<LoginPage />} />
@@ -55,12 +60,25 @@ function App() {
       <Route path="/dependencies" element={<ProtectedRoute><DependenciesPage /></ProtectedRoute>} />
       <Route path="/status" element={<StatusPage />} />
       <Route path="/embeds" element={<ProtectedRoute><EmbedsPage /></ProtectedRoute>} />
+      <Route path="/report" element={<ProtectedRoute><ReportPage /></ProtectedRoute>} />
+      <Route path="/search" element={<ProtectedRoute><SearchPage /></ProtectedRoute>} />
       <Route path="/policy" element={<ProtectedRoute><PolicyPage /></ProtectedRoute>} />
       <Route path="/inbox" element={<ProtectedRoute><InboxPage /></ProtectedRoute>} />
       <Route path="/alerts" element={<ProtectedRoute><AlertsPage /></ProtectedRoute>} />
       <Route path="/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
       <Route path="/services" element={<Navigate to="/" replace />} />
     </Routes>
+  );
+
+  return (
+    <>
+      <DemoBanner />
+      {shell ? (
+        <div className="relative flex h-screen flex-col bg-gray-50 md:flex-row">
+          <AppNav />
+          <div className="min-h-0 min-w-0 flex-1 overflow-y-auto">{routes}</div>
+        </div>
+      ) : routes}
     </>
   );
 }

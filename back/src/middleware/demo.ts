@@ -18,6 +18,8 @@ const GITHUB_READS = [
   /^\/api\/user$/,
   /^\/api\/prs$/,
   /^\/api\/repos\/[^/]+\/[^/]+\/(prs|readme)$/,
+  /^\/api\/search\//,
+  /^\/api\/inbox\/item$/,
 ];
 
 /** Requests that are not GETs but change nothing: fine in any demo. */

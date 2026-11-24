@@ -16,6 +16,8 @@ vi.mock('@/pages', () => ({
   EmbedsPage: () => <div data-testid="embeds-page">Embeds Page</div>,
   StatusPage: () => <div data-testid="status-page">Status Page</div>,
   PolicyPage: () => <div data-testid="policy-page">Policy Page</div>,
+  SearchPage: () => <div data-testid="search-page">Search Page</div>,
+  ReportPage: () => <div data-testid="report-page">Report Page</div>,
 }));
 
 // Mock ProtectedRoute to render children for testing
@@ -97,5 +99,32 @@ describe('App', () => {
     
     expect(screen.getByTestId('protected-route')).toBeInTheDocument();
     expect(screen.getByTestId('metrics-page')).toBeInTheDocument();
+  });
+});
+describe('App shell', () => {
+  it('wraps the pages of a signed-in person in the navigation', async () => {
+    const auth = await import('@/lib/auth');
+    auth.setAuthDisabled(true);
+    render(<MemoryRouter initialEntries={['/inbox']}><App /></MemoryRouter>);
+    expect(screen.getByRole('navigation', { name: 'Main' })).toBeInTheDocument();
+    expect(screen.getByTestId('inbox-page')).toBeInTheDocument();
+    auth.setAuthDisabled(false);
+  });
+
+  it('leaves the login and the public status page bare', async () => {
+    const auth = await import('@/lib/auth');
+    auth.setAuthDisabled(true);
+    for (const path of ['/login', '/status']) {
+      const { unmount } = render(<MemoryRouter initialEntries={[path]}><App /></MemoryRouter>);
+      expect(screen.queryByRole('navigation', { name: 'Main' })).not.toBeInTheDocument();
+      unmount();
+    }
+    auth.setAuthDisabled(false);
+  });
+
+  it('shows no navigation to someone who is not signed in', () => {
+    localStorage.clear();
+    render(<MemoryRouter initialEntries={['/']}><App /></MemoryRouter>);
+    expect(screen.queryByRole('navigation', { name: 'Main' })).not.toBeInTheDocument();
   });
 });

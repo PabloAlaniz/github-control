@@ -16,7 +16,8 @@ const SOURCE_NOTES = {
     default: 'No policy yet: these are the defaults. Edit and apply to start one.',
 };
 const SECTION_LABELS = {
-    baseline: 'Settings baseline', 'health.weights': 'Health weight', 'health.checks': 'Custom check', alerts: 'Alert threshold', signals: 'Signal',
+    baseline: 'Settings baseline', 'health.weights': 'Health weight', 'health.checks': 'Custom check', alerts: 'Alert threshold',
+    'alerts.rules': 'Alert rule', signals: 'Signal',
 };
 
 const show = (value) => {
@@ -26,7 +27,7 @@ const show = (value) => {
 };
 
 function changeText(change) {
-    if (change.section === 'health.checks') {
+    if (change.section === 'health.checks' || change.section === 'alerts.rules') {
         if (change.from === null) return <>added <b>{change.key}</b> ({show(change.to)})</>;
         if (change.to === null) return <>removed <b>{change.key}</b></>;
         return <>changed <b>{change.key}</b></>;
@@ -191,12 +192,12 @@ export function PolicyPage() {
     return (
         <DashboardLayout
             stats={
-                <header className="flex items-center gap-4">
+                <header className="flex flex-wrap items-center gap-x-4 gap-y-2">
                     <Button variant="ghost" onClick={() => navigate('/')} className="gap-2">
                         <ArrowLeft size={16} />
                         Back
                     </Button>
-                    <div className="flex-1">
+                    <div className="min-w-48 flex-1">
                         <Text variant="h2">Policy</Text>
                         <Text variant="muted">What every repo is expected to have: settings, what counts for health, and when to alert</Text>
                     </div>

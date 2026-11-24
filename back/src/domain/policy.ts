@@ -16,6 +16,11 @@
  *   alerts:
  *     stale_days: 90
  *     health_below: 40
+ *     rules:                  # alerts of your own
+ *       - id: low-coverage
+ *         label: Coverage under 60%
+ *         when: { coverage_below: 60 }
+ *         priority: [high]
  *   signals:
  *     openssf_scorecard: true
  *
@@ -48,6 +53,23 @@ export interface CustomCheck {
   only?: 'public' | 'private';
 }
 
+/** The conditions a rule can watch. A rule has exactly one. */
+export const RULE_CONDITIONS = [
+  'check', 'coverage_below', 'ci_success_below', 'unreleased_commits_over', 'settings_drift_over', 'scorecard_below', 'eol_runtime',
+] as const;
+export type RuleCondition = (typeof RULE_CONDITIONS)[number];
+
+/** An alert rule of the policy: opens an alert for each repo where its condition holds. */
+export interface AlertRule {
+  id: string;
+  label: string;
+  /** Exactly one condition, e.g. `{ coverage_below: 60 }` or `{ check: 'codeowners' }`. */
+  when: Partial<Record<RuleCondition, number | string | boolean>>;
+  /** Only repos with one of these priorities ("none" for repos without one). */
+  priority?: ('high' | 'medium' | 'low' | 'none')[];
+  only?: 'public' | 'private';
+}
+
 export interface HealthPolicy {
   /** Relative weight per category. `custom` is the weight of the custom checks as a whole. */
   weights: Record<HealthCategoryName | 'custom', number>;
@@ -58,7 +80,7 @@ export interface Policy {
   /** `{ setting: expected }` for the repo settings to enforce. */
   baseline: Record<string, boolean>;
   health: HealthPolicy;
-  alerts: { staleDays: number; healthBelow: number };
+  alerts: { staleDays: number; healthBelow: number; rules: AlertRule[] };
   signals: { scorecard: boolean };
 }
 
@@ -73,6 +95,25 @@ const CheckSchema = z.object({
   only: z.enum(['public', 'private']).optional(),
 }).strict().refine((check) => !!check.files !== !!check.forbidden, 'a check needs either "files" or "forbidden"');
 
+const percent = z.number().min(0).max(100);
+const count = z.number().int().min(0).max(100000);
+
+const RuleSchema = z.object({
+  id: z.string().regex(/^[a-z0-9][a-z0-9_-]{0,39}$/, 'id must be lowercase letters, digits, "-" or "_" (max 40)'),
+  label: z.string().trim().min(1).max(80),
+  when: z.object({
+    check: z.string().min(1).max(40),
+    coverage_below: percent,
+    ci_success_below: percent,
+    unreleased_commits_over: count,
+    settings_drift_over: count,
+    scorecard_below: z.number().min(0).max(10),
+    eol_runtime: z.literal(true),
+  }).partial().strict().refine((when) => Object.keys(when).length === 1, 'a rule needs exactly one condition'),
+  priority: z.array(z.enum(['high', 'medium', 'low', 'none'])).min(1).max(4).optional(),
+  only: z.enum(['public', 'private']).optional(),
+}).strict();
+
 const DocumentSchema = z.object({
   version: z.literal(1).optional(),
   baseline: z.record(z.string(), z.boolean()).optional(),
@@ -85,6 +126,7 @@ const DocumentSchema = z.object({
   alerts: z.object({
     stale_days: z.number().int().min(0).max(3650),
     health_below: z.number().int().min(0).max(100),
+    rules: z.array(RuleSchema).max(30),
   }).partial().strict().optional(),
   signals: z.object({ openssf_scorecard: z.boolean() }).partial().strict().optional(),
 }).strict();
@@ -125,6 +167,16 @@ export function parsePolicyDocument(text: string): ParsedPolicy {
   for (const id of new Set(ids.filter((id, index) => ids.indexOf(id) !== index))) {
     errors.push(`health.checks: the id "${id}" is used more than once`);
   }
+  const rules = document?.alerts?.rules ?? [];
+  const ruleIds = rules.map((rule) => rule.id);
+  for (const id of new Set(ruleIds.filter((id, index) => ruleIds.indexOf(id) !== index))) {
+    errors.push(`alerts.rules: the id "${id}" is used more than once`);
+  }
+  for (const rule of rules) {
+    if (rule.when.check !== undefined && !ids.includes(rule.when.check)) {
+      errors.push(`alerts.rules.${rule.id}: there is no check "${rule.when.check}" in health.checks`);
+    }
+  }
   return errors.length > 0 ? { document: null, errors } : { document, errors };
 }
 
@@ -155,6 +207,7 @@ export function buildPolicy(document: PolicyDocument, legacy: LegacySettings = {
     alerts: {
       staleDays: document.alerts?.stale_days ?? numberOr(legacy.ALERT_STALE_DAYS, 90, 3650),
       healthBelow: document.alerts?.health_below ?? numberOr(legacy.ALERT_HEALTH_BELOW, 40, 100),
+      rules: (document.alerts?.rules ?? []) as AlertRule[],
     },
     signals: { scorecard: document.signals?.openssf_scorecard ?? false },
   };
@@ -196,7 +249,7 @@ export function serializePolicy(policy: Policy): string {
       weights: policy.health.weights,
       checks: policy.health.checks,
     },
-    alerts: { stale_days: policy.alerts.staleDays, health_below: policy.alerts.healthBelow },
+    alerts: { stale_days: policy.alerts.staleDays, health_below: policy.alerts.healthBelow, rules: policy.alerts.rules },
     signals: { openssf_scorecard: policy.signals.scorecard },
   });
 }

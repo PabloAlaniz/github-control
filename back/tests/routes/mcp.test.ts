@@ -60,7 +60,7 @@ describe('MCP server', () => {
     it('lists its tools with a schema and a read-only hint', async () => {
       const { tools } = (await rpc('tools/list')).result;
       expect(tools.map((tool: any) => tool.name)).toEqual([
-        'list_repos', 'get_repo', 'list_alerts', 'get_inbox', 'list_dependencies', 'list_services', 'get_policy', 'plan_policy', 'update_repo',
+        'list_repos', 'get_repo', 'list_alerts', 'get_inbox', 'list_dependencies', 'find_package', 'list_services', 'get_report', 'search_code', 'get_policy', 'plan_policy', 'update_repo',
       ]);
       for (const tool of tools) {
         expect(tool.inputSchema.type).toBe('object');

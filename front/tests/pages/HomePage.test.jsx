@@ -207,13 +207,11 @@ describe('HomePage', () => {
         expect(screen.queryByTestId('health-table')).not.toBeInTheDocument();
     });
 
-    it('navigates to activity page', () => {
+    it('leaves getting around the app to the navigation', () => {
         render(<HomePage />);
-
-        const activityBtn = screen.getByText('Activity').closest('button');
-        fireEvent.click(activityBtn);
-
-        expect(mockNavigate).toHaveBeenCalledWith('/activity');
+        // The header keeps the dashboard's own actions only.
+        expect(screen.queryByText('Activity')).not.toBeInTheDocument();
+        expect(screen.queryByText('Logout')).not.toBeInTheDocument();
     });
 
     describe('view state in the URL', () => {
