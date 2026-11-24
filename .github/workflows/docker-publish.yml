@@ -1,6 +1,6 @@
 # Builds the self-hosted image for amd64 and arm64 and publishes it to the
-# GitHub Container Registry. Runs for release tags (v1.2.3), when the Release
-# workflow calls it with a version, and by hand.
+# GitHub Container Registry. Runs when the Release workflow publishes a
+# release, for a release tag pushed by hand (v1.2.3), and by hand.
 #
 # Tags published for v1.2.3: 1.2.3, 1.2 and latest. A manual run publishes
 # only `edge`, so it never moves `latest`.
