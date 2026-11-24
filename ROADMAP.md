@@ -29,15 +29,16 @@ Where GitHub Control is heading. Nothing here is a promise; priorities follow wh
 - MCP server: the dashboard as tools for coding agents
 - Alerts for failing CI, services down, serious security alerts, stale repos and low health, sent to Slack, Discord, Telegram, ntfy, email or a webhook, with daily or weekly digests
 - Code search across all tracked repos
+- Alert rules of your own in the policy (coverage, CI reliability, unreleased commits, settings drift, Scorecard, end-of-life runtimes, custom checks)
+- Check and review state of each pull request in the inbox, and a "ready to merge" section
 
 ## Next
 
-- **Alert rules of your own**, defined in the policy.
-- **Inbox**: check status of each pull request in the list, review and comment without leaving it.
+- **Inbox**: review and comment on a pull request without leaving it.
+- **AI cost attribution**: track AI coding assistant usage per repo.
 
 ## Later
 
-- **AI cost attribution**: track AI coding assistant usage per repo.
 - GitHub App / OAuth sign-in, multiple users.
 - Better mobile layout.
 - Dependency inventory from lockfiles (resolved and transitive versions) and more ecosystems.
@@ -48,7 +49,7 @@ Where GitHub Control is heading. Nothing here is a promise; priorities follow wh
 - On Cloudflare Workers the full sync must be run by an external script.
 - The dependency inventory reads direct dependencies declared in npm, PyPI, Go and Cargo manifests; it does not read lockfiles. End-of-life dates for Node and Python are a table in the code that has to be updated by hand.
 - Signals look at one page of results: the latest 100 workflow runs, 100 branches, 100 alerts per source and the 100 most recently updated open pull requests and issues.
-- The inbox is as fresh as the last sync or Refresh, and does not show the check status of a pull request; checks are verified when merging.
+- The inbox is as fresh as the last sync or Refresh, including the check and review state it shows; checks are verified again when merging.
 - Code search goes through GitHub's code search: default branches only, about 10 searches a minute, the first 50 files, and at most 15 repo owners per search.
 - Email alerts need the Node server or Docker; Cloudflare Workers cannot open SMTP connections.
 - Custom checks look at file paths only (does a file exist, or not), not at file contents.

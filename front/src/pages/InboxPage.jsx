@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-    ArrowLeft, Bookmark, CircleDot, GitMerge, GitPullRequest, Loader2, MessageSquare, Plus, RefreshCw, Trash2, X,
+    ArrowLeft, Bookmark, Check, CircleDot, Clock, GitMerge, GitPullRequest, Loader2, MessageSquare, Plus, RefreshCw, Trash2, X,
 } from 'lucide-react';
 import { DashboardLayout } from '../components/templates/DashboardLayout';
 import { Card } from '../components/atoms/Card';
@@ -39,6 +39,17 @@ function labelStyle(color) {
     return { backgroundColor: `#${color}`, color: light ? '#111827' : '#ffffff' };
 }
 
+const CHECKS = {
+    success: { icon: Check, tone: 'text-green-600', label: 'Checks pass' },
+    failure: { icon: X, tone: 'text-red-600', label: 'Checks fail' },
+    pending: { icon: Clock, tone: 'text-amber-600', label: 'Checks are running' },
+};
+const REVIEWS = {
+    approved: { text: 'approved', tone: 'text-green-700' },
+    changes_requested: { text: 'changes requested', tone: 'text-red-700' },
+    review_required: { text: 'review required', tone: 'text-amber-700' },
+};
+
 function ItemRow({ item, active, selected, onToggle, showRepo }) {
     const Icon = item.type === 'pr' ? GitPullRequest : CircleDot;
     return (
@@ -69,8 +80,13 @@ function ItemRow({ item, active, selected, onToggle, showRepo }) {
                     {item.author && <> by {item.author}</>}
                     {item.requestedReviewers.length > 0 && <> · review: {item.requestedReviewers.join(', ')}</>}
                     {item.assignees.length > 0 && <> · assigned: {item.assignees.join(', ')}</>}
+                    {REVIEWS[item.review] && <> · <span className={REVIEWS[item.review].tone}>{REVIEWS[item.review].text}</span></>}
                 </p>
             </div>
+            {CHECKS[item.checks] && (() => {
+                const { icon: CheckIcon, tone, label } = CHECKS[item.checks];
+                return <CheckIcon size={14} className={cn('mt-0.5 flex-shrink-0', tone)} aria-label={label} title={label} />;
+            })()}
             {item.comments > 0 && (
                 <span className="flex flex-shrink-0 items-center gap-1 text-xs text-gray-400" title={`${item.comments} comments`}>
                     <MessageSquare size={12} />{item.comments}

@@ -18,6 +18,12 @@ export function isDependencyUpdate(item) {
 
 const daysSince = (iso, now) => Math.floor((now - new Date(iso).getTime()) / DAY_MS);
 
+/** A pull request with green checks and no review standing in its way. */
+export function isReadyToMerge(item) {
+    return item.type === 'pr' && !item.draft && item.checks === 'success'
+        && item.review !== 'changes_requested' && item.review !== 'review_required';
+}
+
 /**
  * Sections, in the order they are listed. `needsViewer` ones only make sense
  * when the server knows who "me" is.
@@ -26,6 +32,7 @@ export const SECTIONS = [
     { id: 'review', label: 'Needs my review', needsViewer: true, match: (item, { viewer }) => item.type === 'pr' && item.requestedReviewers.includes(viewer) },
     { id: 'mine', label: 'My pull requests', needsViewer: true, match: (item, { viewer }) => item.type === 'pr' && item.author === viewer },
     { id: 'assigned', label: 'Assigned to me', needsViewer: true, match: (item, { viewer }) => item.assignees.includes(viewer) },
+    { id: 'ready', label: 'Ready to merge', match: (item) => isReadyToMerge(item) },
     { id: 'deps', label: 'Dependency updates', match: (item) => isDependencyUpdate(item) },
     { id: 'stale', label: 'Stale pull requests', match: (item, { now }) => item.type === 'pr' && daysSince(item.updatedAt, now) >= STALE_PR_DAYS },
     { id: 'prs', label: 'All pull requests', match: (item) => item.type === 'pr' },

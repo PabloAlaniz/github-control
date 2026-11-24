@@ -54,8 +54,8 @@ alertsRoutes.get('/', async (c) => {
   const open = status === 'open' && alerts.length < limit
     ? alerts.length
     : (await c.var.storage.alerts.listAlerts({ status: 'open', limit: 10_000 })).length;
-  const { staleDays, healthBelow } = resolveAlertOptions(c.env);
-  return c.json({ alerts, open, kinds: ALERT_KIND_LABELS, rules: { staleDays, healthBelow } });
+  const { staleDays, healthBelow, rules = [] } = resolveAlertOptions(c.env);
+  return c.json({ alerts, open, kinds: ALERT_KIND_LABELS, rules: { staleDays, healthBelow, custom: rules.length } });
 });
 
 // Re-evaluate now, from what is stored (no GitHub calls). Runs on its own after every sync and service check.

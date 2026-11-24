@@ -245,10 +245,33 @@ health:
 alerts:
   stale_days: 90
   health_below: 40
+  rules:                    # alerts of your own: one per repo where the condition holds
+    - id: low-coverage
+      label: Coverage under 70%
+      when: { coverage_below: 70 }
+      priority: [high]      # optional: high, medium, low, none
+    - id: missing-codeowners
+      label: No CODEOWNERS
+      when: { check: codeowners }
+      only: public          # optional: public or private
 
 signals:
   openssf_scorecard: true   # fetch the OpenSSF Scorecard of public repos
 ```
+
+A rule watches exactly one condition:
+
+| Condition | Holds when |
+|---|---|
+| `check: <id>` | that custom check fails |
+| `coverage_below: N` | test coverage is under N % |
+| `ci_success_below: N` | CI passes less than N % of the time |
+| `unreleased_commits_over: N` | more than N commits are not in the latest release |
+| `settings_drift_over: N` | more than N settings differ from the baseline |
+| `scorecard_below: N` | the OpenSSF Scorecard is under N (0 to 10) |
+| `eol_runtime: true` | the repo declares a runtime past its end of life |
+
+Rule alerts show up with the others, as the kind "Policy rule", and go to the same channels.
 
 Every section is optional; what you leave out keeps its default. A complete example is in [`docs/demo/policy.yml`](docs/demo/policy.yml).
 
@@ -293,12 +316,12 @@ This is the one page that asks GitHub when you use it, because code is not somet
 
 The **Inbox** lists the open pull requests and issues of all your active repos. Every sync reads them, and **Refresh** reads them again on demand; opening the page costs no GitHub calls.
 
-- **Sections** are ready-made questions: what needs my review, my pull requests, what is assigned to me, dependency updates (Dependabot, Renovate), pull requests nobody touched in 30 days, all pull requests, all issues. "Me" is the account the GitHub token belongs to.
+- **Sections** are ready-made questions: what needs my review, my pull requests, what is assigned to me, what is ready to merge (green checks, no review pending), dependency updates (Dependabot, Renovate), pull requests nobody touched in 30 days, all pull requests, all issues. "Me" is the account the GitHub token belongs to.
 - **Filters** by text, repo, label and draft state live in the URL. Name a combination to keep it under *Saved views*.
 - **Keyboard**: `j`/`k` to move, `x` to select, `o` or `Enter` to open on GitHub, `/` to search.
 - **Merge** the selected pull requests in one go: dependency updates are grouped by repo so a whole repo can be selected at once.
 
-It keeps the 100 most recently updated open items of each repo.
+Each pull request shows whether its checks pass, fail or are still running, and where its review stands. It keeps the 100 most recently updated open items of each repo.
 
 ## Alerts
 

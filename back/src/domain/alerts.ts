@@ -8,9 +8,9 @@
  * (resolved).
  */
 import { computeHealthScore, repoRowToHealthInput } from '../lib/analyzers/healthScore';
-import { resolvePolicy, type HealthPolicy, type PolicyConfig } from './policy';
+import { resolvePolicy, type AlertRule, type HealthPolicy, type PolicyConfig } from './policy';
 
-export const ALERT_KINDS = ['ci_failing', 'service_down', 'security', 'repo_stale', 'health_low'] as const;
+export const ALERT_KINDS = ['ci_failing', 'service_down', 'security', 'repo_stale', 'health_low', 'custom'] as const;
 export type AlertKind = (typeof ALERT_KINDS)[number];
 
 export const ALERT_KIND_LABELS: Record<AlertKind, string> = {
@@ -19,6 +19,7 @@ export const ALERT_KIND_LABELS: Record<AlertKind, string> = {
   security: 'Security alerts',
   repo_stale: 'Repo went stale',
   health_low: 'Low health score',
+  custom: 'Policy rule',
 };
 
 /** Kinds whose end is worth a message of its own ("back to normal"). */
@@ -35,6 +36,8 @@ export interface AlertOptions {
   healthBelow: number;
   /** How the health score is computed (weights, custom checks). Unset = the built-in score. */
   health?: HealthPolicy;
+  /** The policy's own alert rules. */
+  rules?: AlertRule[];
 }
 
 export const DEFAULT_ALERT_OPTIONS: AlertOptions = { staleDays: 90, healthBelow: 40 };
@@ -42,7 +45,7 @@ export const DEFAULT_ALERT_OPTIONS: AlertOptions = { staleDays: 90, healthBelow:
 /** Options from the policy in force (or the `ALERT_STALE_DAYS` and `ALERT_HEALTH_BELOW` settings). */
 export function resolveAlertOptions(config: PolicyConfig): AlertOptions {
   const policy = resolvePolicy(config);
-  return { ...policy.alerts, health: policy.health };
+  return { staleDays: policy.alerts.staleDays, healthBelow: policy.alerts.healthBelow, rules: policy.alerts.rules, health: policy.health };
 }
 
 export interface Condition {
@@ -68,6 +71,51 @@ export interface ConditionInput {
 
 const DAY_MS = 86_400_000;
 const plural = (n: number, word: string) => `${n} ${word}${n === 1 ? '' : 's'}`;
+
+/**
+ * Why a rule's condition holds for a repo, in a few words, or null when it
+ * does not (or when the data it needs was never synced).
+ */
+export function ruleFinding(rule: AlertRule, repo: Record<string, any>, signals: Record<string, Record<string, any>>, now: Date): string | null {
+  const { when } = rule;
+  const number = (value: unknown) => (typeof value === 'number' && Number.isFinite(value) ? value : null);
+
+  if (when.check !== undefined) {
+    const result = (signals.policy?.checks ?? []).find((check: any) => check.id === when.check);
+    return result?.passed === false ? `check "${result.label ?? when.check}" fails` : null;
+  }
+  if (when.coverage_below !== undefined) {
+    const coverage = number(repo.test_coverage);
+    return coverage !== null && coverage < Number(when.coverage_below) ? `coverage is ${coverage}%` : null;
+  }
+  if (when.ci_success_below !== undefined) {
+    const rate = number(signals.ci?.successRate);
+    return rate !== null && rate < Number(when.ci_success_below) ? `CI passes ${rate}% of the time` : null;
+  }
+  if (when.unreleased_commits_over !== undefined) {
+    const commits = number(signals.release?.unreleasedCommits);
+    return commits !== null && commits > Number(when.unreleased_commits_over) ? `${commits} commits not released` : null;
+  }
+  if (when.settings_drift_over !== undefined) {
+    const drift = number(signals.config?.drift);
+    return drift !== null && drift > Number(when.settings_drift_over) ? `${drift} settings out of line` : null;
+  }
+  if (when.scorecard_below !== undefined) {
+    const score = number(signals.scorecard?.score);
+    return score !== null && score < Number(when.scorecard_below) ? `OpenSSF Scorecard is ${score}` : null;
+  }
+  if (when.eol_runtime) {
+    const today = now.toISOString().slice(0, 10);
+    const past = (signals.dependencies?.runtimes ?? []).filter((runtime: any) => typeof runtime.eolDate === 'string' && runtime.eolDate < today);
+    return past.length > 0 ? `${past.map((runtime: any) => `${runtime.name} ${runtime.release ?? runtime.version}`).join(', ')} past end of life` : null;
+  }
+  return null;
+}
+
+function ruleApplies(rule: AlertRule, repo: Record<string, any>): boolean {
+  if (rule.only && (rule.only === 'private') !== (repo.is_private === true)) return false;
+  return !rule.priority || rule.priority.includes(repo.priority ?? 'none');
+}
 
 function repoConditions(repo: Record<string, any>, input: ConditionInput): Condition[] {
   const { options, now } = input;
@@ -124,6 +172,18 @@ function repoConditions(repo: Record<string, any>, input: ConditionInput): Condi
         url: repoUrl, level: 0,
       });
     }
+  }
+
+  for (const rule of options.rules ?? []) {
+    if (!ruleApplies(rule, repo)) continue;
+    const finding = ruleFinding(rule, repo, signals, now);
+    if (!finding) continue;
+    found.push({
+      key: `rule:${rule.id}:${fullName}`, kind: 'custom', entity: fullName,
+      title: `${rule.label}: ${fullName} (${finding})`,
+      detail: { rule: rule.id, finding },
+      url: repoUrl, level: 0,
+    });
   }
 
   return found;

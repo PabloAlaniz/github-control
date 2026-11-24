@@ -17,7 +17,7 @@ import { fileURLToPath } from 'node:url';
 import { analyzeBranches, type BranchInput, type PullInput } from '../src/lib/signals/branches';
 import { analyzeRuns, type RunInput } from '../src/lib/signals/ci';
 import { diffConfig } from '../src/lib/signals/config';
-import { buildInbox } from '../src/lib/signals/inbox';
+import { buildInbox, type PullState } from '../src/lib/signals/inbox';
 import { summarizeScorecard } from '../src/lib/signals/scorecard';
 import { buildPolicy, parsePolicyDocument, policyBaseline, runCustomChecks } from '../src/domain/policy';
 import { parseManifest, type Dependency, type RuntimeDecl } from '../src/lib/signals/manifests';
@@ -427,6 +427,7 @@ function inbox(repo: Row, now: number) {
   const rand = random(`${repo.name}:inbox`);
   const issues: Row[] = [];
   const pulls: Row[] = [];
+  const states = new Map<number, PullState>();
   (INBOX[repo.name] ?? []).forEach(([kind, title, author, daysAgo, extra = {}], index) => {
     const number = 200 + index * 7 + Math.floor(rand() * 5);
     const updatedAt = new Date(now - daysAgo * DAY - Math.floor(rand() * 20) * 3_600_000).toISOString();
@@ -450,10 +451,18 @@ function inbox(repo: Row, now: number) {
         requested_reviewers: (extra.review ?? []).map((login) => ({ login })),
         head: { ref: branch, sha: sha(rand) },
       });
+      // Most checks pass; a failing repo's updates fail, and drafts are still running.
+      const roll = rand();
+      const checks = extra.draft ? 'pending' : repo.ci_status === 'failure' && roll < 0.6 ? 'failure' : roll < 0.12 ? 'failure' : roll < 0.2 ? 'pending' : 'success';
+      const bot = author.endsWith('[bot]');
+      states.set(number, {
+        checks,
+        review: bot || extra.draft ? null : (extra.comments ?? 0) > 7 ? 'changes_requested' : (extra.review ?? []).length > 0 ? 'review_required' : 'approved',
+      });
     }
   });
   issues.sort((a, b) => String(b.updated_at).localeCompare(String(a.updated_at)));
-  return { available: true, ...buildInbox(issues, pulls), truncated: false };
+  return { available: true, ...buildInbox(issues, pulls, states), truncated: false };
 }
 
 // ── Uptime, saved views ─────────────────────────────

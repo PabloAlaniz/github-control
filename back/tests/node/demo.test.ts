@@ -130,6 +130,9 @@ describe('demo mode: server', () => {
     const { alerts, open } = await (await send('GET', '/api/alerts')).json();
     expect(open).toBeGreaterThan(2);
     expect(alerts.map((alert: any) => alert.key)).toContain('ci_failing:acme/billing-worker');
+    // The demo policy has rules of its own.
+    expect(alerts.map((alert: any) => alert.key)).toContain('rule:eol-runtime:acme/billing-worker');
+    expect(alerts.filter((alert: any) => alert.kind === 'custom').length).toBeGreaterThan(1);
     expect((await (await send('GET', '/api/alerts/channels')).json()).channels).toEqual([]);
 
     // A channel would make the server call a URL of the visitor's choosing.

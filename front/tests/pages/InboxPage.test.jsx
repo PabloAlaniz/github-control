@@ -66,6 +66,29 @@ describe('InboxPage', () => {
         expect(within(nav).getByRole('button', { name: /^Everything/ })).toHaveTextContent('6');
     });
 
+    it('shows the checks and the review of a pull request, and what is ready to merge', async () => {
+        mockApi({ data: { ...inbox, items: [
+            item(1, { title: 'Green and approved', checks: 'success', review: 'approved' }),
+            item(2, { title: 'Red', checks: 'failure', review: 'changes_requested' }),
+            item(3, { title: 'Running', checks: 'pending', review: 'review_required' }),
+            item(4, { title: 'No checks' }),
+        ] } });
+        render(<InboxPage />);
+        await screen.findByRole('navigation', { name: 'Inbox sections' });
+        pickSection('All pull requests');
+
+        const row = (title) => screen.getByText(title).closest('li');
+        expect(within(row('Green and approved')).getByLabelText('Checks pass')).toBeInTheDocument();
+        expect(row('Green and approved')).toHaveTextContent('approved');
+        expect(within(row('Red')).getByLabelText('Checks fail')).toBeInTheDocument();
+        expect(row('Red')).toHaveTextContent('changes requested');
+        expect(within(row('Running')).getByLabelText('Checks are running')).toBeInTheDocument();
+        expect(within(row('No checks')).queryByLabelText(/Checks/)).not.toBeInTheDocument();
+
+        pickSection('Ready to merge');
+        expect(titles()).toEqual(['Green and approved']);
+    });
+
     it('switches section and keeps it in the URL', async () => {
         mockApi();
         render(<InboxPage />);

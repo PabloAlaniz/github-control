@@ -21729,13 +21729,39 @@
        "createdAt": "2026-11-18T03:00:00.000Z",
        "updatedAt": "2026-11-20T03:00:00.000Z",
        "headRef": "new-cart-flow-quantity-stepper-and-saved",
-       "headSha": "dbbaa29ce113e758d8f3f0a641611d89fd63ab04"
+       "headSha": "dbbaa29ce113e758d8f3f0a641611d89fd63ab04",
+       "checks": "pending",
+       "review": "review_required"
+      },
+      {
+       "type": "pr",
+       "number": 216,
+       "title": "Bump next from 15.3.0 to 15.3.4",
+       "url": "https://github.com/acme/storefront-web/pull/216",
+       "author": "dependabot[bot]",
+       "authorIsBot": true,
+       "labels": [
+        {
+         "name": "dependencies",
+         "color": "0366d6"
+        }
+       ],
+       "assignees": [],
+       "requestedReviewers": [],
+       "draft": false,
+       "comments": 0,
+       "createdAt": "2026-11-12T04:00:00.000Z",
+       "updatedAt": "2026-11-19T04:00:00.000Z",
+       "headRef": "dependabot/next-15.3.4",
+       "headSha": "8693cb8415e00ce92fb0f6f3d57fba6d9448e26b",
+       "checks": "pending",
+       "review": null
       },
       {
        "type": "issue",
-       "number": 238,
+       "number": 236,
        "title": "Checkout button is hidden behind the cookie banner on mobile",
-       "url": "https://github.com/acme/storefront-web/issues/238",
+       "url": "https://github.com/acme/storefront-web/issues/236",
        "author": "dana",
        "authorIsBot": false,
        "labels": [
@@ -21754,60 +21780,18 @@
        "requestedReviewers": [],
        "draft": false,
        "comments": 4,
-       "createdAt": "2026-11-09T11:00:00.000Z",
-       "updatedAt": "2026-11-19T11:00:00.000Z",
+       "createdAt": "2026-11-13T23:00:00.000Z",
+       "updatedAt": "2026-11-18T23:00:00.000Z",
        "headRef": null,
-       "headSha": null
+       "headSha": null,
+       "checks": null,
+       "review": null
       },
       {
        "type": "pr",
-       "number": 218,
-       "title": "Bump next from 15.3.0 to 15.3.4",
-       "url": "https://github.com/acme/storefront-web/pull/218",
-       "author": "dependabot[bot]",
-       "authorIsBot": true,
-       "labels": [
-        {
-         "name": "dependencies",
-         "color": "0366d6"
-        }
-       ],
-       "assignees": [],
-       "requestedReviewers": [],
-       "draft": false,
-       "comments": 0,
-       "createdAt": "2026-11-12T10:00:00.000Z",
-       "updatedAt": "2026-11-19T10:00:00.000Z",
-       "headRef": "dependabot/next-15.3.4",
-       "headSha": "688693cb8415e00ce92fb0f6f3d57fba6d9448e2"
-      },
-      {
-       "type": "pr",
-       "number": 229,
-       "title": "Bump eslint from 9.28.0 to 9.31.0",
-       "url": "https://github.com/acme/storefront-web/pull/229",
-       "author": "dependabot[bot]",
-       "authorIsBot": true,
-       "labels": [
-        {
-         "name": "dependencies",
-         "color": "0366d6"
-        }
-       ],
-       "assignees": [],
-       "requestedReviewers": [],
-       "draft": false,
-       "comments": 0,
-       "createdAt": "2026-11-15T10:00:00.000Z",
-       "updatedAt": "2026-11-19T10:00:00.000Z",
-       "headRef": "dependabot/eslint-9.31.0",
-       "headSha": "42f7021b4e738fb9ad6b7a87b29be1a3b5fb6690"
-      },
-      {
-       "type": "pr",
-       "number": 223,
+       "number": 222,
        "title": "Bump @tanstack/react-query from 5.80.0 to 5.84.1",
-       "url": "https://github.com/acme/storefront-web/pull/223",
+       "url": "https://github.com/acme/storefront-web/pull/222",
        "author": "dependabot[bot]",
        "authorIsBot": true,
        "labels": [
@@ -21820,16 +21804,42 @@
        "requestedReviewers": [],
        "draft": false,
        "comments": 0,
-       "createdAt": "2026-11-15T22:00:00.000Z",
-       "updatedAt": "2026-11-18T22:00:00.000Z",
+       "createdAt": "2026-11-11T17:00:00.000Z",
+       "updatedAt": "2026-11-18T17:00:00.000Z",
        "headRef": "dependabot/@tanstack/react-query-5.84.1",
-       "headSha": "5f8e8bfca8a32d9c9610a12258be0ad2a3956a69"
+       "headSha": "e8bfca8a32d9c9610a12258be0ad2a3956a69324",
+       "checks": "success",
+       "review": null
       },
       {
        "type": "pr",
-       "number": 207,
+       "number": 228,
+       "title": "Bump eslint from 9.28.0 to 9.31.0",
+       "url": "https://github.com/acme/storefront-web/pull/228",
+       "author": "dependabot[bot]",
+       "authorIsBot": true,
+       "labels": [
+        {
+         "name": "dependencies",
+         "color": "0366d6"
+        }
+       ],
+       "assignees": [],
+       "requestedReviewers": [],
+       "draft": false,
+       "comments": 0,
+       "createdAt": "2026-11-12T17:00:00.000Z",
+       "updatedAt": "2026-11-18T17:00:00.000Z",
+       "headRef": "dependabot/eslint-9.31.0",
+       "headSha": "021b4e738fb9ad6b7a87b29be1a3b5fb669091c4",
+       "checks": "success",
+       "review": null
+      },
+      {
+       "type": "pr",
+       "number": 211,
        "title": "Fix hydration mismatch on the product page",
-       "url": "https://github.com/acme/storefront-web/pull/207",
+       "url": "https://github.com/acme/storefront-web/pull/211",
        "author": "carol",
        "authorIsBot": false,
        "labels": [
@@ -21845,10 +21855,12 @@
        ],
        "draft": false,
        "comments": 2,
-       "createdAt": "2026-11-06T18:00:00.000Z",
-       "updatedAt": "2026-11-17T18:00:00.000Z",
+       "createdAt": "2026-11-10T17:00:00.000Z",
+       "updatedAt": "2026-11-17T17:00:00.000Z",
        "headRef": "fix-hydration-mismatch-on-the-product-pa",
-       "headSha": "93329b70a85cec1ef0740d76fe9161d3656b090d"
+       "headSha": "3329b70a85cec1ef0740d76fe9161d3656b090de",
+       "checks": "pending",
+       "review": "review_required"
       },
       {
        "type": "issue",
@@ -21867,10 +21879,12 @@
        "requestedReviewers": [],
        "draft": false,
        "comments": 0,
-       "createdAt": "2026-11-03T03:00:00.000Z",
-       "updatedAt": "2026-11-08T03:00:00.000Z",
+       "createdAt": "2026-10-31T09:00:00.000Z",
+       "updatedAt": "2026-11-08T09:00:00.000Z",
        "headRef": null,
-       "headSha": null
+       "headSha": null,
+       "checks": null,
+       "review": null
       }
      ],
      "truncated": false
@@ -22416,13 +22430,15 @@
        "createdAt": "2026-11-09T23:00:00.000Z",
        "updatedAt": "2026-11-18T23:00:00.000Z",
        "headRef": "idempotency-keys-for-payment-intents",
-       "headSha": "02aca6851128ac11d5db2af45263e4a492e4b903"
+       "headSha": "02aca6851128ac11d5db2af45263e4a492e4b903",
+       "checks": "pending",
+       "review": "review_required"
       },
       {
        "type": "issue",
-       "number": 214,
+       "number": 217,
        "title": "Intermittent 502 from the payments provider sandbox",
-       "url": "https://github.com/acme/checkout-api/issues/214",
+       "url": "https://github.com/acme/checkout-api/issues/217",
        "author": "carol",
        "authorIsBot": false,
        "labels": [
@@ -22438,10 +22454,12 @@
        "requestedReviewers": [],
        "draft": false,
        "comments": 9,
-       "createdAt": "2026-11-08T11:00:00.000Z",
-       "updatedAt": "2026-11-17T11:00:00.000Z",
+       "createdAt": "2026-11-12T18:00:00.000Z",
+       "updatedAt": "2026-11-16T18:00:00.000Z",
        "headRef": null,
-       "headSha": null
+       "headSha": null,
+       "checks": null,
+       "review": null
       },
       {
        "type": "pr",
@@ -22457,10 +22475,12 @@
        ],
        "draft": false,
        "comments": 1,
-       "createdAt": "2026-11-09T12:00:00.000Z",
-       "updatedAt": "2026-11-16T12:00:00.000Z",
+       "createdAt": "2026-11-06T02:00:00.000Z",
+       "updatedAt": "2026-11-16T02:00:00.000Z",
        "headRef": "retry-webhooks-with-exponential-backoff",
-       "headSha": "da670e430e97ce6b7cf485d1b56092b6b88fbdd0"
+       "headSha": "a670e430e97ce6b7cf485d1b56092b6b88fbdd01",
+       "checks": "failure",
+       "review": "review_required"
       }
      ],
      "truncated": false
@@ -22933,13 +22953,15 @@
        "createdAt": "2026-11-10T06:00:00.000Z",
        "updatedAt": "2026-11-20T06:00:00.000Z",
        "headRef": "date-picker-keyboard-navigation",
-       "headSha": "38d01a7da16791e3b5946d5d9eee62a5bb74c826"
+       "headSha": "38d01a7da16791e3b5946d5d9eee62a5bb74c826",
+       "checks": "success",
+       "review": "review_required"
       },
       {
        "type": "issue",
-       "number": 209,
+       "number": 207,
        "title": "Tooltip overflows the viewport near the right edge",
-       "url": "https://github.com/acme/design-system/issues/209",
+       "url": "https://github.com/acme/design-system/issues/207",
        "author": "frank",
        "authorIsBot": false,
        "labels": [
@@ -22956,10 +22978,12 @@
        "requestedReviewers": [],
        "draft": false,
        "comments": 2,
-       "createdAt": "2026-11-08T09:00:00.000Z",
-       "updatedAt": "2026-11-14T09:00:00.000Z",
+       "createdAt": "2026-11-09T04:00:00.000Z",
+       "updatedAt": "2026-11-14T04:00:00.000Z",
        "headRef": null,
-       "headSha": null
+       "headSha": null,
+       "checks": null,
+       "review": null
       },
       {
        "type": "issue",
@@ -22978,10 +23002,12 @@
        "requestedReviewers": [],
        "draft": false,
        "comments": 14,
-       "createdAt": "2026-10-25T08:00:00.000Z",
-       "updatedAt": "2026-10-31T08:00:00.000Z",
+       "createdAt": "2026-10-22T03:00:00.000Z",
+       "updatedAt": "2026-10-31T03:00:00.000Z",
        "headRef": null,
-       "headSha": null
+       "headSha": null,
+       "checks": null,
+       "review": null
       }
      ],
      "truncated": false
@@ -23591,9 +23617,9 @@
      "items": [
       {
        "type": "pr",
-       "number": 207,
-       "title": "Bump sqlalchemy from 1.4.52 to 2.0.41",
-       "url": "https://github.com/acme/billing-worker/pull/207",
+       "number": 214,
+       "title": "Bump pydantic from 1.10.15 to 2.11.5",
+       "url": "https://github.com/acme/billing-worker/pull/214",
        "author": "dependabot[bot]",
        "authorIsBot": true,
        "labels": [
@@ -23606,10 +23632,12 @@
        "requestedReviewers": [],
        "draft": false,
        "comments": 0,
-       "createdAt": "2026-11-09T09:00:00.000Z",
-       "updatedAt": "2026-11-19T09:00:00.000Z",
-       "headRef": "dependabot/sqlalchemy-2.0.41",
-       "headSha": "6dbadc8a4028a91310473c52a8a489e4f6c3419a"
+       "createdAt": "2026-11-16T05:00:00.000Z",
+       "updatedAt": "2026-11-19T05:00:00.000Z",
+       "headRef": "dependabot/pydantic-2.11.5",
+       "headSha": "eca13e671f3f0d14f22b0f6565d993c4b8a055de",
+       "checks": "success",
+       "review": null
       },
       {
        "type": "pr",
@@ -23628,38 +23656,18 @@
        "requestedReviewers": [],
        "draft": false,
        "comments": 0,
-       "createdAt": "2026-11-12T07:00:00.000Z",
-       "updatedAt": "2026-11-19T07:00:00.000Z",
+       "createdAt": "2026-11-12T01:00:00.000Z",
+       "updatedAt": "2026-11-19T01:00:00.000Z",
        "headRef": "dependabot/celery-5.5.3",
-       "headSha": "c998efce48c5b4beabd160b6c2f8a2e42d411bbe"
+       "headSha": "efce48c5b4beabd160b6c2f8a2e42d411bbe9655",
+       "checks": "success",
+       "review": null
       },
       {
        "type": "pr",
-       "number": 214,
-       "title": "Bump pydantic from 1.10.15 to 2.11.5",
-       "url": "https://github.com/acme/billing-worker/pull/214",
-       "author": "dependabot[bot]",
-       "authorIsBot": true,
-       "labels": [
-        {
-         "name": "dependencies",
-         "color": "0366d6"
-        }
-       ],
-       "assignees": [],
-       "requestedReviewers": [],
-       "draft": false,
-       "comments": 0,
-       "createdAt": "2026-11-17T02:00:00.000Z",
-       "updatedAt": "2026-11-19T02:00:00.000Z",
-       "headRef": "dependabot/pydantic-2.11.5",
-       "headSha": "52eca13e671f3f0d14f22b0f6565d993c4b8a055"
-      },
-      {
-       "type": "pr",
-       "number": 225,
+       "number": 222,
        "title": "Bump fastapi from 0.110.0 to 0.115.12",
-       "url": "https://github.com/acme/billing-worker/pull/225",
+       "url": "https://github.com/acme/billing-worker/pull/222",
        "author": "dependabot[bot]",
        "authorIsBot": true,
        "labels": [
@@ -23672,16 +23680,42 @@
        "requestedReviewers": [],
        "draft": false,
        "comments": 0,
-       "createdAt": "2026-11-07T18:00:00.000Z",
-       "updatedAt": "2026-11-18T18:00:00.000Z",
+       "createdAt": "2026-11-10T21:00:00.000Z",
+       "updatedAt": "2026-11-18T21:00:00.000Z",
        "headRef": "dependabot/fastapi-0.115.12",
-       "headSha": "3ca8e16c4a7fdff213fd0dabf56eefeeb813b844"
+       "headSha": "8e16c4a7fdff213fd0dabf56eefeeb813b844c49",
+       "checks": "success",
+       "review": null
+      },
+      {
+       "type": "pr",
+       "number": 207,
+       "title": "Bump sqlalchemy from 1.4.52 to 2.0.41",
+       "url": "https://github.com/acme/billing-worker/pull/207",
+       "author": "dependabot[bot]",
+       "authorIsBot": true,
+       "labels": [
+        {
+         "name": "dependencies",
+         "color": "0366d6"
+        }
+       ],
+       "assignees": [],
+       "requestedReviewers": [],
+       "draft": false,
+       "comments": 0,
+       "createdAt": "2026-11-12T20:00:00.000Z",
+       "updatedAt": "2026-11-18T20:00:00.000Z",
+       "headRef": "dependabot/sqlalchemy-2.0.41",
+       "headSha": "dbadc8a4028a91310473c52a8a489e4f6c3419a2",
+       "checks": "failure",
+       "review": null
       },
       {
        "type": "issue",
-       "number": 238,
+       "number": 236,
        "title": "Nightly reconciliation job times out",
-       "url": "https://github.com/acme/billing-worker/issues/238",
+       "url": "https://github.com/acme/billing-worker/issues/236",
        "author": "dana",
        "authorIsBot": false,
        "labels": [
@@ -23700,10 +23734,12 @@
        "requestedReviewers": [],
        "draft": false,
        "comments": 7,
-       "createdAt": "2026-11-13T05:00:00.000Z",
-       "updatedAt": "2026-11-18T05:00:00.000Z",
+       "createdAt": "2026-11-10T10:00:00.000Z",
+       "updatedAt": "2026-11-18T10:00:00.000Z",
        "headRef": null,
-       "headSha": null
+       "headSha": null,
+       "checks": null,
+       "review": null
       },
       {
        "type": "pr",
@@ -23725,7 +23761,9 @@
        "createdAt": "2026-09-29T00:00:00.000Z",
        "updatedAt": "2026-10-06T00:00:00.000Z",
        "headRef": "fix-flaky-invoice-rounding-test",
-       "headSha": "6f24105f6f6f55ffa9713cda7ecc90d0efac4165"
+       "headSha": "6f24105f6f6f55ffa9713cda7ecc90d0efac4165",
+       "checks": "pending",
+       "review": null
       }
      ],
      "truncated": false
@@ -24182,13 +24220,15 @@
        "createdAt": "2026-11-07T10:00:00.000Z",
        "updatedAt": "2026-11-17T10:00:00.000Z",
        "headRef": "offline-mode-for-the-order-history",
-       "headSha": "6ea127e4c3ab60198505f2e6166da781db3517fc"
+       "headSha": "6ea127e4c3ab60198505f2e6166da781db3517fc",
+       "checks": "success",
+       "review": "changes_requested"
       },
       {
        "type": "issue",
-       "number": 208,
+       "number": 211,
        "title": "Crash on launch on Android 12 with a restored backup",
-       "url": "https://github.com/acme/mobile-app/issues/208",
+       "url": "https://github.com/acme/mobile-app/issues/211",
        "author": "support-bot[bot]",
        "authorIsBot": true,
        "labels": [
@@ -24205,10 +24245,12 @@
        "requestedReviewers": [],
        "draft": false,
        "comments": 3,
-       "createdAt": "2026-11-08T20:00:00.000Z",
-       "updatedAt": "2026-11-14T20:00:00.000Z",
+       "createdAt": "2026-11-07T03:00:00.000Z",
+       "updatedAt": "2026-11-15T03:00:00.000Z",
        "headRef": null,
-       "headSha": null
+       "headSha": null,
+       "checks": null,
+       "review": null
       }
      ],
      "truncated": false
@@ -24714,10 +24756,12 @@
        "requestedReviewers": [],
        "draft": false,
        "comments": 0,
-       "createdAt": "2026-11-16T02:00:00.000Z",
-       "updatedAt": "2026-11-19T02:00:00.000Z",
+       "createdAt": "2026-11-12T09:00:00.000Z",
+       "updatedAt": "2026-11-19T09:00:00.000Z",
        "headRef": "dependabot/apache-airflow-2.11.0",
-       "headSha": "83960a3fc610db8b42924a77c14cec7fe0426ee7"
+       "headSha": "3960a3fc610db8b42924a77c14cec7fe0426ee77",
+       "checks": "success",
+       "review": null
       },
       {
        "type": "pr",
@@ -24736,7 +24780,9 @@
        "createdAt": "2026-11-03T07:00:00.000Z",
        "updatedAt": "2026-11-12T07:00:00.000Z",
        "headRef": "partition-the-events-table-by-day",
-       "headSha": "3f1abac2824f6830664540c0abd73cb2605c05d3"
+       "headSha": "3f1abac2824f6830664540c0abd73cb2605c05d3",
+       "checks": "success",
+       "review": "review_required"
       }
      ],
      "truncated": false
@@ -25567,13 +25613,15 @@
        "createdAt": "2026-11-12T02:00:00.000Z",
        "updatedAt": "2026-11-18T02:00:00.000Z",
        "headRef": "document-the-webhooks-api",
-       "headSha": "772bd8ad49c3bf987d6e4a0190c152630ff3fab1"
+       "headSha": "772bd8ad49c3bf987d6e4a0190c152630ff3fab1",
+       "checks": "success",
+       "review": "review_required"
       },
       {
        "type": "issue",
-       "number": 210,
+       "number": 208,
        "title": "Search does not find pages added this month",
-       "url": "https://github.com/acme/docs-site/issues/210",
+       "url": "https://github.com/acme/docs-site/issues/208",
        "author": "frank",
        "authorIsBot": false,
        "labels": [
@@ -25586,10 +25634,12 @@
        "requestedReviewers": [],
        "draft": false,
        "comments": 1,
-       "createdAt": "2026-11-01T07:00:00.000Z",
-       "updatedAt": "2026-11-11T07:00:00.000Z",
+       "createdAt": "2026-10-30T19:00:00.000Z",
+       "updatedAt": "2026-11-10T19:00:00.000Z",
        "headRef": null,
-       "headSha": null
+       "headSha": null,
+       "checks": null,
+       "review": null
       }
      ],
      "truncated": false
@@ -26118,7 +26168,9 @@
        "createdAt": "2026-10-25T12:00:00.000Z",
        "updatedAt": "2026-11-05T12:00:00.000Z",
        "headRef": null,
-       "headSha": null
+       "headSha": null,
+       "checks": null,
+       "review": null
       }
      ],
      "truncated": false
@@ -26764,28 +26816,6 @@
      "items": [
       {
        "type": "pr",
-       "number": 210,
-       "title": "Bump vite from 5.2.0 to 5.4.19",
-       "url": "https://github.com/acme/analytics-dashboard/pull/210",
-       "author": "dependabot[bot]",
-       "authorIsBot": true,
-       "labels": [
-        {
-         "name": "dependencies",
-         "color": "0366d6"
-        }
-       ],
-       "assignees": [],
-       "requestedReviewers": [],
-       "draft": false,
-       "comments": 0,
-       "createdAt": "2026-11-12T20:00:00.000Z",
-       "updatedAt": "2026-11-18T20:00:00.000Z",
-       "headRef": "dependabot/vite-5.4.19",
-       "headSha": "7e202583bd44cf0971f4c80ad2a3e66a43608279"
-      },
-      {
-       "type": "pr",
        "number": 217,
        "title": "Bump esbuild from 0.21.5 to 0.25.5",
        "url": "https://github.com/acme/analytics-dashboard/pull/217",
@@ -26801,16 +26831,42 @@
        "requestedReviewers": [],
        "draft": false,
        "comments": 0,
-       "createdAt": "2026-11-09T20:00:00.000Z",
-       "updatedAt": "2026-11-18T20:00:00.000Z",
+       "createdAt": "2026-11-10T08:00:00.000Z",
+       "updatedAt": "2026-11-19T08:00:00.000Z",
        "headRef": "dependabot/esbuild-0.25.5",
-       "headSha": "3bddd420d1cd6fbfa085e8217c38830d592d172d"
+       "headSha": "ddd420d1cd6fbfa085e8217c38830d592d172dac",
+       "checks": "pending",
+       "review": null
+      },
+      {
+       "type": "pr",
+       "number": 211,
+       "title": "Bump vite from 5.2.0 to 5.4.19",
+       "url": "https://github.com/acme/analytics-dashboard/pull/211",
+       "author": "dependabot[bot]",
+       "authorIsBot": true,
+       "labels": [
+        {
+         "name": "dependencies",
+         "color": "0366d6"
+        }
+       ],
+       "assignees": [],
+       "requestedReviewers": [],
+       "draft": false,
+       "comments": 0,
+       "createdAt": "2026-11-13T04:00:00.000Z",
+       "updatedAt": "2026-11-19T04:00:00.000Z",
+       "headRef": "dependabot/vite-5.4.19",
+       "headSha": "e202583bd44cf0971f4c80ad2a3e66a43608279c",
+       "checks": "success",
+       "review": null
       },
       {
        "type": "issue",
-       "number": 224,
+       "number": 222,
        "title": "Funnel chart double counts returning users",
-       "url": "https://github.com/acme/analytics-dashboard/issues/224",
+       "url": "https://github.com/acme/analytics-dashboard/issues/222",
        "author": "carol",
        "authorIsBot": false,
        "labels": [
@@ -26823,10 +26879,12 @@
        "requestedReviewers": [],
        "draft": false,
        "comments": 5,
-       "createdAt": "2026-11-12T21:00:00.000Z",
-       "updatedAt": "2026-11-15T21:00:00.000Z",
+       "createdAt": "2026-11-11T09:00:00.000Z",
+       "updatedAt": "2026-11-16T09:00:00.000Z",
        "headRef": null,
-       "headSha": null
+       "headSha": null,
+       "checks": null,
+       "review": null
       },
       {
        "type": "pr",
@@ -26850,7 +26908,9 @@
        "createdAt": "2026-10-09T20:00:00.000Z",
        "updatedAt": "2026-10-12T20:00:00.000Z",
        "headRef": "upgrade-to-react-19",
-       "headSha": "bc863d3a304bf567f5ecc72d2cb3b9ab71371ff0"
+       "headSha": "bc863d3a304bf567f5ecc72d2cb3b9ab71371ff0",
+       "checks": "success",
+       "review": "changes_requested"
       }
      ],
      "truncated": false
@@ -27779,10 +27839,12 @@
        "requestedReviewers": [],
        "draft": false,
        "comments": 2,
-       "createdAt": "2026-10-15T08:00:00.000Z",
-       "updatedAt": "2026-10-21T08:00:00.000Z",
+       "createdAt": "2026-10-12T04:00:00.000Z",
+       "updatedAt": "2026-10-21T04:00:00.000Z",
        "headRef": null,
-       "headSha": null
+       "headSha": null,
+       "checks": null,
+       "review": null
       },
       {
        "type": "pr",
@@ -27799,7 +27861,9 @@
        "createdAt": "2026-09-15T18:00:00.000Z",
        "updatedAt": "2026-09-18T18:00:00.000Z",
        "headRef": "remove-the-unused-reporting-module",
-       "headSha": "70babbef6206e1580598e3506e45ab73ee3deb54"
+       "headSha": "70babbef6206e1580598e3506e45ab73ee3deb54",
+       "checks": "pending",
+       "review": null
       }
      ],
      "truncated": false
@@ -28633,13 +28697,15 @@
        "createdAt": "2026-11-13T11:00:00.000Z",
        "updatedAt": "2026-11-19T11:00:00.000Z",
        "headRef": "async-client",
-       "headSha": "194dfaa168327193ab19f998bb231cf8079e6e6a"
+       "headSha": "194dfaa168327193ab19f998bb231cf8079e6e6a",
+       "checks": "success",
+       "review": "review_required"
       },
       {
        "type": "issue",
-       "number": 211,
+       "number": 209,
        "title": "Type hints are missing on paginated responses",
-       "url": "https://github.com/acme/sdk-python/issues/211",
+       "url": "https://github.com/acme/sdk-python/issues/209",
        "author": "ivan",
        "authorIsBot": false,
        "labels": [
@@ -28654,10 +28720,12 @@
        "requestedReviewers": [],
        "draft": false,
        "comments": 0,
-       "createdAt": "2026-11-11T02:00:00.000Z",
-       "updatedAt": "2026-11-13T02:00:00.000Z",
+       "createdAt": "2026-11-04T12:00:00.000Z",
+       "updatedAt": "2026-11-13T12:00:00.000Z",
        "headRef": null,
-       "headSha": null
+       "headSha": null,
+       "checks": null,
+       "review": null
       }
      ],
      "truncated": false

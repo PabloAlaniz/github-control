@@ -21,6 +21,7 @@ const KIND_TONES = {
     security: 'bg-orange-50 text-orange-700 border-orange-200',
     repo_stale: 'bg-amber-50 text-amber-700 border-amber-200',
     health_low: 'bg-yellow-50 text-yellow-800 border-yellow-200',
+    custom: 'bg-indigo-50 text-indigo-700 border-indigo-200',
 };
 const DIGEST_LABELS = { off: 'No digest', daily: 'Daily digest', weekly: 'Weekly digest' };
 const RESOLVED_SHOWN = 20;
@@ -232,6 +233,7 @@ function rulesText(rules) {
     const parts = ['CI failing', 'a service down', 'critical or high security alerts'];
     if (rules.staleDays > 0) parts.push(`high or medium priority repos without commits for ${rules.staleDays} days`);
     if (rules.healthBelow > 0) parts.push(`a health score under ${rules.healthBelow}`);
+    if (rules.custom > 0) parts.push(`${rules.custom} rule${rules.custom === 1 ? '' : 's'} of the policy`);
     return `Alerts open for: ${parts.join(', ')}.`;
 }
 
@@ -347,7 +349,7 @@ export function AlertsPage() {
                         </div>
                         {channels.length === 0 && editing === null && (
                             <p className="px-4 py-6 text-sm text-gray-500">
-                                No channels yet. Alerts are still listed here; add a channel to get them in Slack, Discord, Telegram, ntfy or any webhook.
+                                No channels yet. Alerts are still listed here; add a channel to get them by email, in Slack, Discord, Telegram or ntfy, or on any webhook.
                             </p>
                         )}
                         <ul className="divide-y divide-gray-100">

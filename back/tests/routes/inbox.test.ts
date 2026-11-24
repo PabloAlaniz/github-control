@@ -13,6 +13,7 @@ const pullsMerge = vi.fn();
 const checksList = vi.fn();
 const combinedStatus = vi.fn();
 const getAuthenticated = vi.fn();
+const graphql = vi.fn();
 vi.mock('@back/lib/github/client', () => ({
   getOctokit: () => ({
     issues: { listForRepo: issuesList },
@@ -20,12 +21,13 @@ vi.mock('@back/lib/github/client', () => ({
     checks: { listForRef: checksList },
     repos: { getCombinedStatusForRef: combinedStatus },
     users: { getAuthenticated },
+    graphql,
   }),
 }));
 
 import app from '@back/index';
 import type { Storage } from '@back/application/ports/storage';
-import { buildInbox } from '@back/lib/signals/inbox';
+import { buildInbox, pullStates } from '@back/lib/signals/inbox';
 
 let env: any;
 let storage: Storage;
@@ -62,10 +64,28 @@ describe('inbox signal', () => {
       type: 'issue', number: 3, title: 'Issue 3', url: 'https://github.com/acme/api/issues/3',
       author: 'bob', authorIsBot: false, labels: [{ name: 'bug', color: 'd73a4a' }, { name: 'help wanted', color: null }],
       assignees: ['alice'], requestedReviewers: [], draft: false, comments: 2,
-      createdAt: '2026-01-01T00:00:00Z', updatedAt: '2026-01-03T00:00:00Z', headRef: null, headSha: null,
+      createdAt: '2026-01-01T00:00:00Z', updatedAt: '2026-01-03T00:00:00Z', headRef: null, headSha: null, checks: null, review: null,
     });
     expect(inbox.items[1]).toMatchObject({ type: 'pr', number: 7, requestedReviewers: ['alice'], headRef: 'feat/7', headSha: SHA, draft: false });
     expect(inbox.items[2]).toMatchObject({ author: 'dependabot[bot]', authorIsBot: true, draft: true });
+  });
+
+  it('adds the check and review state of each pull request, never of an issue', () => {
+    const states = pullStates({ repository: { pullRequests: { nodes: [
+      { number: 7, reviewDecision: 'APPROVED', commits: { nodes: [{ commit: { statusCheckRollup: { state: 'SUCCESS' } } }] } },
+      { number: 9, reviewDecision: 'CHANGES_REQUESTED', commits: { nodes: [{ commit: { statusCheckRollup: { state: 'ERROR' } } }] } },
+      { number: 11, reviewDecision: null, commits: { nodes: [{ commit: { statusCheckRollup: null } }] } },
+      { number: 3, reviewDecision: 'APPROVED', commits: { nodes: [{ commit: { statusCheckRollup: { state: 'SUCCESS' } } }] } },
+      { reviewDecision: 'APPROVED' },
+    ] } } });
+    const inbox = buildInbox([issue(3), prIssue(7), prIssue(9), prIssue(11), prIssue(13)], [pull(7), pull(9), pull(11), pull(13)], states);
+
+    expect(inbox.items.map((item) => [item.number, item.checks, item.review])).toEqual([
+      [3, null, null], [7, 'success', 'approved'], [9, 'failure', 'changes_requested'], [11, null, null], [13, null, null],
+    ]);
+    expect(pullStates({ repository: { pullRequests: { nodes: [{ number: 1, commits: { nodes: [{ commit: { statusCheckRollup: { state: 'EXPECTED' } } }] }, reviewDecision: 'REVIEW_REQUIRED' }] } } }).get(1))
+      .toEqual({ checks: 'pending', review: 'review_required' });
+    expect(pullStates(null).size).toBe(0);
   });
 
   it('copes with a pull request missing from the pull listing and with deleted users', () => {
@@ -87,6 +107,9 @@ describe('inbox API', () => {
     pullsMerge.mockResolvedValue({ data: { merged: true } });
     checksList.mockResolvedValue({ data: { check_runs: [{ status: 'completed', conclusion: 'success' }] } });
     combinedStatus.mockResolvedValue({ data: { state: 'pending', statuses: [] } });
+    graphql.mockResolvedValue({ repository: { pullRequests: { nodes: [
+      { number: 7, reviewDecision: 'REVIEW_REQUIRED', commits: { nodes: [{ commit: { statusCheckRollup: { state: 'FAILURE' } } }] } },
+    ] } } });
   });
 
   describe('GET /api/inbox', () => {
@@ -103,7 +126,9 @@ describe('inbox API', () => {
       const inbox = await (await request('/api/inbox')).json() as any;
       expect(inbox).toMatchObject({ viewer: 'alice', reposSynced: 2, reposTotal: 2, truncated: [] });
       expect(inbox.items.map((item: any) => `${item.repo}#${item.number}`)).toEqual(['acme/api#7', 'acme/api#3']);
-      expect(inbox.items[0]).toMatchObject({ type: 'pr', repo: 'acme/api', priority: 'high', groups: [], headSha: SHA });
+      expect(inbox.items[0]).toMatchObject({ type: 'pr', repo: 'acme/api', priority: 'high', groups: [], headSha: SHA, checks: 'failure', review: 'review_required' });
+      // One GraphQL query per repo that has pull requests.
+      expect(graphql).toHaveBeenCalledTimes(1);
       expect(typeof inbox.oldestCheck).toBe('string');
       // One listing per repo; the pull listing only where there are pull requests.
       expect(issuesList).toHaveBeenCalledTimes(2);
@@ -123,6 +148,12 @@ describe('inbox API', () => {
       });
       expect(await (await post('/api/inbox/refresh')).json()).toEqual({ repos: 2, failed: 1 });
       expect((await (await request('/api/inbox')).json() as any).truncated).toEqual(['acme/api']);
+    });
+
+    it('lists pull requests without their state when it cannot be read', async () => {
+      graphql.mockRejectedValue(new Error('Resource not accessible by personal access token'));
+      expect(await (await post('/api/inbox/refresh')).json()).toEqual({ repos: 2, failed: 0 });
+      expect((await (await request('/api/inbox')).json() as any).items[0]).toMatchObject({ number: 7, checks: null, review: null });
     });
 
     it('works without knowing who the viewer is', async () => {

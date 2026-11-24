@@ -118,6 +118,68 @@ describe('alert rules', () => {
   });
 });
 
+describe('policy rules', () => {
+  const rule = (when: Record<string, unknown>, extra: Record<string, unknown> = {}) => ({ id: 'r', label: 'Rule', when, ...extra }) as any;
+  const run = (rules: any[], repos: Record<string, any>[], signals: Record<string, Record<string, any>> = {}) =>
+    evaluateConditions({
+      repos, services: [], signals: new Map(Object.entries(signals)), now: NOW,
+      options: { staleDays: 0, healthBelow: 0, rules },
+    });
+
+  it('opens an alert per repo where the condition holds, saying why', () => {
+    const repos = [repo('low', { test_coverage: 41 }), repo('fine', { test_coverage: 90 }), repo('unknown', { test_coverage: null })];
+    expect(run([rule({ coverage_below: 60 }, { id: 'low-coverage', label: 'Coverage under 60%' })], repos)).toEqual([{
+      key: 'rule:low-coverage:acme/low', kind: 'custom', entity: 'acme/low',
+      title: 'Coverage under 60%: acme/low (coverage is 41%)',
+      detail: { rule: 'low-coverage', finding: 'coverage is 41%' }, url: 'https://github.com/acme/low', level: 0,
+    }]);
+  });
+
+  it.each([
+    [{ check: 'codeowners' }, { policy: { checks: [{ id: 'codeowners', label: 'CODEOWNERS file', passed: false }] } }, 'check "CODEOWNERS file" fails'],
+    [{ ci_success_below: 80 }, { ci: { successRate: 71 } }, 'CI passes 71% of the time'],
+    [{ unreleased_commits_over: 20 }, { release: { unreleasedCommits: 41 } }, '41 commits not released'],
+    [{ settings_drift_over: 0 }, { config: { drift: 2 } }, '2 settings out of line'],
+    [{ scorecard_below: 5 }, { scorecard: { score: 3.2 } }, 'OpenSSF Scorecard is 3.2'],
+    [{ eol_runtime: true }, { dependencies: { runtimes: [{ name: 'node', release: '18', eolDate: '2025-04-30' }, { name: 'python', release: '3.12', eolDate: '2028-10-31' }] } }, 'node 18 past end of life'],
+  ])('%o holds when the signal says so', (when, signals, finding) => {
+    const [condition] = run([rule(when)], [repo('api')], { 'acme/api': signals as any });
+    expect(condition.detail.finding).toBe(finding);
+  });
+
+  it.each([
+    [{ check: 'codeowners' }, { policy: { checks: [{ id: 'codeowners', passed: true }] } }],
+    [{ check: 'codeowners' }, { policy: { checks: [{ id: 'codeowners', passed: null }] } }],
+    [{ check: 'codeowners' }, {}],
+    [{ ci_success_below: 80 }, { ci: { successRate: 80 } }],
+    [{ ci_success_below: 80 }, { ci: { available: false } }],
+    [{ unreleased_commits_over: 20 }, { release: { unreleasedCommits: 20 } }],
+    [{ settings_drift_over: 0 }, { config: { drift: 0 } }],
+    [{ scorecard_below: 5 }, { scorecard: { available: false } }],
+    [{ eol_runtime: true }, { dependencies: { runtimes: [{ name: 'go', release: '1', eolDate: null }] } }],
+  ])('%o stays quiet when it does not hold or was never synced', (when, signals) => {
+    expect(run([rule(when)], [repo('api')], { 'acme/api': signals as any })).toEqual([]);
+  });
+
+  it('follows the scope of the rule', () => {
+    const repos = [
+      repo('high', { test_coverage: 10, priority: 'high' }), repo('low', { test_coverage: 10, priority: 'low' }),
+      repo('none', { test_coverage: 10 }), repo('private', { test_coverage: 10, priority: 'high', is_private: true }),
+    ];
+    const entities = (extra: Record<string, unknown>) => run([rule({ coverage_below: 60 }, extra)], repos).map((c) => c.entity);
+
+    expect(entities({})).toHaveLength(4);
+    expect(entities({ priority: ['high'] })).toEqual(['acme/high', 'acme/private']);
+    expect(entities({ priority: ['none', 'low'] })).toEqual(['acme/low', 'acme/none']);
+    expect(entities({ only: 'private' })).toEqual(['acme/private']);
+    expect(entities({ only: 'public', priority: ['high'] })).toEqual(['acme/high']);
+  });
+
+  it('skips archived and paused repos like every other alert', () => {
+    expect(run([rule({ coverage_below: 60 })], [repo('old', { test_coverage: 1, is_archived: true }), repo('paused', { test_coverage: 1, priority: 'paused' })])).toEqual([]);
+  });
+});
+
 describe('alert options', () => {
   it('uses the defaults unless a valid value is configured', () => {
     expect(resolveAlertOptions({})).toMatchObject({ staleDays: 90, healthBelow: 40 });

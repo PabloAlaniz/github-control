@@ -46,7 +46,7 @@ describe('node server: policy', () => {
     expect(body.policy).toMatchObject({ source: 'saved', editable: true, text: yaml });
 
     expect(loadConfigFile(dataDir).POLICY).toBe(yaml);
-    expect((await (await send('GET', '/api/alerts')).json() as any).rules).toEqual({ staleDays: 30, healthBelow: 40 });
+    expect((await (await send('GET', '/api/alerts')).json() as any).rules).toEqual({ staleDays: 30, healthBelow: 40, custom: 0 });
 
     const activity = await (await send('GET', '/api/activity')).json() as any;
     expect(JSON.stringify(activity)).toContain('policy.update');

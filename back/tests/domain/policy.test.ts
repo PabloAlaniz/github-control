@@ -41,7 +41,7 @@ describe('policy document', () => {
           { id: 'no-env', label: 'No .env committed', weight: 5, forbidden: ['**/.env'], only: 'public' },
         ],
       },
-      alerts: { staleDays: 30, healthBelow: 40 },
+      alerts: { staleDays: 30, healthBelow: 40, rules: [] },
       signals: { scorecard: true },
     });
   });
@@ -83,7 +83,7 @@ describe('policy document', () => {
   it('with nothing configured is the built-in behaviour', () => {
     const policy = resolvePolicy({});
     expect(policy.health).toEqual({ weights: { ...DEFAULT_WEIGHTS, custom: 0 }, checks: [] });
-    expect(policy.alerts).toEqual({ staleDays: 90, healthBelow: 40 });
+    expect(policy.alerts).toEqual({ staleDays: 90, healthBelow: 40, rules: [] });
     expect(policy.signals.scorecard).toBe(false);
     expect(Object.keys(policy.baseline).length).toBeGreaterThan(0);
   });
@@ -101,6 +101,50 @@ describe('policy document', () => {
 
   it('labels the settings of its baseline', () => {
     expect(policyBaseline(buildPolicy({ baseline: { has_wiki: false } }))).toEqual({ has_wiki: { expected: false, label: 'Wiki' } });
+  });
+});
+
+describe('alert rules in the policy', () => {
+  const RULES = `
+health:
+  checks:
+    - { id: codeowners, label: CODEOWNERS file, files: [CODEOWNERS] }
+alerts:
+  rules:
+    - id: low-coverage
+      label: Coverage under 60%
+      when: { coverage_below: 60 }
+      priority: [high, medium]
+    - id: no-codeowners
+      label: Missing CODEOWNERS
+      when: { check: codeowners }
+      only: public
+`;
+
+  it('are read with their condition and scope, and written back', () => {
+    const { document, errors } = parsePolicyDocument(RULES);
+    expect(errors).toEqual([]);
+    const policy = buildPolicy(document!);
+    expect(policy.alerts.rules).toEqual([
+      { id: 'low-coverage', label: 'Coverage under 60%', when: { coverage_below: 60 }, priority: ['high', 'medium'] },
+      { id: 'no-codeowners', label: 'Missing CODEOWNERS', when: { check: 'codeowners' }, only: 'public' },
+    ]);
+    expect(buildPolicy(parsePolicyDocument(serializePolicy(policy)).document!)).toEqual(policy);
+  });
+
+  it.each([
+    ['alerts: { rules: [{ id: a, label: x, when: {} }] }', /exactly one condition/],
+    ['alerts: { rules: [{ id: a, label: x, when: { coverage_below: 60, eol_runtime: true } }] }', /exactly one condition/],
+    ['alerts: { rules: [{ id: a, label: x, when: { coverage_below: 160 } }] }', /coverage_below/],
+    ['alerts: { rules: [{ id: a, label: x, when: { speed_below: 1 } }] }', /speed_below/],
+    ['alerts: { rules: [{ id: a, label: x, when: { eol_runtime: false } }] }', /eol_runtime/],
+    ['alerts: { rules: [{ id: a, label: x, when: { check: nope } }] }', /there is no check "nope" in health\.checks/],
+    ['alerts: { rules: [{ id: a, label: x, when: { eol_runtime: true }, priority: [urgent] }] }', /priority/],
+    ['alerts: { rules: [{ id: a, label: x, when: { eol_runtime: true } }, { id: a, label: y, when: { eol_runtime: true } }] }', /"a" is used more than once/],
+  ])('rejects %s', (text, message) => {
+    const { document, errors } = parsePolicyDocument(text);
+    expect(document).toBeNull();
+    expect(errors.join('\n')).toMatch(message);
   });
 });
 

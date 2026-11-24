@@ -16,7 +16,8 @@ const SOURCE_NOTES = {
     default: 'No policy yet: these are the defaults. Edit and apply to start one.',
 };
 const SECTION_LABELS = {
-    baseline: 'Settings baseline', 'health.weights': 'Health weight', 'health.checks': 'Custom check', alerts: 'Alert threshold', signals: 'Signal',
+    baseline: 'Settings baseline', 'health.weights': 'Health weight', 'health.checks': 'Custom check', alerts: 'Alert threshold',
+    'alerts.rules': 'Alert rule', signals: 'Signal',
 };
 
 const show = (value) => {
@@ -26,7 +27,7 @@ const show = (value) => {
 };
 
 function changeText(change) {
-    if (change.section === 'health.checks') {
+    if (change.section === 'health.checks' || change.section === 'alerts.rules') {
         if (change.from === null) return <>added <b>{change.key}</b> ({show(change.to)})</>;
         if (change.to === null) return <>removed <b>{change.key}</b></>;
         return <>changed <b>{change.key}</b></>;
