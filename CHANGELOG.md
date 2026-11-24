@@ -21,7 +21,7 @@ The first release since 0.1.0: version 0.2.0 was never tagged, so its changes sh
 
 ### Upgrading
 
-* Storage migrations run on start; nothing to do by hand.
+* On Node and Docker, schema migrations are applied on start. On Cloudflare Workers, run `node dist/cli.mjs migrate` against the database.
 * Reviewing and commenting from the inbox needs a token with *Pull requests* and *Issues* set to read and write.
 * The vulnerability lookup and the Scorecard are off until the policy turns them on.
 
