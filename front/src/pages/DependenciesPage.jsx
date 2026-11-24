@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Package, GitFork, AlertTriangle, ChevronDown, ChevronRight, Lock, Loader2, Search } from 'lucide-react';
+import { ArrowLeft, Package, GitFork, AlertTriangle, ChevronDown, ChevronRight, Lock, Loader2, Search, ShieldAlert } from 'lucide-react';
 import { Input } from '../components/atoms/Input';
 import { DashboardLayout } from '../components/templates/DashboardLayout';
 import { Card } from '../components/atoms/Card';
@@ -147,6 +147,111 @@ function PackageFinder() {
     );
 }
 
+const SEVERITY_TONES = {
+    critical: 'bg-red-100 text-red-800', high: 'bg-orange-100 text-orange-800', moderate: 'bg-amber-100 text-amber-800',
+    low: 'bg-gray-100 text-gray-700', unknown: 'bg-gray-100 text-gray-500',
+};
+const SEVERITIES = ['critical', 'high', 'moderate', 'low', 'unknown'];
+
+/** Known vulnerabilities of the versions pinned in lockfiles, across repos. Loads on its own. */
+function Vulnerabilities() {
+    const [data, setData] = useState(null);
+    const [severity, setSeverity] = useState('all');
+    const [showAll, setShowAll] = useState(false);
+
+    useEffect(() => {
+        let active = true;
+        apiFetch('/api/dependencies/vulnerabilities')
+            .then((res) => (res.ok ? res.json() : null))
+            .then((body) => { if (active && typeof body?.enabled === 'boolean') setData(body); })
+            .catch(() => {});
+        return () => { active = false; };
+    }, []);
+
+    if (!data) return null;
+    const items = data.items ?? [];
+    const header = (
+        <div className="px-4 py-3 border-b border-gray-100">
+            <h3 className="flex items-center gap-2 text-sm font-semibold text-gray-900"><ShieldAlert size={15} className="text-gray-400" />Known vulnerabilities</h3>
+            <Text variant="muted" className="text-xs">The versions pinned in lockfiles, looked up in the OSV database at each sync</Text>
+        </div>
+    );
+
+    if (data.repos_checked === 0) {
+        return (
+            <Card className="overflow-hidden">
+                {header}
+                <p className="px-4 py-4 text-sm text-gray-600">
+                    {data.enabled
+                        ? 'Turned on in the policy. Results appear after the next sync.'
+                        : <>Off. Add <code className="rounded bg-gray-100 px-1 font-mono text-xs">signals: {'{'} known_vulnerabilities: true {'}'}</code> to the policy to look them up: package names and versions are sent to api.osv.dev, never the name of a repo.</>}
+                </p>
+            </Card>
+        );
+    }
+
+    const shown = items.filter((item) => severity === 'all' || item.severity === severity);
+    const visible = showAll ? shown : shown.slice(0, 15);
+    return (
+        <Card className="overflow-hidden">
+            {header}
+            <div className="flex flex-wrap items-center gap-2 border-b border-gray-100 px-4 py-2 text-xs">
+                <span className="text-gray-600">
+                    {items.length === 0 ? 'None found' : `${items.length} in ${data.repos_affected} of ${data.repos_checked} repos`}
+                    {' · '}{(data.packages_checked ?? 0).toLocaleString('en-US')} pinned versions checked
+                </span>
+                {items.length > 0 && (
+                    <span className="ml-auto flex flex-wrap gap-1" role="group" aria-label="Severity">
+                        {['all', ...SEVERITIES.filter((name) => data.bySeverity?.[name] > 0)].map((name) => (
+                            <button key={name} type="button" onClick={() => { setSeverity(name); setShowAll(false); }} aria-pressed={severity === name}
+                                className={cn('rounded-full px-2 py-0.5 font-medium', severity === name ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200')}>
+                                {name === 'all' ? 'All' : `${name} ${data.bySeverity[name]}`}
+                            </button>
+                        ))}
+                    </span>
+                )}
+            </div>
+            {items.length > 0 && (
+                <div className="overflow-x-auto">
+                    <table className="w-full text-sm">
+                        <thead className="bg-gray-50 text-xs uppercase tracking-wider text-gray-500">
+                            <tr>
+                                <th className="px-4 py-2 text-left font-semibold">Severity</th>
+                                <th className="px-4 py-2 text-left font-semibold">Package</th>
+                                <th className="px-4 py-2 text-left font-semibold">Advisory</th>
+                                <th className="px-4 py-2 text-left font-semibold">Fixed in</th>
+                                <th className="px-4 py-2 text-left font-semibold">Repos</th>
+                            </tr>
+                        </thead>
+                        <tbody className="divide-y divide-gray-100">
+                            {visible.map((item) => (
+                                <tr key={`${item.ecosystem}:${item.name}:${item.version}:${item.id}`} className="align-top">
+                                    <td className="px-4 py-2"><span className={cn('rounded-full px-2 py-0.5 text-xs font-medium', SEVERITY_TONES[item.severity] || SEVERITY_TONES.unknown)}>{item.severity}</span></td>
+                                    <td className="px-4 py-2 font-mono text-xs text-gray-900">{item.name} <span className="text-gray-500">{item.version}</span></td>
+                                    <td className="px-4 py-2 text-xs text-gray-700">
+                                        <a href={item.url} target="_blank" rel="noopener noreferrer" className="font-mono text-blue-600 hover:underline">{item.aliases?.[0] || item.id}</a>
+                                        <span className="block text-gray-600">{item.summary}</span>
+                                    </td>
+                                    <td className="px-4 py-2 font-mono text-xs text-gray-700">{item.fixed || <span className="font-sans italic text-gray-400">no fix known</span>}</td>
+                                    <td className="px-4 py-2 text-xs text-gray-700">{item.repos.join(', ')}</td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            )}
+            {shown.length > visible.length && (
+                <button type="button" onClick={() => setShowAll(true)} className="w-full border-t border-gray-100 px-4 py-2 text-xs font-medium text-blue-600 hover:bg-gray-50">
+                    Show all {shown.length}
+                </button>
+            )}
+            {data.truncated?.length > 0 && (
+                <p className="border-t border-gray-100 px-4 py-2 text-xs text-amber-700">Too many findings to list in full for: {data.truncated.join(', ')}.</p>
+            )}
+        </Card>
+    );
+}
+
 function PackageRow({ pkg, open, onToggle }) {
     return (
         <>
@@ -271,6 +376,7 @@ export function DependenciesPage() {
             ) : (
                 <div className="space-y-6">
                     <RuntimeTable runtimes={runtimes} />
+                    {data.locked?.repos > 0 && <Vulnerabilities />}
                     {data.locked?.repos > 0 && <PackageFinder />}
 
                     <Card className="overflow-hidden">

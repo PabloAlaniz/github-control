@@ -109,12 +109,13 @@ describe('policy API', () => {
 health:
   checks:
     - { id: codeowners, label: CODEOWNERS, files: [CODEOWNERS] }
-signals: { openssf_scorecard: true }
+signals: { openssf_scorecard: true, known_vulnerabilities: true }
 `);
-      expect(body.notes).toHaveLength(2);
+      expect(body.notes).toHaveLength(3);
+      expect(body.notes[2]).toMatch(/api\.osv\.dev, never the name of a repo/);
       expect(body.notes[0]).toMatch(/New checks \(codeowners\)/);
       expect(body.notes[1]).toMatch(/securityscorecards/);
-      expect(body.changes.map((c: any) => `${c.section}.${c.key}`)).toEqual(['health.weights.custom', 'health.checks.codeowners', 'signals.openssf_scorecard']);
+      expect(body.changes.map((c: any) => `${c.section}.${c.key}`)).toEqual(['health.weights.custom', 'health.checks.codeowners', 'signals.known_vulnerabilities', 'signals.openssf_scorecard']);
     });
 
     it('accepts the YAML as plain text too, and refuses anything else', async () => {

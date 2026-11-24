@@ -42,7 +42,7 @@ describe('policy document', () => {
         ],
       },
       alerts: { staleDays: 30, healthBelow: 40, rules: [] },
-      signals: { scorecard: true },
+      signals: { scorecard: true, vulnerabilities: false },
     });
   });
 

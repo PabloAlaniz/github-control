@@ -104,6 +104,10 @@ export function ruleFinding(rule: AlertRule, repo: Record<string, any>, signals:
     const score = number(signals.scorecard?.score);
     return score !== null && score < Number(when.scorecard_below) ? `OpenSSF Scorecard is ${score}` : null;
   }
+  if (when.vulnerabilities_over !== undefined) {
+    const found = number(signals.vulnerabilities?.total);
+    return found !== null && found > Number(when.vulnerabilities_over) ? `${found} known vulnerabilit${found === 1 ? 'y' : 'ies'} in pinned dependencies` : null;
+  }
   if (when.eol_runtime) {
     const today = now.toISOString().slice(0, 10);
     const past = (signals.dependencies?.runtimes ?? []).filter((runtime: any) => typeof runtime.eolDate === 'string' && runtime.eolDate < today);

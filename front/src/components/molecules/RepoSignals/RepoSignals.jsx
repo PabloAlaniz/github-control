@@ -91,6 +91,38 @@ function PolicyCard({ data }) {
     );
 }
 
+const VULN_TONES = { critical: 'text-red-700', high: 'text-orange-700', moderate: 'text-amber-700', low: 'text-gray-600', unknown: 'text-gray-500' };
+
+/** Known vulnerabilities of the versions the lockfiles pin, when the policy asks for the lookup. */
+function VulnerabilitiesCard({ data }) {
+    const items = data.worst ?? [];
+    const counts = Object.entries(data.bySeverity ?? {}).filter(([, count]) => count > 0);
+    return (
+        <SignalCard title="Known vulnerabilities" summary={data.checked > 0 ? `${data.checked.toLocaleString('en-US')} pinned` : undefined}>
+            {data.checked === 0 ? (
+                <p className="text-xs text-gray-400 italic">No lockfile to check</p>
+            ) : data.total === 0 ? (
+                <p className="text-xs text-green-700">None in the pinned versions</p>
+            ) : (
+                <div className="text-xs text-gray-700 space-y-1.5">
+                    <p>{counts.map(([severity, count]) => <span key={severity} className={cn('mr-2 font-medium', VULN_TONES[severity])}>{count} {severity}</span>)}</p>
+                    <ul className="space-y-1">
+                        {items.map(item => (
+                            <li key={`${item.name}:${item.version}:${item.id}`}>
+                                <a href={item.url} target="_blank" rel="noopener noreferrer" className={cn('font-mono hover:underline', VULN_TONES[item.severity])} title={item.summary}>
+                                    {item.name} {item.version}
+                                </a>
+                                <span className="text-gray-500">{item.fixed ? ` → ${item.fixed}` : ' (no fix known)'}</span>
+                            </li>
+                        ))}
+                        {data.total > items.length && <li className="text-gray-400">…and {data.total - items.length} more</li>}
+                    </ul>
+                </div>
+            )}
+        </SignalCard>
+    );
+}
+
 const scorecardTone = (score) => (score >= 7 ? 'text-green-700' : score >= 4 ? 'text-amber-700' : 'text-red-700');
 
 /** OpenSSF Scorecard of a public repo, when the policy asks for it. */
@@ -484,6 +516,7 @@ export function RepoSignals({ repo, onSync, syncing = false, onCleanupBranches, 
                     {signals.config && <ConfigCard data={signals.config} onApply={onApplyConfig} applying={applyingConfig} />}
                     {signals.dependencies && <DependenciesCard data={signals.dependencies} />}
                     {signals.policy?.checks?.length > 0 && <PolicyCard data={signals.policy} />}
+                    {signals.vulnerabilities?.enabled && <VulnerabilitiesCard data={signals.vulnerabilities} />}
                     {signals.scorecard?.enabled && <ScorecardCard data={signals.scorecard} repoFullName={repo.fullName} />}
                 </div>
             ) : (

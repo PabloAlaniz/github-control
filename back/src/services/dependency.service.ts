@@ -132,3 +132,60 @@ export async function locatePackage(ctx: AppContext, query: string): Promise<{ q
   if (!exact) locations = collect((name) => name.includes(wanted)).slice(0, 200);
   return { query: query.trim(), exact, repos: new Set(locations.map((location) => location.repo)).size, locations };
 }
+
+const SEVERITY_ORDER = ['critical', 'high', 'moderate', 'low', 'unknown'];
+
+export interface VulnerablePackage {
+  id: string;
+  aliases: string[];
+  ecosystem: string;
+  name: string;
+  version: string;
+  severity: string;
+  summary: string;
+  fixed: string | null;
+  url: string;
+  /** The repos whose lockfiles pin this version. */
+  repos: string[];
+}
+
+/**
+ * Known vulnerabilities across the active repos, one row per advisory and
+ * pinned version with the repos it is in, worst and most widespread first.
+ * Built from the `vulnerabilities` signal: no lookups at request time.
+ */
+export async function listVulnerabilities(ctx: AppContext) {
+  const [records, repos] = await Promise.all([
+    ctx.storage.signals.listSignals('vulnerabilities'),
+    ctx.storage.repos.listRepos(),
+  ]);
+  const active = new Set(repos.map((repo) => repo.full_name as string));
+  const checked = records.filter((record) => active.has(record.full_name) && record.data.enabled === true);
+
+  const rows = new Map<string, VulnerablePackage>();
+  const bySeverity: Record<string, number> = Object.fromEntries(SEVERITY_ORDER.map((severity) => [severity, 0]));
+  const affected = new Set<string>();
+  for (const record of checked) {
+    for (const item of (record.data.items ?? []) as Record<string, any>[]) {
+      const key = `${item.ecosystem}\n${item.name}\n${item.version}\n${item.id}`;
+      const row = rows.get(key) ?? { ...(item as Omit<VulnerablePackage, 'repos'>), repos: [] };
+      row.repos.push(record.full_name);
+      rows.set(key, row);
+      affected.add(record.full_name);
+    }
+  }
+  const items = [...rows.values()].sort((a, b) =>
+    SEVERITY_ORDER.indexOf(a.severity) - SEVERITY_ORDER.indexOf(b.severity) || b.repos.length - a.repos.length || a.name.localeCompare(b.name) || a.id.localeCompare(b.id));
+  for (const row of items) bySeverity[row.severity] = (bySeverity[row.severity] ?? 0) + 1;
+
+  return {
+    /** Repos whose pinned versions were looked up, and how many of them have a finding. */
+    repos_checked: checked.length,
+    repos_affected: affected.size,
+    packages_checked: checked.reduce((sum, record) => sum + (Number(record.data.checked) || 0), 0),
+    total: items.length,
+    bySeverity,
+    truncated: checked.filter((record) => record.data.truncated === true).map((record) => record.full_name),
+    items,
+  };
+}

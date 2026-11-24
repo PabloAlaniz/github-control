@@ -141,6 +141,8 @@ describe('policy rules', () => {
     [{ unreleased_commits_over: 20 }, { release: { unreleasedCommits: 41 } }, '41 commits not released'],
     [{ settings_drift_over: 0 }, { config: { drift: 2 } }, '2 settings out of line'],
     [{ scorecard_below: 5 }, { scorecard: { score: 3.2 } }, 'OpenSSF Scorecard is 3.2'],
+    [{ vulnerabilities_over: 0 }, { vulnerabilities: { total: 1 } }, '1 known vulnerability in pinned dependencies'],
+    [{ vulnerabilities_over: 2 }, { vulnerabilities: { total: 5 } }, '5 known vulnerabilities in pinned dependencies'],
     [{ eol_runtime: true }, { dependencies: { runtimes: [{ name: 'node', release: '18', eolDate: '2025-04-30' }, { name: 'python', release: '3.12', eolDate: '2028-10-31' }] } }, 'node 18 past end of life'],
   ])('%o holds when the signal says so', (when, signals, finding) => {
     const [condition] = run([rule(when)], [repo('api')], { 'acme/api': signals as any });
@@ -156,6 +158,8 @@ describe('policy rules', () => {
     [{ unreleased_commits_over: 20 }, { release: { unreleasedCommits: 20 } }],
     [{ settings_drift_over: 0 }, { config: { drift: 0 } }],
     [{ scorecard_below: 5 }, { scorecard: { available: false } }],
+    [{ vulnerabilities_over: 0 }, { vulnerabilities: { enabled: false } }],
+    [{ vulnerabilities_over: 0 }, { vulnerabilities: { total: 0 } }],
     [{ eol_runtime: true }, { dependencies: { runtimes: [{ name: 'go', release: '1', eolDate: null }] } }],
   ])('%o stays quiet when it does not hold or was never synced', (when, signals) => {
     expect(run([rule(when)], [repo('api')], { 'acme/api': signals as any })).toEqual([]);

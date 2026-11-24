@@ -47,3 +47,4 @@ alerts:
 
 signals:
   openssf_scorecard: true
+  known_vulnerabilities: true

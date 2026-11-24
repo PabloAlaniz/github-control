@@ -77,4 +77,34 @@ describe('dependencies with lockfiles', () => {
       expect((await app.request('/api/dependencies/locate?name=lodash', {}, env)).status).toBe(401);
     });
   });
+
+  describe('known vulnerabilities', () => {
+    const found = (id: string, name: string, version: string, severity: string) => ({
+      id, aliases: [], ecosystem: 'npm', name, version, severity, summary: `${name} problem`, fixed: null, url: `https://osv.dev/vulnerability/${id}`,
+    });
+
+    it('lists them across active repos, worst and most widespread first', async () => {
+      await storage.signals.upsertSignal('acme/api', 'vulnerabilities', { enabled: true, checked: 40, total: 2, truncated: true,
+        items: [found('GHSA-1', 'lodash', '4.17.15', 'high'), found('GHSA-2', 'minimist', '1.2.0', 'critical')] });
+      await storage.signals.upsertSignal('acme/web', 'vulnerabilities', { enabled: true, checked: 10, total: 2,
+        items: [found('GHSA-1', 'lodash', '4.17.15', 'high'), found('GHSA-3', 'ws', '7.0.0', 'high')] });
+      await storage.signals.upsertSignal('acme/old', 'vulnerabilities', { enabled: true, checked: 5, total: 1, items: [found('GHSA-9', 'old', '1.0.0', 'critical')] });
+
+      const { status, body } = await get('/api/dependencies/vulnerabilities');
+      expect(status).toBe(200);
+      expect(body).toMatchObject({
+        enabled: false, repos_checked: 2, repos_affected: 2, packages_checked: 50, total: 3, truncated: ['acme/api'],
+        bySeverity: { critical: 1, high: 2, moderate: 0, low: 0, unknown: 0 },
+      });
+      expect(body.items.map((item: any) => [item.id, item.repos])).toEqual([
+        ['GHSA-2', ['acme/api']], ['GHSA-1', ['acme/api', 'acme/web']], ['GHSA-3', ['acme/web']],
+      ]);
+    });
+
+    it('is empty, and says whether the lookup is on, when nothing was checked', async () => {
+      await storage.signals.upsertSignal('acme/api', 'vulnerabilities', { enabled: false });
+      env.POLICY = 'signals: { known_vulnerabilities: true }';
+      expect((await get('/api/dependencies/vulnerabilities')).body).toMatchObject({ enabled: true, repos_checked: 0, total: 0, items: [] });
+    });
+  });
 });

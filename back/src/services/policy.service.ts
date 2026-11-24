@@ -65,7 +65,8 @@ export function diffPolicies(current: Policy, next: Policy): Change[] {
   compare('alerts', alerts(current), alerts(next));
   const rulesById = (policy: Policy) => Object.fromEntries(policy.alerts.rules.map((rule) => [rule.id, rule]));
   compare('alerts.rules', rulesById(current), rulesById(next));
-  compare('signals', { openssf_scorecard: current.signals.scorecard }, { openssf_scorecard: next.signals.scorecard });
+  const signals = (policy: Policy) => ({ openssf_scorecard: policy.signals.scorecard, known_vulnerabilities: policy.signals.vulnerabilities });
+  compare('signals', signals(current), signals(next));
   return changes;
 }
 
@@ -134,6 +135,10 @@ export async function planPolicy(ctx: AppContext, text: string): Promise<PlanRes
   if (unread.length > 0) notes.push(`Not read from GitHub yet, so drift is unknown until the next sync: ${unread.join(', ')}.`);
   if (next.signals.scorecard && !current.signals.scorecard) {
     notes.push('OpenSSF Scorecard results are fetched at the next sync, for public repos only; their names are sent to api.securityscorecards.dev.');
+  }
+
+  if (next.signals.vulnerabilities && !current.signals.vulnerabilities) {
+    notes.push('Known vulnerabilities are looked up at the next sync: the names and versions of the packages in each lockfile are sent to api.osv.dev, never the name of a repo.');
   }
 
   const sum = (values: (number | null)[]) => values.reduce<number>((total, value) => total + (value ?? 0), 0);
