@@ -200,11 +200,21 @@ function parseGemfile(text: string, manifest: string): ManifestResult {
   return { dependencies, runtimes: [] };
 }
 
+/** XML without its comments. Repeats until none is left, so removing one cannot leave another behind. */
+function stripXmlComments(text: string): string {
+  let current = text;
+  for (;;) {
+    const next = current.replace(/<!--[\s\S]*?-->/g, '');
+    if (next === current) return next;
+    current = next;
+  }
+}
+
 const xmlTag = (block: string, tag: string) => new RegExp(`<${tag}>\\s*([^<]*?)\\s*</${tag}>`).exec(block)?.[1] ?? '';
 
 /** pom.xml: the project's own `<dependency>` entries, with `${property}` versions resolved from `<properties>`. */
 function parsePom(text: string, manifest: string): ManifestResult {
-  const xml = text.replace(/<!--[\s\S]*?-->/g, '');
+  const xml = stripXmlComments(text);
   const properties = new Map<string, string>();
   for (const [, name, value] of (/<properties>([\s\S]*?)<\/properties>/.exec(xml)?.[1] ?? '').matchAll(/<([\w.-]+)>\s*([^<]*?)\s*<\/\1>/g)) properties.set(name, value);
   // Managed versions and plugin dependencies are not what the project itself depends on.
@@ -233,7 +243,7 @@ function parseGradle(text: string, manifest: string): ManifestResult {
 
 /** .csproj and friends, and Directory.Packages.props: `<PackageReference Include="X" Version="1.2.3" />`. */
 function parseMsbuild(text: string, manifest: string): ManifestResult {
-  const xml = text.replace(/<!--[\s\S]*?-->/g, '');
+  const xml = stripXmlComments(text);
   const found = new Map<string, string>();
   for (const [, attributes, body] of xml.matchAll(/<Package(?:Reference|Version)\b([^>]*?)(?:\/>|>([\s\S]*?)<\/Package(?:Reference|Version)>)/g)) {
     const name = /\b(?:Include|Update)\s*=\s*"([^"]+)"/.exec(attributes)?.[1];
