@@ -16,6 +16,7 @@ vi.mock('@/pages', () => ({
   EmbedsPage: () => <div data-testid="embeds-page">Embeds Page</div>,
   StatusPage: () => <div data-testid="status-page">Status Page</div>,
   PolicyPage: () => <div data-testid="policy-page">Policy Page</div>,
+  SearchPage: () => <div data-testid="search-page">Search Page</div>,
 }));
 
 // Mock ProtectedRoute to render children for testing

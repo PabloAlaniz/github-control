@@ -160,6 +160,10 @@ Three routes act on GitHub from what a signal showed: `routes/branches.ts` (dele
 
 `routes/mcp.ts` implements the stateless part of MCP's Streamable HTTP transport by hand (JSON-RPC over POST, JSON answers). A tool does not touch storage: it sends a request to the app's own routes with the caller's credentials. Authentication, validation, the activity log and the demo restrictions therefore apply to an agent exactly as to any other client, and a tool can never do more than the HTTP API allows.
 
+### Code search
+
+`services/search.service.ts` is the one place that asks GitHub at request time rather than reading stored data. It scopes the query to the owners of the tracked repos (qualifiers in the user's text that would move the search elsewhere are dropped) and keeps only results from repos the dashboard tracks.
+
 ### Public surface
 
 Two groups of routes answer without authentication, each behind its own switch and mounted before the auth middleware: `routes/badges.ts` (`PUBLIC_BADGES`: badges and cards, public repos only) and `routes/status.ts` (`PUBLIC_STATUS`: the names, states and uptime of active services). Both render from stored data, so a request never reaches GitHub. `lib/badge.ts` and `lib/cards.ts` build the SVG by hand; anything a caller can supply (`label`, `title`) is escaped and length-limited.
@@ -168,7 +172,7 @@ Two groups of routes answer without authentication, each behind its own switch a
 
 `domain/alerts.ts` is the rule book: a pure function from the stored state (repos, services, signals) to the conditions that hold right now, each with a stable key such as `ci_failing:acme/api`. `services/alert.service.ts` compares them with the open records of the `alerts` collection and opens, updates or resolves accordingly, so there is no event to miss: whatever changed the data, the next evaluation sees the result. It runs at the end of a full sync and of every round of service checks, one evaluation at a time per storage.
 
-What changed is sent to the `alert_channels` that asked for that kind. A channel type (`lib/alerts/channels.ts`) is a function from a message to one HTTP request, which is why the same code delivers from Node and from the Worker; adding a type is adding an entry to `CHANNEL_TYPES`. Destinations are secrets: the API returns them masked, and an edit that leaves a secret empty keeps the stored one. Digests are sent by the same scheduler that runs the service checks.
+What changed is sent to the `alert_channels` that asked for that kind. A channel type (`lib/alerts/channels.ts`) is a function from a message to one HTTP request, which is why the same code delivers from Node and from the Worker; adding a type is adding an entry to `CHANNEL_TYPES`. Email is the exception: SMTP needs a socket, so `node/email-channel.ts` implements `send` and registers the type from the Node entry only, the same way Node-only storage drivers are registered. Destinations are secrets: the API returns them masked, and an edit that leaves a secret empty keeps the stored one. Digests are sent by the same scheduler that runs the service checks.
 
 ## Authentication
 

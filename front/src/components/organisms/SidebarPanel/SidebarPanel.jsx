@@ -457,6 +457,14 @@ export function SidebarPanel({
                     onChange={onSearchChange}
                     className="w-full"
                 />
+                {isRepoTab && (
+                    <a
+                        href={`/search${searchValue?.trim() ? `?q=${encodeURIComponent(searchValue.trim())}` : ''}`}
+                        className="mt-2 inline-block text-xs text-blue-600 hover:underline"
+                    >
+                        {searchValue?.trim() ? `Search “${searchValue.trim()}” in the code of all repos` : 'Search the code of all repos'}
+                    </a>
+                )}
             </div>
 
             {/* Scrollable content */}

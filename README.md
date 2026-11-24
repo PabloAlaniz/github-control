@@ -36,6 +36,7 @@ Open http://localhost:13337. From a clone, without Docker: `DEMO=true npm start`
 - **History**: a daily snapshot per repo (LOC, files, stars, issues, health) with charts and date-to-date comparison.
 - **Monorepo aware**: detects apps inside a repo and tracks each one's health and coverage.
 - **Services**: the deployed URLs behind your repos, health-checked every 15 minutes (configurable), with uptime, latency and incident history.
+- **Code search**: look for a word, a function or a config key in the code of all your repos at once.
 - **Inbox**: the open pull requests and issues of every repo in one list, with sections (needs my review, mine, assigned to me, dependency updates, stale), filters you can save, keyboard navigation and guarded bulk merge.
 - **Public surface** (opt-in): badges and cards for your READMEs, a summary card of your open source work, and a status page for your services.
 - **Alerts**: know when CI breaks, a service goes down, a serious security alert appears, a repo you care about goes stale or a health score drops, in Slack, Discord, Telegram, ntfy or any webhook, with an optional daily or weekly digest.
@@ -274,10 +275,17 @@ claude mcp add --transport http github-control https://your-server.example/api/m
 | `get_inbox` | Open pull requests and issues; filter by type, repo or requested reviewer |
 | `list_dependencies` | Packages and versions across repos, diverging majors, end-of-life runtimes |
 | `list_services` | Services with their state and uptime |
+| `search_code` | Search the code of the tracked repos on GitHub |
 | `get_policy`, `plan_policy` | The policy in force, and a dry run of a new one |
 | `update_repo` | Set a repo's priority, next action or notes in the dashboard |
 
-The tools read what the dashboard already knows; none of them calls GitHub, and only `update_repo` changes anything (the dashboard's own notes, never GitHub). Each call goes through the same API as everything else, so it is logged in the activity log as an agent.
+The tools read what the dashboard already knows without calling GitHub, except `search_code`, which searches on GitHub live. Only `update_repo` changes anything (the dashboard's own notes, never GitHub). Each call goes through the same API as everything else, so it is logged in the activity log as an agent.
+
+## Code search
+
+**Search code** (under the repo search box, or from the command palette) looks for text in the default branch of every repo on the dashboard and shows the files and lines that match, grouped by repo. It can be narrowed to one repo or one language, and GitHub's qualifiers work too: `"exact phrase"`, `path:src`, `filename:Dockerfile`, `extension:yml`.
+
+This is the one page that asks GitHub when you use it, because code is not something a sync can cache. It uses GitHub's code search, which allows about 10 searches a minute and returns the first 50 files. Repos you archived, paused or do not track are left out of the results.
 
 ## Inbox
 
@@ -308,7 +316,7 @@ After every sync and every round of service checks, GitHub Control compares what
 
 Archived and paused repos never raise alerts. Open and recently resolved alerts are listed on the **Alerts** page (the bell in the header) whether or not anything is sent anywhere.
 
-To be told, add a **channel** on that page: Slack, Discord, Telegram, ntfy or a generic webhook that receives JSON. Each channel chooses which kinds of alert it gets, and can also get a daily or weekly digest of what is open. A channel hears when an alert opens or gets worse, and when CI or a service recovers. What was already wrong when you add a channel is not sent: only what changes from then on.
+To be told, add a **channel** on that page: Slack, Discord, Telegram, ntfy, email over SMTP, or a generic webhook that receives JSON. Each channel chooses which kinds of alert it gets, and can also get a daily or weekly digest of what is open. A channel hears when an alert opens or gets worse, and when CI or a service recovers. What was already wrong when you add a channel is not sent: only what changes from then on.
 
 ```json
 { "source": "github-control", "event": "opened", "kind": "ci_failing", "entity": "acme/api",
@@ -317,6 +325,8 @@ To be told, add a **channel** on that page: Slack, Discord, Telegram, ntfy or a 
 ```
 
 `event` is `opened`, `worsened`, `resolved`, `digest` or `test`.
+
+Email needs an SMTP server: host, port (587 by default, 465 for implicit TLS), an optional username and password, a sender and up to 20 recipients. It is available on the Node server and Docker, not on Cloudflare Workers, which cannot open SMTP connections.
 
 Service checks run every 15 minutes; set `SERVICE_CHECK_MINUTES` to check more often (an outage shorter than the interval can go unnoticed). On Cloudflare Workers the interval is the Cron Trigger in `back/wrangler.toml`, which also drives alerts and digests.
 
@@ -375,6 +385,7 @@ curl -X POST -H "Authorization: Bearer $API_KEY" http://localhost:13337/api/sync
 | Signals | `GET /api/repos/:owner/:repo/signals`, `POST .../signals/sync?kinds=`, `POST .../branches/delete`, `POST .../config/apply` |
 | Dependencies | `GET /api/dependencies` |
 | Public (no sign-in, opt-in) | `GET /api/badges/:owner/:repo/:metric.svg`, `.../card.svg`, `/api/badges/summary.svg`, `GET /api/status`, `/api/status/badge.svg` |
+| Search | `GET /api/search/code?q=&repo=&language=` |
 | Policy | `GET /api/policy`, `POST /api/policy/plan`, `PUT /api/policy` |
 | MCP | `POST /api/mcp` |
 | Inbox | `GET /api/inbox`, `POST /api/inbox/refresh`, `POST /api/inbox/merge` |

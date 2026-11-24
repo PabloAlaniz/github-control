@@ -185,6 +185,27 @@ export const TOOLS: Tool[] = [
     },
   },
   {
+    name: 'search_code',
+    description: 'Search the code of the tracked repositories on GitHub and get the files and lines that match. Unlike the other tools this asks GitHub live, which allows about 10 searches a minute. Supports GitHub code search qualifiers such as path:, extension: and filename:.',
+    readOnly: true,
+    inputSchema: {
+      type: 'object',
+      properties: {
+        query: { type: 'string', description: 'Words to look for, e.g. "createStorage" or "TODO path:src"' },
+        repo: repoArg,
+        language: { type: 'string', description: 'Only files in this language, e.g. "typescript"' },
+      },
+      required: ['query'],
+    },
+    async run(args, api) {
+      if (typeof args.query !== 'string' || !args.query.trim()) throw new ToolError('"query" must be the words to look for');
+      const params = new URLSearchParams({ q: args.query });
+      if (args.repo) params.set('repo', repoPath(args.repo));
+      if (typeof args.language === 'string' && args.language) params.set('language', args.language);
+      return ask(api, 'GET', `/api/search/code?${params}`);
+    },
+  },
+  {
     name: 'get_policy',
     description: 'The policy in force as YAML: the repo settings baseline, health score weights and custom checks, and alert thresholds.',
     readOnly: true,
@@ -233,7 +254,9 @@ export const TOOLS: Tool[] = [
 ];
 
 const describeTool = ({ name, description, inputSchema, readOnly }: Tool) => ({
-  name, description, inputSchema, annotations: { readOnlyHint: readOnly, destructiveHint: false, openWorldHint: false },
+  name, description, inputSchema,
+  // search_code is the one tool that reaches outside the dashboard's own data.
+  annotations: { readOnlyHint: readOnly, destructiveHint: false, openWorldHint: name === 'search_code' },
 });
 
 const rpcError = (id: unknown, code: number, message: string) => ({ jsonrpc: '2.0', id: id ?? null, error: { code, message } });
@@ -254,7 +277,7 @@ export async function handleMessage(message: any, api: Api): Promise<Json | null
         protocolVersion: PROTOCOL_VERSIONS.includes(asked) ? asked : PROTOCOL_VERSIONS[0],
         capabilities: { tools: {} },
         serverInfo: SERVER_INFO,
-        instructions: 'GitHub Control: a dashboard over all of the user\'s GitHub repositories. Tools read what it already knows (health, CI, alerts, pull requests, dependencies, services); they do not query GitHub live.',
+        instructions: 'GitHub Control: a dashboard over all of the user\'s GitHub repositories. Tools read what it already knows (health, CI, alerts, pull requests, dependencies, services) without querying GitHub; only search_code asks GitHub live.',
       });
     }
     case 'ping':

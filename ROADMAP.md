@@ -27,16 +27,16 @@ Where GitHub Control is heading. Nothing here is a promise; priorities follow wh
 - Policy as code: baseline, health weights, custom checks and alert thresholds in one YAML document, from the app or a versioned file, with a dry run
 - OpenSSF Scorecard as an optional signal for public repos
 - MCP server: the dashboard as tools for coding agents
-- Alerts for failing CI, services down, serious security alerts, stale repos and low health, sent to Slack, Discord, Telegram, ntfy or a webhook, with daily or weekly digests
+- Alerts for failing CI, services down, serious security alerts, stale repos and low health, sent to Slack, Discord, Telegram, ntfy, email or a webhook, with daily or weekly digests
+- Code search across all tracked repos
 
 ## Next
 
-- **Search across repos.**
-- **Alerts by email**, and rules of your own.
+- **Alert rules of your own**, defined in the policy.
+- **Inbox**: check status of each pull request in the list, review and comment without leaving it.
 
 ## Later
 
-- **Inbox**: check status of each pull request in the list, review and comment without leaving it.
 - **AI cost attribution**: track AI coding assistant usage per repo.
 - GitHub App / OAuth sign-in, multiple users.
 - Better mobile layout.
@@ -49,6 +49,8 @@ Where GitHub Control is heading. Nothing here is a promise; priorities follow wh
 - The dependency inventory reads direct dependencies declared in npm, PyPI, Go and Cargo manifests; it does not read lockfiles. End-of-life dates for Node and Python are a table in the code that has to be updated by hand.
 - Signals look at one page of results: the latest 100 workflow runs, 100 branches, 100 alerts per source and the 100 most recently updated open pull requests and issues.
 - The inbox is as fresh as the last sync or Refresh, and does not show the check status of a pull request; checks are verified when merging.
+- Code search goes through GitHub's code search: default branches only, about 10 searches a minute, the first 50 files, and at most 15 repo owners per search.
+- Email alerts need the Node server or Docker; Cloudflare Workers cannot open SMTP connections.
 - Custom checks look at file paths only (does a file exist, or not), not at file contents.
 - The MCP server is stateless: one JSON answer per request, no streaming or server-initiated messages.
 - Uptime is computed from periodic checks (every 15 minutes unless `SERVICE_CHECK_MINUTES` says otherwise), so an outage shorter than the interval can go unnoticed.

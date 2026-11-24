@@ -1,8 +1,10 @@
 /**
- * Alert channels: where a message can be sent and how. Every channel type is
- * one HTTP request, so it works on Node and on Cloudflare Workers alike.
+ * Alert channels: where a message can be sent and how. The built-in types are
+ * one HTTP request each, so they work on Node and on Cloudflare Workers alike.
  *
- * Adding a type = adding an entry to CHANNEL_TYPES.
+ * Adding a type = adding an entry to CHANNEL_TYPES. A type that needs more
+ * than an HTTP request (email over SMTP needs a socket) implements `send` and
+ * is registered by the runtime that can support it: see node/email-channel.ts.
  */
 export interface OutgoingMessage {
   /** One line: what happened. */
@@ -35,7 +37,10 @@ export interface ChannelType {
   fields: ChannelField[];
   /** Null when the configuration is usable, otherwise what is wrong with it. */
   validate(config: Record<string, string>): string | null;
-  request(config: Record<string, string>, message: OutgoingMessage): HttpRequest;
+  /** The HTTP request that delivers the message. */
+  request?(config: Record<string, string>, message: OutgoingMessage): HttpRequest;
+  /** For types that are not one HTTP request: delivers the message, or throws with the reason. */
+  send?(config: Record<string, string>, message: OutgoingMessage): Promise<void>;
 }
 
 const JSON_HEADERS = { 'Content-Type': 'application/json' };
@@ -116,6 +121,11 @@ export const CHANNEL_TYPES: Record<string, ChannelType> = {
   },
 };
 
+/** Makes a channel type available. Used by runtime-specific types (Node's email). */
+export function registerChannelType(name: string, type: ChannelType): void {
+  CHANNEL_TYPES[name] = type;
+}
+
 export function isChannelType(type: string): boolean {
   return Object.prototype.hasOwnProperty.call(CHANNEL_TYPES, type);
 }
@@ -159,6 +169,16 @@ export async function deliver(
   if (!channelType) return `Unknown channel type "${type}"`;
   const invalid = channelType.validate(config);
   if (invalid) return invalid;
+
+  if (channelType.send) {
+    try {
+      await channelType.send(config, message);
+      return null;
+    } catch (error: any) {
+      return `Could not send: ${String(error?.message ?? 'unknown error').slice(0, 200)}`;
+    }
+  }
+  if (!channelType.request) return `Channel type "${type}" cannot deliver messages`;
 
   const { url, headers, body } = channelType.request(config, message);
   const controller = new AbortController();
