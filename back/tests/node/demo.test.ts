@@ -114,7 +114,7 @@ describe('demo mode: server', () => {
     const { send } = start({ DEMO: 'true' });
 
     const { signals } = await (await send('GET', '/api/repos/acme/billing-worker/signals')).json();
-    expect(Object.keys(signals).sort()).toEqual(['branches', 'ci', 'config', 'dependencies', 'inbox', 'lockfile', 'policy', 'release', 'scorecard', 'security', 'standards']);
+    expect(Object.keys(signals).sort()).toEqual(['branches', 'ci', 'config', 'dependencies', 'inbox', 'lockfile', 'policy', 'release', 'scorecard', 'security', 'standards', 'vulnerabilities']);
 
     const inventory = await (await send('GET', '/api/dependencies')).json();
     expect(inventory.packages.length).toBeGreaterThan(10);

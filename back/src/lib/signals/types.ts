@@ -41,6 +41,8 @@ export interface SignalPolicy {
   checks: CustomCheck[];
   /** Ask the OpenSSF Scorecard API about public repos. */
   scorecard: boolean;
+  /** Look the pinned versions up in the OSV vulnerability database. */
+  vulnerabilities: boolean;
 }
 
 export type SignalData = Record<string, unknown>;
@@ -62,10 +64,11 @@ function decodeBase64(content: string): string {
 
 export function createSignalContext(
   octokit: Octokit, owner: string, repo: string, baseline: Baseline = resolveBaseline(undefined),
-  policy: SignalPolicy = { checks: [], scorecard: false },
+  policy: SignalPolicy = { checks: [], scorecard: false, vulnerabilities: false },
 ): SignalContext {
   let repoPromise: Promise<RepoInfo> | undefined;
   let treePromise: Promise<string[]> | undefined;
+  const files = new Map<string, Promise<string | null>>();
 
   const ctx: SignalContext = {
     octokit,
@@ -90,7 +93,14 @@ export function createSignalContext(
       })();
       return treePromise;
     },
-    async readFile(path: string) {
+    readFile(path: string) {
+      // Memoized: lockfiles are read by more than one collector.
+      if (!files.has(path)) files.set(path, fetchFile(path));
+      return files.get(path)!;
+    },
+  };
+
+  async function fetchFile(path: string): Promise<string | null> {
       try {
         const { data } = await octokit.repos.getContent({ owner, repo, path });
         const file = data as { content?: string; encoding?: string; sha?: string; size?: number };
@@ -105,7 +115,6 @@ export function createSignalContext(
         if (isUnavailable(err)) return null;
         throw err;
       }
-    },
-  };
+  }
   return ctx;
 }

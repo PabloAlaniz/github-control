@@ -13,7 +13,7 @@
 import { Hono } from 'hono';
 import type { HttpEnv } from '../http/context';
 
-const SERVER_INFO = { name: 'github-control', version: '0.2.0' };
+const SERVER_INFO = { name: 'github-control', version: '0.3.0' };
 /** Protocol revisions this server speaks, newest first. */
 const PROTOCOL_VERSIONS = ['2025-06-18', '2025-03-26', '2024-11-05'];
 
@@ -176,6 +176,24 @@ export const TOOLS: Tool[] = [
     async run(args, api) {
       if (typeof args.name !== 'string' || args.name.trim().length < 2) throw new ToolError('"name" must be a package name');
       return ask(api, 'GET', `/api/dependencies/locate?name=${encodeURIComponent(args.name.trim())}`);
+    },
+  },
+  {
+    name: 'list_vulnerabilities',
+    description: 'Known vulnerabilities of the dependency versions pinned in lockfiles, across all repositories: advisory, package, version, severity, the version that fixes it and the repositories affected. Empty unless the policy turns the lookup on.',
+    readOnly: true,
+    inputSchema: {
+      type: 'object',
+      properties: {
+        severity: { type: 'string', enum: ['critical', 'high', 'moderate', 'low', 'unknown'], description: 'Only this severity' },
+        repo: { type: 'string', description: 'Only findings in this repository (owner/name)' },
+      },
+    },
+    async run(args, api) {
+      const result = await ask(api, 'GET', '/api/dependencies/vulnerabilities');
+      const items = (result.items as Json[]).filter((item) =>
+        (typeof args.severity !== 'string' || item.severity === args.severity) && (typeof args.repo !== 'string' || item.repos.includes(args.repo)));
+      return { ...result, total: items.length, items: items.slice(0, 100) };
     },
   },
   {

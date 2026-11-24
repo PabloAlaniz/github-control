@@ -195,4 +195,65 @@ describe('DependenciesPage', () => {
             expect(screen.queryByRole('search', { name: 'Find a package' })).not.toBeInTheDocument();
         });
     });
+
+    describe('known vulnerabilities', () => {
+        const locked = { ...payload, locked: { repos: 2, packages: 300 } };
+        const item = (n, severity, extra = {}) => ({
+            id: `GHSA-${n}`, aliases: [`CVE-2025-${n}`], ecosystem: 'npm', name: `pkg${n}`, version: '1.0.0', severity,
+            summary: `Problem ${n}`, fixed: '1.0.1', url: `https://osv.dev/vulnerability/GHSA-${n}`, repos: ['me/a'], ...extra,
+        });
+        const found = {
+            enabled: true, repos_checked: 2, repos_affected: 1, packages_checked: 1300, total: 18, truncated: ['me/a'],
+            bySeverity: { critical: 1, high: 17, moderate: 0, low: 0, unknown: 0 },
+            items: [item(0, 'critical', { fixed: null, aliases: [], repos: ['me/a', 'me/b'] }), ...Array.from({ length: 17 }, (_, i) => item(i + 1, 'high'))],
+        };
+        const mock = (body, ok = true) => api.apiFetch.mockImplementation((path) => (
+            path === '/api/dependencies/vulnerabilities' ? respond(body, ok) : respond(locked)
+        ));
+        const table = () => screen.getByText('Known vulnerabilities').closest('div').parentElement;
+
+        it('lists them worst first, filters by severity and shows the rest on demand', async () => {
+            mock(found);
+            render(<DependenciesPage />);
+
+            expect(await screen.findByText('18 in 1 of 2 repos · 1,300 pinned versions checked')).toBeInTheDocument();
+            expect(screen.getByRole('link', { name: 'GHSA-0' })).toHaveAttribute('href', 'https://osv.dev/vulnerability/GHSA-0');
+            expect(screen.getByRole('link', { name: 'CVE-2025-1' })).toBeInTheDocument();
+            expect(screen.getByText('no fix known')).toBeInTheDocument();
+            expect(screen.getByText('me/a, me/b')).toBeInTheDocument();
+            expect(screen.getByText(/Too many findings to list in full for: me\/a/)).toBeInTheDocument();
+            expect(within(table()).getAllByRole('row')).toHaveLength(16);
+
+            fireEvent.click(screen.getByRole('button', { name: 'Show all 18' }));
+            expect(within(table()).getAllByRole('row')).toHaveLength(19);
+
+            const severities = screen.getByRole('group', { name: 'Severity' });
+            expect(within(severities).getAllByRole('button').map((b) => b.textContent)).toEqual(['All', 'critical 1', 'high 17']);
+            fireEvent.click(within(severities).getByRole('button', { name: 'critical 1' }));
+            expect(within(table()).getAllByRole('row')).toHaveLength(2);
+        });
+
+        it('says when nothing was found, when it is waiting for a sync, and how to turn it on', async () => {
+            mock({ ...found, total: 0, items: [], repos_affected: 0, truncated: [] });
+            const { unmount } = render(<DependenciesPage />);
+            expect(await screen.findByText(/None found · 1,300 pinned versions checked/)).toBeInTheDocument();
+            unmount();
+
+            mock({ enabled: true, repos_checked: 0, items: [] });
+            const second = render(<DependenciesPage />);
+            expect(await screen.findByText(/Results appear after the next sync/)).toBeInTheDocument();
+            second.unmount();
+
+            mock({ enabled: false, repos_checked: 0, items: [] });
+            render(<DependenciesPage />);
+            expect(await screen.findByText(/known_vulnerabilities: true/)).toBeInTheDocument();
+        });
+
+        it('stays out of the way when it cannot be read', async () => {
+            mock({ error: 'boom' }, false);
+            render(<DependenciesPage />);
+            await screen.findByText('Find a package anywhere');
+            expect(screen.queryByText('Known vulnerabilities')).not.toBeInTheDocument();
+        });
+    });
 });

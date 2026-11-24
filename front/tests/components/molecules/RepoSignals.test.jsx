@@ -332,6 +332,28 @@ describe('RepoSignals: policy, scorecard and downloads', () => {
         expect(screen.getByRole('link', { name: 'Full report' })).toHaveAttribute('href', 'https://scorecard.dev/viewer/?uri=github.com/me/api');
     });
 
+    it('shows the known vulnerabilities of the pinned versions', () => {
+        const found = (name, severity, fixed) => ({ id: `GHSA-${name}`, name, version: '1.0.0', severity, summary: `${name} problem`, fixed, url: `https://osv.dev/vulnerability/GHSA-${name}` });
+        const { rerender } = render(<RepoSignals repo={repo({ vulnerabilities: {
+            enabled: true, checked: 1200, total: 9, bySeverity: { critical: 1, high: 0, moderate: 8, low: 0, unknown: 0 },
+            worst: [found('h11', 'critical', '0.16.0'), found('ws', 'moderate', null)],
+        } })} />);
+        expect(screen.getByText('1,200 pinned')).toBeInTheDocument();
+        expect(screen.getByText('1 critical')).toBeInTheDocument();
+        expect(screen.queryByText(/0 high/)).not.toBeInTheDocument();
+        expect(screen.getByRole('link', { name: 'h11 1.0.0' })).toHaveAttribute('href', 'https://osv.dev/vulnerability/GHSA-h11');
+        expect(screen.getByText(/→ 0.16.0/)).toBeInTheDocument();
+        expect(screen.getByText(/no fix known/)).toBeInTheDocument();
+        expect(screen.getByText('…and 7 more')).toBeInTheDocument();
+
+        rerender(<RepoSignals repo={repo({ vulnerabilities: { enabled: true, checked: 30, total: 0, bySeverity: {} } })} />);
+        expect(screen.getByText('None in the pinned versions')).toBeInTheDocument();
+        rerender(<RepoSignals repo={repo({ vulnerabilities: { enabled: true, checked: 0, total: 0 } })} />);
+        expect(screen.getByText('No lockfile to check')).toBeInTheDocument();
+        rerender(<RepoSignals repo={repo({ vulnerabilities: { enabled: false } })} />);
+        expect(screen.queryByText('Known vulnerabilities')).not.toBeInTheDocument();
+    });
+
     it('explains a scorecard that is not available, and hides it when the policy has it off', () => {
         const { rerender } = render(<RepoSignals repo={repo({ scorecard: { enabled: true, available: false, reason: 'private' } })} />);
         expect(screen.getByText('Only for public repos')).toBeInTheDocument();

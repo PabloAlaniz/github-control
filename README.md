@@ -31,7 +31,8 @@ Open http://localhost:13337. From a clone, without Docker: `DEMO=true npm start`
   - *branch hygiene*: merged-but-not-deleted and stale branches and idle pull requests, with a guarded cleanup;
   - *CI reliability*: success rate, duration and flaky commits per workflow;
   - *settings drift* against a baseline you define, fixable per repo or in bulk.
-- **Dependency inventory**: which repos use each package and at what version, declared and resolved from lockfiles, diverging major versions, runtimes past their end of life, and a finder that tells you every repo a package is in, even as a transitive dependency.
+- **Dependency inventory** (npm, PyPI, Go, Cargo, RubyGems, Maven, NuGet): which repos use each package and at what version, declared and resolved from lockfiles, diverging major versions, runtimes past their end of life, and a finder that tells you every repo a package is in, even as a transitive dependency.
+- **Known vulnerabilities** (opt-in): the versions your lockfiles pin, looked up in the OSV database, with the fix and the repos affected.
 - **Organize your way**: groups with colors, priorities (high / medium / low / paused), status, notes, next action and blockers, with bulk actions.
 - **Traffic history**: GitHub only keeps 14 days of views, clones, referrers and popular paths; every sync saves them, so your history keeps growing.
 - **History**: a daily snapshot per repo (LOC, files, stars, issues, health) with charts and date-to-date comparison.
@@ -281,6 +282,7 @@ alerts:
 
 signals:
   openssf_scorecard: true   # fetch the OpenSSF Scorecard of public repos
+  known_vulnerabilities: true   # look the versions pinned in lockfiles up in the OSV database
 ```
 
 A rule watches exactly one condition:
@@ -293,6 +295,7 @@ A rule watches exactly one condition:
 | `unreleased_commits_over: N` | more than N commits are not in the latest release |
 | `settings_drift_over: N` | more than N settings differ from the baseline |
 | `scorecard_below: N` | the OpenSSF Scorecard is under N (0 to 10) |
+| `vulnerabilities_over: N` | more than N known vulnerabilities in the pinned dependencies (needs `known_vulnerabilities`) |
 | `eol_runtime: true` | the repo declares a runtime past its end of life |
 
 Rule alerts show up with the others, as the kind "Policy rule", and go to the same channels.
@@ -304,6 +307,8 @@ Every section is optional; what you leave out keeps its default. A complete exam
 To keep the policy **under version control**, put it in a file and point `POLICY_FILE` at it (for example a file from a repo, mounted into the container). The file is then the only way to change the policy: the server re-reads it within seconds of a change, ignores an edit that is not valid, and the page becomes preview-only. `POLICY` takes the document itself as an environment variable (the way to set it on Cloudflare Workers).
 
 The OpenSSF Scorecard is off unless the policy turns it on. When on, each sync asks `api.securityscorecards.dev` about your **public** repos (their names are sent to that service; private repos are never asked about) and shows the score and its weakest checks on the repo.
+
+Known vulnerabilities are off unless the policy turns them on too. When on, each sync sends the name and version of every package pinned in a repo's lockfiles to `api.osv.dev` (the OSV database; the name of the repo is never sent, and this covers private repos) and keeps what comes back: advisory, severity and the version that fixes it. The repo shows its worst findings, and the **Dependencies** page lists them across repos with the repos each one is in. It adds one request per 1000 pinned packages and one per advisory not seen before.
 
 ## MCP server
 
@@ -322,6 +327,7 @@ claude mcp add --transport http github-control https://your-server.example/api/m
 | `get_inbox` | Open pull requests and issues; filter by type, repo or requested reviewer |
 | `list_dependencies` | Packages and versions across repos, diverging majors, end-of-life runtimes |
 | `find_package` | Every repo a package is in, transitive dependencies included, with the pinned versions |
+| `list_vulnerabilities` | Known vulnerabilities of the pinned versions, with the fix and the repos affected |
 | `list_services` | Services with their state and uptime |
 | `get_report` | What changed in the last days: highlights, growth, releases, alerts, CI, services |
 | `search_code` | Search the code of the tracked repos on GitHub |
@@ -440,7 +446,7 @@ curl -X POST -H "Authorization: Bearer $API_KEY" http://localhost:13337/api/sync
 | Metrics | `GET /api/metrics/{aggregate,latest,compare}`, `/api/metrics/repo/:owner/:repo`, `/api/metrics/snapshot/:date` |
 | Traffic | `GET /api/traffic/summary`, `/api/traffic/repo/:owner/:repo`, `POST /api/traffic/repo/:owner/:repo/sync` |
 | Signals | `GET /api/repos/:owner/:repo/signals`, `POST .../signals/sync?kinds=`, `POST .../branches/delete`, `POST .../config/apply` |
-| Dependencies | `GET /api/dependencies`, `GET /api/dependencies/locate?name=` |
+| Dependencies | `GET /api/dependencies`, `GET /api/dependencies/locate?name=`, `GET /api/dependencies/vulnerabilities` |
 | Webhooks | `POST /api/webhooks/github` (signed by GitHub, no API key), `GET /api/webhooks` |
 | Public (no sign-in, opt-in) | `GET /api/badges/:owner/:repo/:metric.svg`, `.../card.svg`, `/api/badges/summary.svg`, `GET /api/status`, `/api/status/badge.svg` |
 | Search | `GET /api/search/code?q=&repo=&language=` |

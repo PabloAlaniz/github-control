@@ -104,6 +104,39 @@ function parseGoSum(text: string): LockedPackage[] {
   return unique('go', pairs);
 }
 
+/** Gemfile.lock: the `specs:` of its GEM, GIT and PATH sections, at four spaces (deeper lines are their requirements). */
+function parseGemfileLock(text: string): LockedPackage[] {
+  const pairs: [string, string][] = [];
+  for (const line of text.split(/\r?\n/)) {
+    const spec = /^ {4}(\S+) \(([^)]+)\)$/.exec(line);
+    // "1.15.5-x86_64-linux": the platform is not part of the version.
+    if (spec) pairs.push([spec[1], spec[2].replace(/-(x86|x64|arm|aarch|universal|java|mingw|mswin|musl).*$/, '')]);
+  }
+  return unique('rubygems', pairs);
+}
+
+/** gradle.lockfile: `group:artifact:version=configurations`. */
+function parseGradleLock(text: string): LockedPackage[] {
+  const pairs: [string, string][] = [];
+  for (const line of text.split(/\r?\n/)) {
+    const entry = /^([\w.-]+:[\w.-]+):([^=\s]+)=/.exec(line.trim());
+    if (entry) pairs.push([entry[1], entry[2]]);
+  }
+  return unique('maven', pairs);
+}
+
+/** packages.lock.json (.NET): per target framework, each package with its resolved version. Project references have none. */
+function parseNugetLock(text: string): LockedPackage[] {
+  const lock = JSON.parse(text);
+  const pairs: [string, string][] = [];
+  for (const framework of Object.values<any>(lock.dependencies ?? {})) {
+    for (const [name, entry] of Object.entries<any>(framework ?? {})) {
+      if (entry?.type !== 'Project' && typeof entry?.resolved === 'string') pairs.push([name, entry.resolved]);
+    }
+  }
+  return unique('nuget', pairs);
+}
+
 const PARSERS: [RegExp, Parser][] = [
   [/^(package-lock|npm-shrinkwrap)\.json$/, parsePackageLock],
   [/^pnpm-lock\.yaml$/, parsePnpmLock],
@@ -111,6 +144,9 @@ const PARSERS: [RegExp, Parser][] = [
   [/^Cargo\.lock$/, parseTomlPackages('cargo')],
   [/^(poetry|uv)\.lock$/, parseTomlPackages('pypi')],
   [/^go\.sum$/, parseGoSum],
+  [/^Gemfile\.lock$/, parseGemfileLock],
+  [/^gradle\.lockfile$/, parseGradleLock],
+  [/^packages\.lock\.json$/, parseNugetLock],
 ];
 
 const EXCLUDED_DIR = /(^|\/)(node_modules|vendor|dist|build|target|\.venv|venv|__pycache__|\.git|fixtures|testdata|examples?)(\/|$)/i;

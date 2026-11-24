@@ -4,7 +4,7 @@
  */
 
 export interface Dependency {
-  ecosystem: 'npm' | 'pypi' | 'go' | 'cargo';
+  ecosystem: 'npm' | 'pypi' | 'go' | 'cargo' | 'rubygems' | 'maven' | 'nuget';
   name: string;
   /** Version or range exactly as declared ('*' if there is none). */
   version: string;
@@ -178,6 +178,82 @@ function parseCargoToml(text: string, manifest: string): ManifestResult {
   return { dependencies, runtimes: [] };
 }
 
+/** Gemfile: `gem 'name', '~> 1.2'`, with `group :development do … end` blocks and `group:` options as dev. */
+function parseGemfile(text: string, manifest: string): ManifestResult {
+  const dependencies: Dependency[] = [];
+  const isDev = (groups: string) => /:(development|test)\b/.test(groups);
+  let devDepth = 0;
+  let depth = 0;
+  for (const raw of text.split('\n')) {
+    const line = raw.replace(/\s+#.*$/, '').trim();
+    if (!line || line.startsWith('#')) continue;
+    const group = /^group\s+(.+?)\s+do\b/.exec(line);
+    if (group) { depth++; if (devDepth === 0 && isDev(group[1])) devDepth = depth; continue; }
+    if (/\bdo(\s*\|[^|]*\|)?$/.test(line)) { depth++; continue; }
+    if (line === 'end') { if (devDepth === depth) devDepth = 0; depth = Math.max(0, depth - 1); continue; }
+    const gem = /^gem\s+['"]([^'"]+)['"](.*)$/.exec(line);
+    if (!gem) continue;
+    const version = /^\s*,\s*['"]([^'"]+)['"]/.exec(gem[2])?.[1] ?? '';
+    const dev = devDepth > 0 || isDev(/groups?:\s*(\[[^\]]*\]|:\w+)/.exec(gem[2])?.[1] ?? '');
+    dependencies.push(dep('rubygems', gem[1], version, dev ? 'dev' : 'prod', manifest));
+  }
+  return { dependencies, runtimes: [] };
+}
+
+/** XML without its comments. Repeats until none is left, so removing one cannot leave another behind. */
+function stripXmlComments(text: string): string {
+  let current = text;
+  for (;;) {
+    const next = current.replace(/<!--[\s\S]*?-->/g, '');
+    if (next === current) return next;
+    current = next;
+  }
+}
+
+const xmlTag = (block: string, tag: string) => new RegExp(`<${tag}>\\s*([^<]*?)\\s*</${tag}>`).exec(block)?.[1] ?? '';
+
+/** pom.xml: the project's own `<dependency>` entries, with `${property}` versions resolved from `<properties>`. */
+function parsePom(text: string, manifest: string): ManifestResult {
+  const xml = stripXmlComments(text);
+  const properties = new Map<string, string>();
+  for (const [, name, value] of (/<properties>([\s\S]*?)<\/properties>/.exec(xml)?.[1] ?? '').matchAll(/<([\w.-]+)>\s*([^<]*?)\s*<\/\1>/g)) properties.set(name, value);
+  // Managed versions and plugin dependencies are not what the project itself depends on.
+  const own = xml.replace(/<dependencyManagement>[\s\S]*?<\/dependencyManagement>/g, '').replace(/<build>[\s\S]*?<\/build>/g, '');
+  const dependencies: Dependency[] = [];
+  for (const [, block] of own.matchAll(/<dependency>([\s\S]*?)<\/dependency>/g)) {
+    const group = xmlTag(block, 'groupId');
+    const artifact = xmlTag(block, 'artifactId');
+    if (!group || !artifact) continue;
+    const version = xmlTag(block, 'version').replace(/^\$\{([^}]+)\}$/, (whole, name) => properties.get(name) ?? whole);
+    dependencies.push(dep('maven', `${group}:${artifact}`, version, xmlTag(block, 'scope') === 'test' ? 'dev' : 'prod', manifest));
+  }
+  return { dependencies, runtimes: [] };
+}
+
+/** build.gradle and build.gradle.kts: `implementation 'group:artifact:version'` and its variants. */
+function parseGradle(text: string, manifest: string): ManifestResult {
+  const dependencies: Dependency[] = [];
+  const pattern = /^\s*(\w+)\s*\(?\s*(?:platform\()?['"]([\w.-]+):([\w.-]+)(?::([^'":@]+))?[^'"]*['"]/gm;
+  for (const [, configuration, group, artifact, version] of text.matchAll(pattern)) {
+    if (!/^(api|implementation|compile|compileOnly|runtimeOnly|runtime|annotationProcessor|kapt|ksp|\w*[tT]est\w*)$/.test(configuration)) continue;
+    dependencies.push(dep('maven', `${group}:${artifact}`, version ?? '', /test/i.test(configuration) ? 'dev' : 'prod', manifest));
+  }
+  return { dependencies, runtimes: [] };
+}
+
+/** .csproj and friends, and Directory.Packages.props: `<PackageReference Include="X" Version="1.2.3" />`. */
+function parseMsbuild(text: string, manifest: string): ManifestResult {
+  const xml = stripXmlComments(text);
+  const found = new Map<string, string>();
+  for (const [, attributes, body] of xml.matchAll(/<Package(?:Reference|Version)\b([^>]*?)(?:\/>|>([\s\S]*?)<\/Package(?:Reference|Version)>)/g)) {
+    const name = /\b(?:Include|Update)\s*=\s*"([^"]+)"/.exec(attributes)?.[1];
+    if (!name) continue;
+    const version = /\bVersion\s*=\s*"([^"]*)"/.exec(attributes)?.[1] ?? xmlTag(body ?? '', 'Version');
+    if (!found.get(name)) found.set(name, version);
+  }
+  return { dependencies: [...found].map(([name, version]) => dep('nuget', name, version, 'prod', manifest)), runtimes: [] };
+}
+
 function parseVersionFile(name: RuntimeDecl['name']) {
   return (text: string, manifest: string): ManifestResult => {
     const version = text.split('\n').map(l => l.trim()).find(l => l && !l.startsWith('#')) ?? '';
@@ -193,6 +269,10 @@ const PARSERS: Array<[RegExp, Parser]> = [
   [/^pyproject\.toml$/, parsePyproject],
   [/^go\.mod$/, parseGoMod],
   [/^Cargo\.toml$/, parseCargoToml],
+  [/^Gemfile$/, parseGemfile],
+  [/^pom\.xml$/, parsePom],
+  [/^build\.gradle(\.kts)?$/, parseGradle],
+  [/^([\w.-]+\.(cs|fs|vb)proj|Directory\.Packages\.props)$/, parseMsbuild],
   [/^\.(nvmrc|node-version)$/, parseVersionFile('node')],
   [/^\.python-version$/, parseVersionFile('python')],
 ];

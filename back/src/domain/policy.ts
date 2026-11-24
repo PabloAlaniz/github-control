@@ -23,6 +23,7 @@
  *         priority: [high]
  *   signals:
  *     openssf_scorecard: true
+ *     known_vulnerabilities: true
  *
  * Every section is optional: what a document leaves out keeps its default (or
  * the older single-purpose settings REPO_BASELINE, ALERT_STALE_DAYS and
@@ -55,7 +56,7 @@ export interface CustomCheck {
 
 /** The conditions a rule can watch. A rule has exactly one. */
 export const RULE_CONDITIONS = [
-  'check', 'coverage_below', 'ci_success_below', 'unreleased_commits_over', 'settings_drift_over', 'scorecard_below', 'eol_runtime',
+  'check', 'coverage_below', 'ci_success_below', 'unreleased_commits_over', 'settings_drift_over', 'scorecard_below', 'eol_runtime', 'vulnerabilities_over',
 ] as const;
 export type RuleCondition = (typeof RULE_CONDITIONS)[number];
 
@@ -81,7 +82,7 @@ export interface Policy {
   baseline: Record<string, boolean>;
   health: HealthPolicy;
   alerts: { staleDays: number; healthBelow: number; rules: AlertRule[] };
-  signals: { scorecard: boolean };
+  signals: { scorecard: boolean; vulnerabilities: boolean };
 }
 
 const weight = z.number().min(0).max(1000);
@@ -109,6 +110,7 @@ const RuleSchema = z.object({
     settings_drift_over: count,
     scorecard_below: z.number().min(0).max(10),
     eol_runtime: z.literal(true),
+    vulnerabilities_over: count,
   }).partial().strict().refine((when) => Object.keys(when).length === 1, 'a rule needs exactly one condition'),
   priority: z.array(z.enum(['high', 'medium', 'low', 'none'])).min(1).max(4).optional(),
   only: z.enum(['public', 'private']).optional(),
@@ -128,7 +130,7 @@ const DocumentSchema = z.object({
     health_below: z.number().int().min(0).max(100),
     rules: z.array(RuleSchema).max(30),
   }).partial().strict().optional(),
-  signals: z.object({ openssf_scorecard: z.boolean() }).partial().strict().optional(),
+  signals: z.object({ openssf_scorecard: z.boolean(), known_vulnerabilities: z.boolean() }).partial().strict().optional(),
 }).strict();
 
 export type PolicyDocument = z.infer<typeof DocumentSchema>;
@@ -209,7 +211,7 @@ export function buildPolicy(document: PolicyDocument, legacy: LegacySettings = {
       healthBelow: document.alerts?.health_below ?? numberOr(legacy.ALERT_HEALTH_BELOW, 40, 100),
       rules: (document.alerts?.rules ?? []) as AlertRule[],
     },
-    signals: { scorecard: document.signals?.openssf_scorecard ?? false },
+    signals: { scorecard: document.signals?.openssf_scorecard ?? false, vulnerabilities: document.signals?.known_vulnerabilities ?? false },
   };
 }
 
@@ -250,7 +252,7 @@ export function serializePolicy(policy: Policy): string {
       checks: policy.health.checks,
     },
     alerts: { stale_days: policy.alerts.staleDays, health_below: policy.alerts.healthBelow, rules: policy.alerts.rules },
-    signals: { openssf_scorecard: policy.signals.scorecard },
+    signals: { openssf_scorecard: policy.signals.scorecard, known_vulnerabilities: policy.signals.vulnerabilities },
   });
 }
 

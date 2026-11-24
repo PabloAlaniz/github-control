@@ -23,6 +23,8 @@ describe('findManifests', () => {
       'requirements-dev.txt', 'go.mod', 'vendor/y/go.mod', 'a/b/c/d/package.json', '.nvmrc',
       'examples/demo/Cargo.toml', 'crates/core/Cargo.toml', 'pyproject.toml', '.python-version',
     ]);
+    expect(findManifests(['Gemfile', 'Gemfile.lock', 'pom.xml', 'app/build.gradle.kts', 'build.gradle', 'src/Api/Api.csproj', 'Directory.Packages.props', 'settings.gradle', 'Api.sln']))
+      .toEqual(['build.gradle', 'Directory.Packages.props', 'Gemfile', 'pom.xml', 'app/build.gradle.kts', 'src/Api/Api.csproj']);
     expect(found).toEqual([
       '.nvmrc', '.python-version', 'go.mod', 'package.json', 'pyproject.toml', 'requirements-dev.txt',
       'crates/core/Cargo.toml', 'packages/api/package.json',
@@ -125,6 +127,108 @@ replace example.com/x => ../x
 `);
     expect(names(result)).toEqual(['github.com/single/dep@v1.0.0:prod', 'github.com/gin-gonic/gin@v1.9.1:prod']);
     expect(result.runtimes).toEqual([{ name: 'go', version: '1.22.3', source: 'go.mod' }]);
+  });
+
+  it('parses a Gemfile, with groups as dev', () => {
+    const gemfile = `source 'https://rubygems.org'
+ruby '3.3.0'
+gem 'rails', '~> 7.1.3'   # the framework
+gem "pg"
+gem 'bootsnap', require: false
+gem 'rubocop', '1.60.0', group: :development
+gem 'faker', groups: [:development, :test]
+group :development, :test do
+  gem 'rspec-rails', '~> 6.1'
+  platforms :mri do
+    gem 'byebug'
+  end
+end
+group :production do
+  gem 'puma', '>= 6'
+end
+gem 'sidekiq'
+`;
+    const r = parseManifest('Gemfile', gemfile);
+    expect(names(r)).toEqual([
+      'rails@~> 7.1.3:prod', 'pg@*:prod', 'bootsnap@*:prod', 'rubocop@1.60.0:dev', 'faker@*:dev',
+      'rspec-rails@~> 6.1:dev', 'byebug@*:dev', 'puma@>= 6:prod', 'sidekiq@*:prod',
+    ]);
+    expect(r.dependencies[0]).toMatchObject({ ecosystem: 'rubygems', major: '7', manifest: 'Gemfile' });
+  });
+
+  it('parses pom.xml, resolving properties and leaving out managed and plugin dependencies', () => {
+    const pom = `<project>
+  <properties><jackson.version>2.17.1</jackson.version></properties>
+  <dependencyManagement><dependencies>
+    <dependency><groupId>org.managed</groupId><artifactId>bom</artifactId><version>1.0</version></dependency>
+  </dependencies></dependencyManagement>
+  <dependencies>
+    <!-- <dependency><groupId>old</groupId><artifactId>gone</artifactId></dependency> -->
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-databind</artifactId>
+      <version>\${jackson.version}</version>
+    </dependency>
+    <dependency><groupId>org.springframework.boot</groupId><artifactId>spring-boot-starter-web</artifactId></dependency>
+    <dependency><groupId>org.junit.jupiter</groupId><artifactId>junit-jupiter</artifactId><version>5.10.2</version><scope>test</scope></dependency>
+    <dependency><groupId>x</groupId><artifactId>y</artifactId><version>\${unknown}</version></dependency>
+    <dependency><artifactId>no-group</artifactId></dependency>
+  </dependencies>
+  <build><plugins><plugin><dependencies>
+    <dependency><groupId>org.plugin</groupId><artifactId>dep</artifactId><version>3.0</version></dependency>
+  </dependencies></plugin></plugins></build>
+</project>`;
+    const r = parseManifest('services/api/pom.xml', pom);
+    expect(names(r)).toEqual([
+      'com.fasterxml.jackson.core:jackson-databind@2.17.1:prod', 'org.springframework.boot:spring-boot-starter-web@*:prod',
+      'org.junit.jupiter:junit-jupiter@5.10.2:dev', 'x:y@${unknown}:prod',
+    ]);
+    expect(r.dependencies[0].ecosystem).toBe('maven');
+  });
+
+  it('parses Gradle build files, Groovy and Kotlin', () => {
+    const groovy = `plugins { id 'java' }
+dependencies {
+    implementation 'org.springframework.boot:spring-boot-starter-web:3.3.0'
+    api "com.google.guava:guava:33.2.1-jre"
+    implementation platform('org.springframework.cloud:spring-cloud-dependencies:2023.0.2')
+    runtimeOnly 'org.postgresql:postgresql'
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.10.2'
+    implementation project(':core')
+    classpath 'not.a:dependency:1.0'
+}`;
+    expect(names(parseManifest('build.gradle', groovy))).toEqual([
+      'org.springframework.boot:spring-boot-starter-web@3.3.0:prod', 'com.google.guava:guava@33.2.1-jre:prod',
+      'org.springframework.cloud:spring-cloud-dependencies@2023.0.2:prod', 'org.postgresql:postgresql@*:prod',
+      'org.junit.jupiter:junit-jupiter@5.10.2:dev',
+    ]);
+    const kotlin = `dependencies {
+    implementation("io.ktor:ktor-server-core:2.3.11")
+    androidTestImplementation("androidx.test:runner:1.5.2")
+    ksp("com.google.dagger:hilt-compiler:2.51")
+}`;
+    expect(names(parseManifest('app/build.gradle.kts', kotlin))).toEqual([
+      'io.ktor:ktor-server-core@2.3.11:prod', 'androidx.test:runner@1.5.2:dev', 'com.google.dagger:hilt-compiler@2.51:prod',
+    ]);
+  });
+
+  it('parses .NET project files and central package versions', () => {
+    const csproj = `<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <PackageReference Include="Serilog"><Version>4.0.0</Version></PackageReference>
+    <PackageReference Include="Central.Only" />
+    <!-- <PackageReference Include="Gone" Version="1.0.0" /> -->
+    <PackageReference Update="Newtonsoft.Json" Version="12.0.0" />
+    <ProjectReference Include="..\\Core\\Core.csproj" />
+  </ItemGroup>
+</Project>`;
+    const r = parseManifest('src/Api/Api.csproj', csproj);
+    expect(names(r)).toEqual(['Newtonsoft.Json@13.0.3:prod', 'Serilog@4.0.0:prod', 'Central.Only@*:prod']);
+    expect(r.dependencies[0]).toMatchObject({ ecosystem: 'nuget', major: '13' });
+    expect(names(parseManifest('Directory.Packages.props', '<Project><ItemGroup><PackageVersion Include="Polly" Version="8.4.0" /></ItemGroup></Project>')))
+      .toEqual(['Polly@8.4.0:prod']);
+    expect(names(parseManifest('Lib.fsproj', '<Project />'))).toEqual([]);
   });
 
   it('parses Cargo.toml', () => {

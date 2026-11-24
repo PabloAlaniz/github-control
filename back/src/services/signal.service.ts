@@ -23,7 +23,7 @@ export async function syncSignals(
   const policy = resolvePolicy(ctx.config);
   const signalCtx = createSignalContext(
     getOctokit(ctx.config), owner, repo, policyBaseline(policy),
-    { checks: policy.health.checks, scorecard: policy.signals.scorecard },
+    { checks: policy.health.checks, scorecard: policy.signals.scorecard, vulnerabilities: policy.signals.vulnerabilities },
   );
   const results: SignalSyncResult[] = [];
 

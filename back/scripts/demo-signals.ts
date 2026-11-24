@@ -19,6 +19,7 @@ import { analyzeRuns, type RunInput } from '../src/lib/signals/ci';
 import { diffConfig } from '../src/lib/signals/config';
 import { buildInbox, type PullState } from '../src/lib/signals/inbox';
 import { summarizeScorecard } from '../src/lib/signals/scorecard';
+import { summarizeFindings, type Finding } from '../src/lib/signals/vulnerabilities';
 import { buildPolicy, parsePolicyDocument, policyBaseline, runCustomChecks } from '../src/domain/policy';
 import { parseManifest, type Dependency, type RuntimeDecl } from '../src/lib/signals/manifests';
 import { dedupeRuntimes } from '../src/lib/signals/runtimes';
@@ -219,6 +220,31 @@ function lockfile(repo: Row, tidy: number) {
   for (const [ecosystem] of items) ecosystems[ecosystem] = (ecosystems[ecosystem] ?? 0) + 1;
   return { lockfiles: Object.keys(ecosystems).map((ecosystem) => files[ecosystem]), total: items.length, ecosystems, truncated: false, items };
 }
+/** Published advisories for the older versions in TRANSITIVE: [ecosystem, name, version, id, CVE, severity, summary, fixed]. */
+const ADVISORIES: [string, string, string, string, string | null, Finding['severity'], string, string][] = [
+  ['pypi', 'h11', '0.14.0', 'GHSA-vqfr-h8mv-ghfj', 'CVE-2025-43859', 'critical', 'h11 accepts some malformed Chunked-Encoding bodies', '0.16.0'],
+  ['npm', 'lodash', '4.17.20', 'GHSA-35jh-r3h4-6jhm', 'CVE-2021-23337', 'high', 'Command Injection in lodash', '4.17.21'],
+  ['pypi', 'starlette', '0.36.3', 'GHSA-f96h-pmfr-66vw', 'CVE-2024-47874', 'high', 'Starlette Denial of service (DoS) via multipart/form-data', '0.40.0'],
+  ['npm', 'lodash', '4.17.20', 'GHSA-29mw-wpgm-hmr9', 'CVE-2020-28500', 'moderate', 'Regular Expression Denial of Service (ReDoS) in lodash', '4.17.21'],
+  ['npm', 'esbuild', '0.21.5', 'GHSA-67mh-4wv8-2f99', null, 'moderate', 'esbuild enables any website to send any requests to the development server and read the response', '0.25.0'],
+  ['npm', 'nanoid', '3.3.7', 'GHSA-mwcw-c2x4-8c55', 'CVE-2024-55565', 'moderate', 'Predictable results in nanoid generation when given non-integer values', '3.3.8'],
+  ['pypi', 'starlette', '0.36.3', 'GHSA-2c2j-9gv5-cj73', 'CVE-2025-54121', 'moderate', 'Starlette has possible denial-of-service vector when parsing large files in multipart forms', '0.47.2'],
+  ['pypi', 'urllib3', '1.26.18', 'GHSA-34jh-p97f-mpxf', 'CVE-2024-37891', 'moderate', "urllib3's Proxy-Authorization request header isn't stripped during cross-origin redirects", '1.26.19'],
+  ['npm', 'brace-expansion', '1.1.11', 'GHSA-v6h2-p8h4-qcjw', 'CVE-2025-5889', 'low', 'brace-expansion Regular Expression Denial of Service vulnerability', '1.1.12'],
+  ['pypi', 'certifi', '2023.7.22', 'GHSA-248v-346w-9cwc', 'CVE-2024-39689', 'low', 'Certifi removes GLOBALTRUST root certificate', '2024.7.4'],
+];
+
+/** What looking the repo's pinned versions up would find. */
+function vulnerabilities(locked: ReturnType<typeof lockfile>) {
+  const pinned = new Set(locked.items.map((row) => row.join('\n')));
+  const findings: Finding[] = ADVISORIES
+    .filter(([ecosystem, name, version]) => pinned.has(`${ecosystem}\n${name}\n${version}`))
+    .map(([ecosystem, name, version, id, cve, severity, summary, fixed]) => ({
+      id, aliases: cve ? [cve] : [], ecosystem, name, version, severity, summary, fixed, url: `https://osv.dev/vulnerability/${id}`,
+    }));
+  return { enabled: true, ...summarizeFindings(findings, locked.total) };
+}
+
 /** The files a repo this tidy would have. */
 function repoPaths(tidy: number): string[] {
   const paths = ['README.md', '.gitignore'];
@@ -578,6 +604,7 @@ for (const repo of file.data.repos as Row[]) {
     scorecard: scorecard(repo, tidy, now),
     lockfile: lockfile(repo, tidy),
   };
+  (byKind as Row).vulnerabilities = vulnerabilities(byKind.lockfile);
   for (const [kind, data] of Object.entries(byKind)) {
     signals.push({ id: signals.length + 1, full_name: repo.full_name, kind, data, checked_at: checkedAt });
   }
