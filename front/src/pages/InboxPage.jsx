@@ -50,7 +50,7 @@ const REVIEWS = {
     review_required: { text: 'review required', tone: 'text-amber-700' },
 };
 
-function ItemRow({ item, active, selected, onToggle, showRepo }) {
+function ItemRow({ item, active, selected, onToggle, onOpen, showRepo }) {
     const Icon = item.type === 'pr' ? GitPullRequest : CircleDot;
     return (
         <li
@@ -83,6 +83,10 @@ function ItemRow({ item, active, selected, onToggle, showRepo }) {
                     {REVIEWS[item.review] && <> · <span className={REVIEWS[item.review].tone}>{REVIEWS[item.review].text}</span></>}
                 </p>
             </div>
+            <button type="button" onClick={onOpen} className="flex-shrink-0 rounded px-2 py-0.5 text-xs font-medium text-blue-600 hover:bg-blue-50"
+                aria-label={`${item.type === 'pr' ? 'Review' : 'Answer'} ${item.repo}#${item.number}`}>
+                {item.type === 'pr' ? 'Review' : 'Answer'}
+            </button>
             {CHECKS[item.checks] && (() => {
                 const { icon: CheckIcon, tone, label } = CHECKS[item.checks];
                 return <CheckIcon size={14} className={cn('mt-0.5 flex-shrink-0', tone)} aria-label={label} title={label} />;
@@ -94,6 +98,138 @@ function ItemRow({ item, active, selected, onToggle, showRepo }) {
             )}
             <span className="hidden w-24 flex-shrink-0 text-right text-xs text-gray-400 sm:block" title={item.updatedAt}>{formatTimeAgo(item.updatedAt)}</span>
         </li>
+    );
+}
+
+const FILE_TONES = { added: 'text-green-700', removed: 'text-red-700', renamed: 'text-amber-700' };
+
+/** One pull request or issue, read from GitHub, with a box to answer it: review, or comment. */
+function ItemModal({ item, onClose, onDone }) {
+    const [detail, setDetail] = useState(null);
+    const [loadError, setLoadError] = useState('');
+    const [text, setText] = useState('');
+    const [sending, setSending] = useState(null);
+    const [error, setError] = useState('');
+    const [done, setDone] = useState('');
+    const isPr = item.type === 'pr';
+
+    useEffect(() => {
+        let active = true;
+        apiFetch(`/api/inbox/item?repo=${encodeURIComponent(item.repo)}&number=${item.number}`)
+            .then(readJson)
+            .then((body) => { if (active) setDetail(body); })
+            .catch((err) => { if (active) setLoadError(err.message); });
+        return () => { active = false; };
+    }, [item.repo, item.number]);
+
+    useEffect(() => {
+        const onKey = (e) => { if (e.key === 'Escape') onClose(); };
+        window.addEventListener('keydown', onKey);
+        return () => window.removeEventListener('keydown', onKey);
+    }, [onClose]);
+
+    const send = async (event) => {
+        setSending(event);
+        setError('');
+        try {
+            const review = isPr && event !== 'plain';
+            await readJson(await apiFetch(review ? '/api/inbox/review' : '/api/inbox/comment', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(review
+                    // The commit shown here, so a review never lands on code that changed meanwhile.
+                    ? { repo: item.repo, number: item.number, event, body: text, sha: detail?.headSha ?? item.headSha }
+                    : { repo: item.repo, number: item.number, body: text }),
+            }));
+            setDone({ approve: 'Approved.', request_changes: 'Changes requested.', comment: 'Review comment sent.', plain: 'Comment sent.' }[event]);
+            setText('');
+            onDone();
+        } catch (err) {
+            setError(err.message);
+        } finally {
+            setSending(null);
+        }
+    };
+
+    const busy = sending !== null;
+    const empty = text.trim() === '';
+
+    return (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" role="dialog" aria-modal="true" aria-label={`${item.repo}#${item.number}`}>
+            <div className="mx-4 flex max-h-[90vh] w-full max-w-3xl flex-col rounded-lg bg-white shadow-xl">
+                <div className="flex items-start justify-between gap-3 border-b border-gray-200 p-5">
+                    <div className="min-w-0">
+                        <Text variant="h3" className="break-words">{item.title}</Text>
+                        <Text variant="muted" className="text-xs">
+                            {item.repo} #{item.number}{item.author && <> by {item.author}</>}
+                            {detail?.type === 'pr' && <> · {detail.headRef} into {detail.baseRef}</>}
+                            {' · '}<a href={item.url} target="_blank" rel="noreferrer" className="text-blue-600 hover:underline">open on GitHub</a>
+                        </Text>
+                    </div>
+                    <Button variant="ghost" size="icon" onClick={onClose} className="h-8 w-8 flex-shrink-0 text-gray-400 hover:text-gray-600" aria-label="Close">
+                        <X size={20} />
+                    </Button>
+                </div>
+
+                <div className="flex-1 space-y-4 overflow-y-auto p-5">
+                    {loadError && <p role="alert" className="text-sm text-red-600">{loadError}</p>}
+                    {!detail && !loadError && <Text variant="muted">Loading from GitHub...</Text>}
+                    {detail && (
+                        <>
+                            {detail.type === 'pr' && (
+                                <p className="text-xs text-gray-600">
+                                    <span className="font-medium text-green-700">+{detail.additions}</span>{' '}
+                                    <span className="font-medium text-red-700">−{detail.deletions}</span> in {detail.changedFiles} file{detail.changedFiles === 1 ? '' : 's'}
+                                    {detail.mergeable === false && <span className="ml-2 font-medium text-red-700">has conflicts</span>}
+                                    {detail.draft && <span className="ml-2 text-gray-500">draft</span>}
+                                </p>
+                            )}
+                            <pre className="max-h-64 overflow-y-auto whitespace-pre-wrap break-words rounded-md border border-gray-200 bg-gray-50 p-3 font-sans text-sm text-gray-800">
+                                {detail.body || <span className="italic text-gray-400">No description.</span>}
+                                {detail.bodyTruncated && '\n…'}
+                            </pre>
+                            {detail.files?.length > 0 && (
+                                <ul className="space-y-0.5 text-xs">
+                                    {detail.files.map((file) => (
+                                        <li key={file.path} className="flex justify-between gap-3">
+                                            <span className={cn('truncate font-mono', FILE_TONES[file.status] || 'text-gray-700')}>{file.path}</span>
+                                            <span className="flex-shrink-0 tabular-nums text-gray-500">+{file.additions} −{file.deletions}</span>
+                                        </li>
+                                    ))}
+                                    {detail.changedFiles > detail.files.length && <li className="text-gray-400">…and {detail.changedFiles - detail.files.length} more files</li>}
+                                </ul>
+                            )}
+                        </>
+                    )}
+                </div>
+
+                <div className="space-y-3 border-t border-gray-200 p-5">
+                    <textarea
+                        value={text} onChange={(e) => { setText(e.target.value); setDone(''); }} rows={3} maxLength={60000}
+                        aria-label={isPr ? 'Review comment' : 'Comment'} placeholder={isPr ? 'Leave a comment (optional when approving)' : 'Write a comment'}
+                        className="block w-full rounded-md border border-gray-200 bg-white p-3 text-sm text-gray-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+                    />
+                    <div className="flex flex-wrap items-center gap-2">
+                        {isPr ? (
+                            <>
+                                <Button onClick={() => send('approve')} disabled={busy || !detail} className="gap-2">
+                                    {sending === 'approve' ? <Loader2 size={14} className="animate-spin" /> : <Check size={14} />}Approve
+                                </Button>
+                                <Button variant="outline" onClick={() => send('request_changes')} disabled={busy || empty || !detail}>Request changes</Button>
+                                <Button variant="outline" onClick={() => send('comment')} disabled={busy || empty || !detail}>Comment</Button>
+                            </>
+                        ) : (
+                            <Button onClick={() => send('plain')} disabled={busy || empty} className="gap-2">
+                                {sending === 'plain' && <Loader2 size={14} className="animate-spin" />}Comment
+                            </Button>
+                        )}
+                        {error && <span role="alert" className="text-sm text-red-600">{error}</span>}
+                        {done && <span role="status" className="text-sm text-green-600">{done}</span>}
+                        <Button variant="ghost" onClick={onClose} className="ml-auto">Close</Button>
+                    </div>
+                </div>
+            </div>
+        </div>
     );
 }
 
@@ -241,7 +377,7 @@ function SectionList({ sections, counts, active, onPick, views, activeQuery, onA
                 </div>
             ))}
             <p className="mt-auto px-3 pt-4 text-[11px] leading-relaxed text-gray-400">
-                <kbd>j</kbd>/<kbd>k</kbd> move · <kbd>x</kbd> select · <kbd>o</kbd> open · <kbd>/</kbd> search
+                <kbd>j</kbd>/<kbd>k</kbd> move · <kbd>x</kbd> select · <kbd>r</kbd> review · <kbd>o</kbd> open · <kbd>/</kbd> search
             </p>
         </nav>
     );
@@ -257,6 +393,7 @@ export function InboxPage() {
     const [selected, setSelected] = useState(() => new Set());
     const [activeRow, setActiveRow] = useState(-1);
     const [merging, setMerging] = useState(false);
+    const [opened, setOpened] = useState(null);
     const listRef = useRef(null);
     const searchRef = useRef(null);
     const { views, saveView, deleteView } = useSavedViews();
@@ -327,10 +464,11 @@ export function InboxPage() {
         k: () => move(-1),
         x: () => { if (activeItem && isMergeable(activeItem)) toggle(activeItem); },
         o: () => { if (activeItem) window.open(activeItem.url, '_blank', 'noopener'); },
+        r: () => { if (activeItem) setOpened(activeItem); },
         enter: () => { if (activeItem) window.open(activeItem.url, '_blank', 'noopener'); },
         '/': () => searchRef.current?.querySelector('input')?.focus(),
         escape: () => { setActiveRow(-1); setSelected(new Set()); },
-    }, { enabled: !merging });
+    }, { enabled: !merging && !opened });
     useEffect(() => {
         if (activeRow >= 0) listRef.current?.querySelector('[data-active="true"]')?.scrollIntoView?.({ block: 'nearest' });
     }, [activeRow]);
@@ -439,7 +577,7 @@ export function InboxPage() {
                                             <ul className="divide-y divide-gray-100">
                                                 {rows.map((item) => (
                                                     <ItemRow key={itemKey(item)} item={item} showRepo={!repo}
-                                                        active={activeItem === item} selected={selected.has(itemKey(item))} onToggle={() => toggle(item)} />
+                                                        active={activeItem === item} selected={selected.has(itemKey(item))} onToggle={() => toggle(item)} onOpen={() => setOpened(item)} />
                                                 ))}
                                             </ul>
                                         </section>
@@ -450,6 +588,8 @@ export function InboxPage() {
                     </Card>
                 )}
             </DashboardLayout>
+
+            {opened && <ItemModal item={opened} onClose={() => setOpened(null)} onDone={load} />}
 
             {merging && (
                 <MergeModal

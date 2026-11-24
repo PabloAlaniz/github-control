@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom';
-import { HomePage, ActivityPage, LoginPage, MetricsPage, RepoMetricsPage, DependenciesPage, AlertsPage, InboxPage, EmbedsPage, StatusPage, PolicyPage, SearchPage } from './pages';
+import { HomePage, ActivityPage, LoginPage, MetricsPage, RepoMetricsPage, DependenciesPage, AlertsPage, InboxPage, EmbedsPage, StatusPage, PolicyPage, SearchPage, ReportPage } from './pages';
 import { SetupPage } from './pages/SetupPage';
 import { SettingsPage } from './pages/SettingsPage';
 import { ProtectedRoute } from './components/templates/ProtectedRoute';
@@ -60,6 +60,7 @@ function App() {
       <Route path="/dependencies" element={<ProtectedRoute><DependenciesPage /></ProtectedRoute>} />
       <Route path="/status" element={<StatusPage />} />
       <Route path="/embeds" element={<ProtectedRoute><EmbedsPage /></ProtectedRoute>} />
+      <Route path="/report" element={<ProtectedRoute><ReportPage /></ProtectedRoute>} />
       <Route path="/search" element={<ProtectedRoute><SearchPage /></ProtectedRoute>} />
       <Route path="/policy" element={<ProtectedRoute><PolicyPage /></ProtectedRoute>} />
       <Route path="/inbox" element={<ProtectedRoute><InboxPage /></ProtectedRoute>} />

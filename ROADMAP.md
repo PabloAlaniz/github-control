@@ -34,10 +34,11 @@ Where GitHub Control is heading. Nothing here is a promise; priorities follow wh
 - Code search across all tracked repos
 - Alert rules of your own in the policy (coverage, CI reliability, unreleased commits, settings drift, Scorecard, end-of-life runtimes, custom checks)
 - Check and review state of each pull request in the inbox, and a "ready to merge" section
+- Review and comment on a pull request, or comment on an issue, from the inbox
+- Report: what changed in the last 7, 14 or 30 days
 
 ## Next
 
-- **Inbox**: review and comment on a pull request without leaving it.
 - **AI cost attribution**: track AI coding assistant usage per repo.
 
 ## Later

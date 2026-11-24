@@ -14,10 +14,14 @@ const checksList = vi.fn();
 const combinedStatus = vi.fn();
 const getAuthenticated = vi.fn();
 const graphql = vi.fn();
+const issuesGet = vi.fn();
+const listFiles = vi.fn();
+const createReview = vi.fn();
+const createComment = vi.fn();
 vi.mock('@back/lib/github/client', () => ({
   getOctokit: () => ({
-    issues: { listForRepo: issuesList },
-    pulls: { list: pullsList, get: pullsGet, merge: pullsMerge },
+    issues: { listForRepo: issuesList, get: issuesGet, createComment },
+    pulls: { list: pullsList, get: pullsGet, merge: pullsMerge, listFiles, createReview },
     checks: { listForRef: checksList },
     repos: { getCombinedStatusForRef: combinedStatus },
     users: { getAuthenticated },
@@ -239,7 +243,119 @@ describe('inbox API', () => {
     });
   });
 
+  describe('reading one item', () => {
+    beforeEach(() => {
+      issuesGet.mockResolvedValue({ data: { title: 'Add refunds', html_url: 'https://github.com/acme/api/pull/7', state: 'open', user: { login: 'bob' }, body: 'x'.repeat(7000), comments: 2, pull_request: {} } });
+      pullsGet.mockResolvedValue({ data: { state: 'open', draft: false, head: { sha: SHA, ref: 'feat/refunds' }, base: { ref: 'main' }, additions: 120, deletions: 8, changed_files: 3, mergeable: true } });
+      listFiles.mockResolvedValue({ data: [{ filename: 'src/refunds.ts', status: 'added', additions: 100, deletions: 0 }] });
+    });
+
+    it('returns what a pull request says and changes', async () => {
+      const body = await (await request('/api/inbox/item?repo=acme/api&number=7')).json() as any;
+      expect(body).toMatchObject({
+        type: 'pr', repo: 'acme/api', number: 7, title: 'Add refunds', author: 'bob', headSha: SHA, baseRef: 'main',
+        additions: 120, deletions: 8, changedFiles: 3, mergeable: true, bodyTruncated: true,
+        files: [{ path: 'src/refunds.ts', status: 'added', additions: 100, deletions: 0 }],
+      });
+      expect(body.body).toHaveLength(6000);
+    });
+
+    it('returns an issue without asking for pull request data', async () => {
+      issuesGet.mockResolvedValue({ data: { title: 'Timeouts', html_url: 'u', state: 'open', user: null, body: null, comments: 0 } });
+      expect(await (await request('/api/inbox/item?repo=acme/api&number=3')).json()).toMatchObject({ type: 'issue', author: null, body: '', bodyTruncated: false });
+      expect(pullsGet).not.toHaveBeenCalled();
+    });
+
+    it('refuses repos it does not track, bad input and items that do not exist', async () => {
+      expect((await request('/api/inbox/item?repo=other/secret&number=1')).status).toBe(400);
+      expect((await request('/api/inbox/item?repo=acme/api')).status).toBe(400);
+      expect((await request('/api/inbox/item?repo=acme/api&number=abc')).status).toBe(400);
+      issuesGet.mockRejectedValue(Object.assign(new Error('Not Found'), { status: 404 }));
+      expect((await request('/api/inbox/item?repo=acme/api&number=99')).status).toBe(404);
+    });
+  });
+
+  describe('POST /api/inbox/review', () => {
+    const review = (body: Record<string, unknown> = {}) =>
+      post('/api/inbox/review', { repo: 'acme/api', number: 7, event: 'approve', sha: SHA, ...body });
+    const reviews = async () =>
+      (await storage.activity.listActivities({ limit: 50, offset: 0 })).filter((a: any) => a.action === 'repo.pr_review');
+
+    // Braces on purpose: a hook that returns a function gets it called as cleanup, and a mock is a function.
+    beforeEach(() => { createReview.mockResolvedValue({ data: { html_url: 'https://github.com/acme/api/pull/7#pullrequestreview-1' } }); });
+
+    it('approves the commit that was shown, logs it and refreshes the repo', async () => {
+      const res = await review();
+      expect(await res.json()).toEqual({ success: true, reviewUrl: 'https://github.com/acme/api/pull/7#pullrequestreview-1' });
+      expect(createReview).toHaveBeenCalledWith({ owner: 'acme', repo: 'api', pull_number: 7, commit_id: SHA, event: 'APPROVE' });
+      expect(await reviews()).toEqual([expect.objectContaining({ entity_id: 'acme/api', new_value: '#7: approve', metadata: { number: 7, event: 'approve', sha: SHA } })]);
+      expect(issuesList).toHaveBeenCalled();
+    });
+
+    it('requests changes or comments with the text given', async () => {
+      await review({ event: 'request_changes', body: ' Needs tests ' });
+      expect(createReview).toHaveBeenCalledWith(expect.objectContaining({ event: 'REQUEST_CHANGES', body: 'Needs tests' }));
+      await review({ event: 'comment', body: 'Looks close' });
+      expect(createReview).toHaveBeenLastCalledWith(expect.objectContaining({ event: 'COMMENT', body: 'Looks close' }));
+    });
+
+    it('refuses to review code that changed since it was shown, or a closed pull request', async () => {
+      pullsGet.mockResolvedValue({ data: { state: 'open', draft: false, head: { sha: 'f'.repeat(40) } } });
+      const moved = await review();
+      expect(moved.status).toBe(409);
+      expect((await moved.json() as any).error).toMatch(/new commits since you looked/);
+
+      pullsGet.mockResolvedValue({ data: { state: 'closed', draft: false, head: { sha: SHA } } });
+      expect((await review()).status).toBe(409);
+      expect(createReview).not.toHaveBeenCalled();
+      expect(await reviews()).toEqual([]);
+    });
+
+    it('reports what GitHub refuses, such as approving your own pull request', async () => {
+      createReview.mockRejectedValue(Object.assign(new Error('Can not approve your own pull request'), { status: 422 }));
+      const res = await review();
+      expect(res.status).toBe(409);
+      expect((await res.json() as any).error).toBe('GitHub refused: Can not approve your own pull request');
+
+      createReview.mockRejectedValue(Object.assign(new Error('Resource not accessible'), { status: 403 }));
+      expect((await review()).status).toBe(403);
+    });
+
+    it('needs text to comment or request changes, and valid input', async () => {
+      expect((await review({ event: 'request_changes' })).status).toBe(400);
+      expect((await review({ event: 'comment', body: '   ' })).status).toBe(400);
+      expect((await review({ event: 'merge' })).status).toBe(400);
+      expect((await review({ sha: 'nope' })).status).toBe(400);
+      expect((await review({ repo: 'other/secret' })).status).toBe(400);
+      expect((await post('/api/inbox/review', '{')).status).toBe(400);
+      expect(createReview).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('POST /api/inbox/comment', () => {
+    beforeEach(() => { createComment.mockResolvedValue({ data: { html_url: 'https://github.com/acme/api/issues/3#issuecomment-1' } }); });
+
+    it('comments on an issue or pull request and logs it', async () => {
+      const res = await post('/api/inbox/comment', { repo: 'acme/api', number: 3, body: 'On it.' });
+      expect(await res.json()).toEqual({ success: true, commentUrl: 'https://github.com/acme/api/issues/3#issuecomment-1' });
+      expect(createComment).toHaveBeenCalledWith({ owner: 'acme', repo: 'api', issue_number: 3, body: 'On it.' });
+      const log = (await storage.activity.listActivities({ limit: 50, offset: 0 })).filter((a: any) => a.action === 'repo.issue_comment');
+      expect(log).toEqual([expect.objectContaining({ entity_id: 'acme/api', new_value: '#3: comment' })]);
+      // The comment's text is not copied into the activity log.
+      expect(JSON.stringify(log)).not.toContain('On it.');
+    });
+
+    it('refuses an empty comment, a repo it does not track and reports GitHub failures', async () => {
+      expect((await post('/api/inbox/comment', { repo: 'acme/api', number: 3, body: '' })).status).toBe(400);
+      expect((await post('/api/inbox/comment', { repo: 'other/secret', number: 3, body: 'hi' })).status).toBe(400);
+      createComment.mockRejectedValue(Object.assign(new Error('boom'), { status: 500 }));
+      expect((await post('/api/inbox/comment', { repo: 'acme/api', number: 3, body: 'hi' })).status).toBe(502);
+    });
+  });
+
   it('requires authentication', async () => {
+    expect((await app.request('/api/inbox/review', { method: 'POST' }, env)).status).toBe(401);
+    expect((await app.request('/api/inbox/comment', { method: 'POST' }, env)).status).toBe(401);
     expect((await app.request('/api/inbox', {}, env)).status).toBe(401);
     expect((await app.request('/api/inbox/merge', { method: 'POST' }, env)).status).toBe(401);
   });

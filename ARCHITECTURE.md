@@ -146,7 +146,7 @@ The `lockfile` signal can hold thousands of entries per repo, so its `items` are
 
 The inbox is a signal like the others: each repo's open pull requests and issues are one `inbox` record, and `services/inbox.service.ts` flattens the records of the active repos into one list. Sections and filters are the frontend's (`front/src/lib/inbox.js`); a saved inbox view is a saved view whose query starts with `inbox=1`.
 
-Three routes act on GitHub from what a signal showed: `routes/branches.ts` (delete branches), `routes/config.ts` (apply the settings baseline) and `routes/inbox.ts` (merge pull requests). All re-read the current state from GitHub before changing anything and log every change.
+Three routes act on GitHub from what a signal showed: `routes/branches.ts` (delete branches), `routes/config.ts` (apply the settings baseline) and `routes/inbox.ts` (merge pull requests, submit reviews, post comments). All re-read the current state from GitHub before changing anything and log every change.
 
 ### Service checks
 
@@ -168,7 +168,9 @@ Three routes act on GitHub from what a signal showed: `routes/branches.ts` (dele
 
 ### Code search
 
-`services/search.service.ts` is the one place that asks GitHub at request time rather than reading stored data. It scopes the query to the owners of the tracked repos (qualifiers in the user's text that would move the search elsewhere are dropped) and keeps only results from repos the dashboard tracks.
+`services/report.service.ts` builds the report from stored data only (metric trends, the `release` and `inbox` signals, alerts, service checks, traffic); it never calls GitHub.
+
+Two places ask GitHub at request time rather than reading stored data: `services/search.service.ts`, and the inbox when it opens one pull request or issue (`getItemDetail`). The search service scopes the query to the owners of the tracked repos (qualifiers in the user's text that would move the search elsewhere are dropped) and keeps only results from repos the dashboard tracks.
 
 ### Public surface
 

@@ -33,6 +33,8 @@ export const ACTIONS = {
   CONFIG_APPLY: 'repo.config_apply',
   POLICY_UPDATE: 'policy.update',
   PR_MERGE: 'repo.pr_merge',
+  PR_REVIEW: 'repo.pr_review',
+  ISSUE_COMMENT: 'repo.issue_comment',
   ALERT_CHANNEL_CREATE: 'alert_channel.create',
   ALERT_CHANNEL_UPDATE: 'alert_channel.update',
   ALERT_CHANNEL_DELETE: 'alert_channel.delete',

@@ -195,6 +195,16 @@ export const TOOLS: Tool[] = [
     },
   },
   {
+    name: 'get_report',
+    description: 'What changed across the repositories and services over the last days: a few highlights, stars and code growth, releases, alerts opened and resolved, open pull requests and issues, failing CI, service uptime and traffic.',
+    readOnly: true,
+    inputSchema: { type: 'object', properties: { days: { type: 'number', description: 'How many days back (default 7, at most 90)' } } },
+    async run(args, api) {
+      const days = Number.isInteger(args.days) && args.days >= 1 && args.days <= 90 ? args.days : 7;
+      return ask(api, 'GET', `/api/report?days=${days}`);
+    },
+  },
+  {
     name: 'search_code',
     description: 'Search the code of the tracked repositories on GitHub and get the files and lines that match. Unlike the other tools this asks GitHub live, which allows about 10 searches a minute. Supports GitHub code search qualifiers such as path:, extension: and filename:.',
     readOnly: true,

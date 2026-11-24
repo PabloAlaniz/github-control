@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import {
-    Activity, BadgeCheck, BarChart3, Bell, FileSearch, Inbox, LayoutGrid, LogOut, Menu, Monitor, Moon, Package,
+    Activity, BadgeCheck, BarChart3, Bell, FileSearch, Inbox, LayoutGrid, LogOut, Menu, Monitor, Moon, Newspaper, Package,
     ScrollText, Settings, Sun, X,
 } from 'lucide-react';
 import { useAlertCount } from '../../../hooks/useAlertCount';
@@ -14,6 +14,7 @@ export const NAV_ITEMS = [
     { path: '/', label: 'Repos', icon: LayoutGrid, match: (pathname) => pathname === '/' },
     { path: '/inbox', label: 'Inbox', icon: Inbox },
     { path: '/alerts', label: 'Alerts', icon: Bell },
+    { path: '/report', label: 'Report', icon: Newspaper },
     { path: '/search', label: 'Search', icon: FileSearch },
     { path: '/metrics', label: 'Metrics', icon: BarChart3 },
     { path: '/dependencies', label: 'Deps', icon: Package },

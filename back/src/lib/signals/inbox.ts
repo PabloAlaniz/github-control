@@ -27,6 +27,12 @@ export interface InboxItem {
   review: 'approved' | 'changes_requested' | 'review_required' | null;
 }
 
+/** A pull request with green checks and no review standing in its way. */
+export function isReadyToMergeItem(item: Record<string, any>): boolean {
+  return item.type === 'pr' && !item.draft && item.checks === 'success'
+    && item.review !== 'changes_requested' && item.review !== 'review_required';
+}
+
 /** What GraphQL knows about an open pull request that the REST listings do not. */
 export interface PullState {
   checks: InboxItem['checks'];

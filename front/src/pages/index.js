@@ -10,3 +10,4 @@ export { EmbedsPage } from './EmbedsPage';
 export { StatusPage } from './StatusPage';
 export { PolicyPage } from './PolicyPage';
 export { SearchPage } from './SearchPage';
+export { ReportPage } from './ReportPage';

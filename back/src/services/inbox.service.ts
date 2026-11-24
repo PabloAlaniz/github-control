@@ -153,3 +153,101 @@ export async function mergePullRequests(
   }
   return results;
 }
+
+// ── Reading and answering one item ──────────────────
+
+export class InboxActionError extends Error {
+  constructor(message: string, public status: 400 | 403 | 404 | 409 | 502) {
+    super(message);
+  }
+}
+
+/** Turns a GitHub failure into one the caller can show. */
+function asActionError(err: any, what: string): InboxActionError {
+  if (err instanceof InboxActionError) return err;
+  if (err?.status === 404) return new InboxActionError(`${what} was not found on GitHub`, 404);
+  if (err?.status === 403) return new InboxActionError(`The token is not allowed to do that on ${what}`, 403);
+  // 422 is how GitHub says "not this, not by you": e.g. approving your own pull request.
+  if (err?.status === 422) return new InboxActionError(`GitHub refused: ${err?.message ?? 'not allowed'}`, 409);
+  return new InboxActionError(`GitHub failed: ${err?.message ?? 'unknown error'}`, 502);
+}
+
+const MAX_BODY = 6000;
+
+/** What a pull request or issue says, read live: enough to decide without opening GitHub. */
+export async function getItemDetail(ctx: AppContext, fullName: string, number: number) {
+  const octokit = getOctokit(ctx.config);
+  const [owner, repo] = fullName.split('/');
+  const what = `${fullName}#${number}`;
+  try {
+    const { data: issue } = await octokit.issues.get({ owner, repo, issue_number: number });
+    const base = {
+      repo: fullName, number, title: issue.title, url: issue.html_url, state: issue.state,
+      author: issue.user?.login ?? null,
+      body: (issue.body ?? '').slice(0, MAX_BODY),
+      bodyTruncated: (issue.body ?? '').length > MAX_BODY,
+      comments: issue.comments,
+    };
+    if (!issue.pull_request) return { ...base, type: 'issue' as const };
+
+    const [{ data: pull }, { data: files }] = await Promise.all([
+      octokit.pulls.get({ owner, repo, pull_number: number }),
+      octokit.pulls.listFiles({ owner, repo, pull_number: number, per_page: 30 }),
+    ]);
+    return {
+      ...base, type: 'pr' as const,
+      draft: pull.draft === true, headSha: pull.head.sha, headRef: pull.head.ref, baseRef: pull.base.ref,
+      additions: pull.additions, deletions: pull.deletions, changedFiles: pull.changed_files,
+      mergeable: pull.mergeable ?? null,
+      files: files.map((file) => ({ path: file.filename, status: file.status, additions: file.additions, deletions: file.deletions })),
+    };
+  } catch (err) {
+    throw asActionError(err, what);
+  }
+}
+
+const REVIEW_EVENTS = { approve: 'APPROVE', request_changes: 'REQUEST_CHANGES', comment: 'COMMENT' } as const;
+
+export interface ReviewInput {
+  repo: string;
+  number: number;
+  event: keyof typeof REVIEW_EVENTS;
+  body: string;
+  /** Head commit when the pull request was shown. A review of anything newer is refused. */
+  sha: string;
+}
+
+/** Submits a review on GitHub, pinned to the commit the reviewer saw. */
+export async function reviewPullRequest(ctx: AppContext, input: ReviewInput): Promise<{ reviewUrl: string | null }> {
+  const octokit = getOctokit(ctx.config);
+  const [owner, repo] = input.repo.split('/');
+  const what = `${input.repo}#${input.number}`;
+  try {
+    const { data: pull } = await octokit.pulls.get({ owner, repo, pull_number: input.number });
+    if (pull.state !== 'open') throw new InboxActionError(`${what} is no longer open`, 409);
+    if (pull.head.sha !== input.sha) {
+      throw new InboxActionError(`${what} has new commits since you looked at it. Refresh and review it again.`, 409);
+    }
+    const { data: review } = await octokit.pulls.createReview({
+      owner, repo, pull_number: input.number, commit_id: input.sha, event: REVIEW_EVENTS[input.event],
+      ...(input.body && { body: input.body }),
+    });
+    await syncSignals(ctx, owner, repo, ['inbox']).catch(() => null);
+    return { reviewUrl: review.html_url ?? null };
+  } catch (err) {
+    throw asActionError(err, what);
+  }
+}
+
+/** Comments on a pull request or an issue. */
+export async function commentOn(ctx: AppContext, fullName: string, number: number, body: string): Promise<{ commentUrl: string | null }> {
+  const octokit = getOctokit(ctx.config);
+  const [owner, repo] = fullName.split('/');
+  try {
+    const { data } = await octokit.issues.createComment({ owner, repo, issue_number: number, body });
+    await syncSignals(ctx, owner, repo, ['inbox']).catch(() => null);
+    return { commentUrl: data.html_url ?? null };
+  } catch (err) {
+    throw asActionError(err, `${fullName}#${number}`);
+  }
+}

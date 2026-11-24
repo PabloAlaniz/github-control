@@ -156,6 +156,14 @@ describe('demo mode: server', () => {
 
     expect((await send('POST', '/api/inbox/refresh')).status).toBe(403);
     expect((await send('POST', '/api/inbox/merge', { pulls: [] })).status).toBe(403);
+    expect((await send('GET', '/api/inbox/item?repo=acme/api&number=1')).status).toBe(403);
+    expect((await send('POST', '/api/inbox/review', { repo: 'acme/api', number: 1, event: 'approve' })).status).toBe(403);
+    expect((await send('POST', '/api/inbox/comment', { repo: 'acme/api', number: 1, body: 'hi' })).status).toBe(403);
+
+    const report = await (await send('GET', '/api/report')).json();
+    expect(report.days).toBe(7);
+    expect(report.repos.total).toBeGreaterThan(5);
+    expect(report.highlights.length).toBeGreaterThan(0);
   });
 
   it('shows the public surfaces: cards, badges and the status page', async () => {

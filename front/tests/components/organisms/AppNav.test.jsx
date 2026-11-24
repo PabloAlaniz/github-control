@@ -29,7 +29,7 @@ describe('AppNav', () => {
     it('lists every destination and marks where you are', () => {
         renderAt('/inbox');
         const labels = within(rail()).getAllByRole('button').map((button) => button.getAttribute('aria-label'));
-        expect(labels.slice(0, 10)).toEqual(['Repos', 'Inbox', 'Alerts', 'Search', 'Metrics', 'Deps', 'Activity', 'Policy', 'Badges', 'Settings']);
+        expect(labels.slice(0, 11)).toEqual(['Repos', 'Inbox', 'Alerts', 'Report', 'Search', 'Metrics', 'Deps', 'Activity', 'Policy', 'Badges', 'Settings']);
         expect(within(rail()).getByRole('button', { name: 'Inbox' })).toHaveAttribute('aria-current', 'page');
         expect(within(rail()).getByRole('button', { name: 'Repos' })).not.toHaveAttribute('aria-current');
     });

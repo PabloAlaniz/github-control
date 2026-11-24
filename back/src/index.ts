@@ -31,6 +31,7 @@ import { alertsRoutes } from './routes/alerts';
 import { inboxRoutes } from './routes/inbox';
 import { policyRoutes } from './routes/policy';
 import { searchRoutes } from './routes/search';
+import { reportRoutes } from './routes/report';
 import { webhookInfoRoutes, webhookRoutes } from './routes/webhooks';
 import { createMcpRoutes } from './routes/mcp';
 import { sendDueDigests } from './services/alert.service';
@@ -142,6 +143,7 @@ app.route('/api/alerts', alertsRoutes);
 app.route('/api/inbox', inboxRoutes);
 app.route('/api/policy', policyRoutes);
 app.route('/api/search', searchRoutes);
+app.route('/api/report', reportRoutes);
 app.route('/api/webhooks', webhookInfoRoutes);
 // MCP: the same API as tools for agents. Each tool call is a request to this app, as the caller.
 app.route('/api/mcp', createMcpRoutes((request, env) => app.fetch(request, env)));

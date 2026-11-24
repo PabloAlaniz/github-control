@@ -38,7 +38,8 @@ Open http://localhost:13337. From a clone, without Docker: `DEMO=true npm start`
 - **Monorepo aware**: detects apps inside a repo and tracks each one's health and coverage.
 - **Services**: the deployed URLs behind your repos, health-checked every 15 minutes (configurable), with uptime, latency and incident history.
 - **Code search**: look for a word, a function or a config key in the code of all your repos at once.
-- **Inbox**: the open pull requests and issues of every repo in one list, with sections (needs my review, mine, assigned to me, dependency updates, stale), filters you can save, keyboard navigation and guarded bulk merge.
+- **Inbox**: the open pull requests and issues of every repo in one list, with sections (needs my review, mine, assigned to me, dependency updates, stale), filters you can save, keyboard navigation, guarded bulk merge, and review or comment without leaving the page.
+- **Report**: what changed in the last week (or 14 or 30 days) in a few sentences, then the detail: growth, releases, alerts, pull requests, CI and services.
 - **Public surface** (opt-in): badges and cards for your READMEs, a summary card of your open source work, and a status page for your services.
 - **Real time** (optional): with a GitHub webhook, a failed build, a new pull request or a security alert shows up as it happens instead of at the next sync.
 - **Alerts**: know when CI breaks, a service goes down, a serious security alert appears, a repo you care about goes stale or a health score drops, in Slack, Discord, Telegram, ntfy or any webhook, with an optional daily or weekly digest.
@@ -229,10 +230,11 @@ The endpoint takes no API key, because GitHub cannot send one. Instead every del
 
 ### What changes on GitHub
 
-Almost everything is read-only. Three actions write to GitHub, all only when you ask and all recorded in the activity log:
+Almost everything is read-only. Four actions write to GitHub, all only when you ask and all recorded in the activity log:
 
 - **Branch cleanup** deletes the branches you select. The server re-checks each one first and never deletes the default branch, a protected branch, or a branch that moved since it was listed.
 - **Merging pull requests** from the inbox. The server re-checks each one first and skips it if it is closed, a draft, has new commits since it was listed, or has failing or running checks. GitHub's own rules (required reviews, conflicts, branch protection) still apply.
+- **Reviewing and commenting** from the inbox: approve, request changes or comment on a pull request, and comment on an issue, as the account the token belongs to. A review is refused if the pull request was closed or got new commits since you opened it.
 - **Applying the settings baseline** changes only the settings that differ. Review the baseline in **Settings** before applying it in bulk.
 
 ## Policy
@@ -321,6 +323,7 @@ claude mcp add --transport http github-control https://your-server.example/api/m
 | `list_dependencies` | Packages and versions across repos, diverging majors, end-of-life runtimes |
 | `find_package` | Every repo a package is in, transitive dependencies included, with the pinned versions |
 | `list_services` | Services with their state and uptime |
+| `get_report` | What changed in the last days: highlights, growth, releases, alerts, CI, services |
 | `search_code` | Search the code of the tracked repos on GitHub |
 | `get_policy`, `plan_policy` | The policy in force, and a dry run of a new one |
 | `update_repo` | Set a repo's priority, next action or notes in the dashboard |
@@ -341,10 +344,18 @@ The **Inbox** lists the open pull requests and issues of all your active repos. 
 
 - **Sections** are ready-made questions: what needs my review, my pull requests, what is assigned to me, what is ready to merge (green checks, no review pending), dependency updates (Dependabot, Renovate), pull requests nobody touched in 30 days, all pull requests, all issues. "Me" is the account the GitHub token belongs to.
 - **Filters** by text, repo, label and draft state live in the URL. Name a combination to keep it under *Saved views*.
-- **Keyboard**: `j`/`k` to move, `x` to select, `o` or `Enter` to open on GitHub, `/` to search.
+- **Keyboard**: `j`/`k` to move, `x` to select, `r` to review or answer, `o` or `Enter` to open on GitHub, `/` to search.
 - **Merge** the selected pull requests in one go: dependency updates are grouped by repo so a whole repo can be selected at once.
 
+- **Review** opens a pull request in place, with its description and the files it changes, to approve it, request changes or comment. **Answer** does the same for an issue, with a comment. The fine-grained token needs *Pull requests* and *Issues* set to read and write for this.
+
 Each pull request shows whether its checks pass, fail or are still running, and where its review stands. It keeps the 100 most recently updated open items of each repo.
+
+## Report
+
+The **Report** page answers "what happened while I was not looking" for the last 7, 14 or 30 days. It opens with a few sentences (CI that is failing, services that went down, alerts opened and resolved, releases, pull requests ready to merge) and then gives the detail: stars and lines of code gained per repo, views against the period before, releases published, open alerts, and uptime and incidents per service.
+
+It is built from what the dashboard already stores, so it costs no GitHub calls. Agents get the same through the `get_report` MCP tool.
 
 ## Alerts
 
@@ -435,7 +446,8 @@ curl -X POST -H "Authorization: Bearer $API_KEY" http://localhost:13337/api/sync
 | Search | `GET /api/search/code?q=&repo=&language=` |
 | Policy | `GET /api/policy`, `POST /api/policy/plan`, `PUT /api/policy` |
 | MCP | `POST /api/mcp` |
-| Inbox | `GET /api/inbox`, `POST /api/inbox/refresh`, `POST /api/inbox/merge` |
+| Inbox | `GET /api/inbox`, `POST /api/inbox/refresh`, `POST /api/inbox/merge`, `GET /api/inbox/item?repo=&number=`, `POST /api/inbox/review`, `POST /api/inbox/comment` |
+| Report | `GET /api/report?days=` |
 | Alerts | `GET /api/alerts?status={open,resolved,all}`, `POST /api/alerts/evaluate`, `GET/POST /api/alerts/channels`, `PUT/DELETE /api/alerts/channels/:id`, `POST /api/alerts/channels/:id/test` |
 | Saved views | `GET/POST /api/saved-views`, `DELETE /api/saved-views/:id` |
 | Services & apps | `/api/services`, `GET /api/services/uptime`, `/api/repo-apps` |
