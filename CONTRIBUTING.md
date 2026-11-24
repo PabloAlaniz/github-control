@@ -32,3 +32,20 @@ To run the self-hosted server locally: `npm start` (data goes to `back/data/`). 
 ## Reporting security issues
 
 Please do not open a public issue for a vulnerability. See [`SECURITY.md`](SECURITY.md).
+
+## Commit messages
+
+Commits on `main` follow [Conventional Commits](https://www.conventionalcommits.org/): `type: summary`, optionally `type(scope): summary`. The type decides the next version and what the changelog lists:
+
+- `feat:` a new feature (minor version).
+- `fix:` a bug fix (patch version).
+- `feat!:` or `fix!:`, or a `BREAKING CHANGE:` footer, for a change that breaks existing setups.
+- `docs:`, `test:`, `refactor:`, `perf:`, `ci:`, `build:`, `chore:` for everything else; these do not trigger a release on their own.
+
+## Releasing
+
+Releases are automatic. On every push to `main`, the **Release** workflow (release-please) opens or updates a pull request named `chore(main): release X.Y.Z` with the next version in the `package.json` files, the lockfile and the MCP server info, and the new section of `CHANGELOG.md`. Merging that pull request creates the tag `vX.Y.Z` and the GitHub release, and publishes the Docker image (`X.Y.Z`, `X.Y` and `latest`).
+
+Do not bump versions by hand. To force a specific version, add a `Release-As: X.Y.Z` footer to a commit.
+
+The workflow needs **Settings → Actions → General → Allow GitHub Actions to create and approve pull requests** turned on.
