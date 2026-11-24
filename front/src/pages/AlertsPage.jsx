@@ -12,6 +12,7 @@ import { Select } from '../components/atoms/Select';
 import { Checkbox } from '../components/atoms/Checkbox';
 import { ErrorState } from '../components/molecules/ErrorState';
 import { apiFetch } from '../lib/api';
+import { alertsChanged } from '../hooks/useAlertCount';
 import { formatTimeAgo } from '../lib/formatters';
 import { cn } from '../lib/utils';
 
@@ -267,6 +268,7 @@ export function AlertsPage() {
         try {
             await apiFetch('/api/alerts/evaluate', { method: 'POST' });
             await load();
+            alertsChanged();
         } finally {
             setEvaluating(false);
         }
@@ -286,12 +288,12 @@ export function AlertsPage() {
     return (
         <DashboardLayout
             stats={
-                <header className="flex items-center gap-4">
+                <header className="flex flex-wrap items-center gap-x-4 gap-y-2">
                     <Button variant="ghost" onClick={() => navigate('/')} className="gap-2">
                         <ArrowLeft size={16} />
                         Back
                     </Button>
-                    <div className="flex-1">
+                    <div className="min-w-48 flex-1">
                         <Text variant="h2">Alerts</Text>
                         <Text variant="muted">{rulesText(data?.rules) || 'What needs attention across your repos and services'}</Text>
                     </div>

@@ -112,12 +112,12 @@ export function EmbedsPage() {
     return (
         <DashboardLayout
             stats={
-                <header className="flex items-center gap-4">
+                <header className="flex flex-wrap items-center gap-x-4 gap-y-2">
                     <Button variant="ghost" onClick={() => navigate('/')} className="gap-2">
                         <ArrowLeft size={16} />
                         Back
                     </Button>
-                    <div className="flex-1">
+                    <div className="min-w-48 flex-1">
                         <Text variant="h2">Badges and embeds</Text>
                         <Text variant="muted">Images and pages anyone can see without signing in, with the Markdown to paste in a README</Text>
                     </div>

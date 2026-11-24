@@ -192,12 +192,12 @@ export function PolicyPage() {
     return (
         <DashboardLayout
             stats={
-                <header className="flex items-center gap-4">
+                <header className="flex flex-wrap items-center gap-x-4 gap-y-2">
                     <Button variant="ghost" onClick={() => navigate('/')} className="gap-2">
                         <ArrowLeft size={16} />
                         Back
                     </Button>
-                    <div className="flex-1">
+                    <div className="min-w-48 flex-1">
                         <Text variant="h2">Policy</Text>
                         <Text variant="muted">What every repo is expected to have: settings, what counts for health, and when to alert</Text>
                     </div>

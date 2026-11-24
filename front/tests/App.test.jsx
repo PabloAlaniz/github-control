@@ -100,3 +100,30 @@ describe('App', () => {
     expect(screen.getByTestId('metrics-page')).toBeInTheDocument();
   });
 });
+describe('App shell', () => {
+  it('wraps the pages of a signed-in person in the navigation', async () => {
+    const auth = await import('@/lib/auth');
+    auth.setAuthDisabled(true);
+    render(<MemoryRouter initialEntries={['/inbox']}><App /></MemoryRouter>);
+    expect(screen.getByRole('navigation', { name: 'Main' })).toBeInTheDocument();
+    expect(screen.getByTestId('inbox-page')).toBeInTheDocument();
+    auth.setAuthDisabled(false);
+  });
+
+  it('leaves the login and the public status page bare', async () => {
+    const auth = await import('@/lib/auth');
+    auth.setAuthDisabled(true);
+    for (const path of ['/login', '/status']) {
+      const { unmount } = render(<MemoryRouter initialEntries={[path]}><App /></MemoryRouter>);
+      expect(screen.queryByRole('navigation', { name: 'Main' })).not.toBeInTheDocument();
+      unmount();
+    }
+    auth.setAuthDisabled(false);
+  });
+
+  it('shows no navigation to someone who is not signed in', () => {
+    localStorage.clear();
+    render(<MemoryRouter initialEntries={['/']}><App /></MemoryRouter>);
+    expect(screen.queryByRole('navigation', { name: 'Main' })).not.toBeInTheDocument();
+  });
+});

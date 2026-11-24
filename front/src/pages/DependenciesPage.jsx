@@ -159,12 +159,12 @@ export function DependenciesPage() {
         <DashboardLayout
             stats={
                 <div className="space-y-4">
-                    <header className="flex items-center gap-4">
+                    <header className="flex flex-wrap items-center gap-x-4 gap-y-2">
                         <Button variant="ghost" onClick={() => navigate('/')} className="gap-2">
                             <ArrowLeft size={16} />
                             Back
                         </Button>
-                        <div className="flex-1">
+                        <div className="min-w-48 flex-1">
                             <Text variant="h2">Dependencies</Text>
                             <Text variant="muted">Direct dependencies and runtimes declared across your repos</Text>
                         </div>

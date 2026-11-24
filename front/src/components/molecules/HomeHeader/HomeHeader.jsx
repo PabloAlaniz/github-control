@@ -1,33 +1,13 @@
 import { Button } from '../../atoms/Button';
 import { Text } from '../../atoms/Text';
 import { BackupMenu } from '../BackupMenu';
-import { RefreshCw, Activity, LogOut, Plus, BarChart3, Command, Package, DownloadCloud, Settings, Sun, Moon, Monitor, Bell, Inbox } from 'lucide-react';
-import { useTheme } from '../../../hooks/useTheme';
+import { RefreshCw, Plus, Command, DownloadCloud } from 'lucide-react';
 
 const SUBTITLES = {
     default: 'Manage and monitor your repositories',
     testing: 'Test quality and coverage across repos',
     infrastructure: 'Deployed services and health monitoring',
 };
-
-const THEME_ICONS = { system: Monitor, light: Sun, dark: Moon };
-const THEME_LABELS = { system: 'System theme', light: 'Light theme', dark: 'Dark theme' };
-
-function ThemeToggle() {
-    const { theme, cycle } = useTheme();
-    const Icon = THEME_ICONS[theme];
-    return (
-        <Button
-            onClick={cycle}
-            variant="ghost"
-            className="px-2.5"
-            title={`${THEME_LABELS[theme]} (click to change)`}
-            aria-label={`${THEME_LABELS[theme]}. Change theme`}
-        >
-            <Icon size={16} />
-        </Button>
-    );
-}
 
 /** "Sync all", or the progress of the sync in flight. */
 function syncLabel({ running, progress }) {
@@ -46,19 +26,12 @@ function syncTitle({ running, lastRun, error }) {
     return 'Refresh the list and update health, metrics, CI status and traffic of every repo';
 }
 
+/** Title and actions of the dashboard. Getting around the app is the navigation's job (AppNav). */
 export function HomeHeader({
     activeTab,
     refreshing,
     onRefresh,
     onAddService,
-    onActivity,
-    onMetrics,
-    onDependencies,
-    onInbox,
-    onAlerts,
-    alertCount,
-    onSettings,
-    onLogout,
     onImportSuccess,
     onOpenPalette,
     sync,
@@ -67,11 +40,11 @@ export function HomeHeader({
     const isServiceTab = activeTab === 'infrastructure';
 
     return (
-        <header className="flex items-center justify-between gap-2">
+        <header className="flex flex-wrap items-center justify-between gap-x-2 gap-y-3">
             <div className="flex items-center gap-3">
                 <div>
                     <Text variant="h2" className="whitespace-nowrap">GitHub Control</Text>
-                    <Text variant="muted" className="hidden xl:block">
+                    <Text variant="muted" className="hidden sm:block">
                         {SUBTITLES[activeTab] || SUBTITLES.default}
                     </Text>
                 </div>
@@ -113,54 +86,7 @@ export function HomeHeader({
                         <span className="hidden sm:inline">Add Service</span>
                     </Button>
                 )}
-                {onInbox && (
-                    <Button onClick={onInbox} variant="ghost" className="gap-2 px-2.5" title="Open pull requests and issues across repos">
-                        <Inbox size={16} />
-                        <span className="hidden min-[1440px]:inline">Inbox</span>
-                    </Button>
-                )}
-                <Button onClick={onActivity} variant="ghost" className="gap-2 px-2.5" title="Activity" aria-label="Activity">
-                    <Activity size={16} />
-                    <span className="hidden min-[1440px]:inline">Activity</span>
-                </Button>
-                <Button onClick={onMetrics} variant="ghost" className="gap-2 px-2.5" title="Metrics" aria-label="Metrics">
-                    <BarChart3 size={16} />
-                    <span className="hidden min-[1440px]:inline">Metrics</span>
-                </Button>
-                {onDependencies && (
-                    <Button onClick={onDependencies} variant="ghost" className="gap-2 px-2.5" title="Dependencies" aria-label="Dependencies">
-                        <Package size={16} />
-                        <span className="hidden min-[1440px]:inline">Deps</span>
-                    </Button>
-                )}
-                {onAlerts && (
-                    <Button
-                        onClick={onAlerts}
-                        variant="ghost"
-                        className="relative px-2.5"
-                        title={alertCount ? `${alertCount} open alert${alertCount === 1 ? '' : 's'}` : 'Alerts'}
-                        aria-label={alertCount ? `Alerts: ${alertCount} open` : 'Alerts'}
-                    >
-                        <Bell size={16} />
-                        {alertCount > 0 && (
-                            <span className="absolute -right-0.5 -top-0.5 min-w-[1.1rem] rounded-full bg-red-600 px-1 text-center text-[10px] font-semibold leading-[1.1rem] text-white">
-                                {alertCount > 99 ? '99+' : alertCount}
-                            </span>
-                        )}
-                    </Button>
-                )}
                 <BackupMenu onImportSuccess={onImportSuccess} />
-                {onSettings && (
-                    <Button onClick={onSettings} variant="ghost" className="gap-2" aria-label="Settings" title="Settings">
-                        <Settings size={16} />
-                        <span className="hidden 2xl:inline">Settings</span>
-                    </Button>
-                )}
-                <ThemeToggle />
-                <Button onClick={onLogout} variant="ghost" className="gap-2" aria-label="Logout" title="Logout">
-                    <LogOut size={16} />
-                    <span className="hidden 2xl:inline">Logout</span>
-                </Button>
             </div>
         </header>
     );

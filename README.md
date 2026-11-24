@@ -22,7 +22,8 @@ Open http://localhost:13337. From a clone, without Docker: `DEMO=true npm start`
 - **Health at a glance**: README, CI, tests, coverage, roadmap, docs quality and a composite health score per repo; latest CI run status.
 - **Saved views and shareable filters**: the tab and filters live in the URL; name a combination and get back to it in one click.
 - **Keyboard first**: a command palette (`Cmd/Ctrl+K`) to jump to a repo, group, view or action, and `j`/`k`/`x`/`o` to move through the table.
-- **Light and dark**: follows your system, or pick one from the header.
+- **Light and dark**: follows your system, or pick one from the navigation.
+- **Works on a phone**: the same pages, with the navigation and the filters behind a menu.
 - **Signals from GitHub** per repo, refreshed by every sync:
   - a *standards* checklist (description, topics, protected default branch, CODEOWNERS and, for public repos, license, security policy and contributing guide) that also counts toward the health score;
   - open *security alerts* (dependencies, code scanning, secrets) by severity;

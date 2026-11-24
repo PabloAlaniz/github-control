@@ -22,7 +22,7 @@ import { useRepoFilters } from '../hooks/useRepoFilters';
 import { useServiceFilters } from '../hooks/useServiceFilters';
 import { useServiceActions } from '../hooks/useServiceActions';
 import { useFullSync } from '../hooks/useFullSync';
-import { useAlertCount } from '../hooks/useAlertCount';
+import { alertsChanged } from '../hooks/useAlertCount';
 import { isInboxView } from '../lib/inbox';
 
 import { useSavedViews } from '../hooks/useSavedViews';
@@ -94,8 +94,7 @@ export function HomePage() {
 
     // Full sync (health, metrics, CI, traffic, signals); reload the list when a run finishes.
     // A finished sync re-evaluates the alerts on the server.
-    const alerts = useAlertCount();
-    const sync = useFullSync(() => { fetchAll(); alerts.refresh(); });
+    const sync = useFullSync(() => { fetchAll(); alertsChanged(); });
 
     // Command palette (Cmd/Ctrl+K)
     const [paletteOpen, setPaletteOpen] = useState(false);
@@ -181,14 +180,6 @@ export function HomePage() {
                             refreshing={refreshing}
                             onRefresh={refreshData}
                             onAddService={() => setShowServiceForm(true)}
-                            onActivity={() => navigate('/activity')}
-                            onMetrics={() => navigate('/metrics')}
-                            onDependencies={() => navigate('/dependencies')}
-                            onInbox={() => navigate('/inbox')}
-                            onAlerts={() => navigate('/alerts')}
-                            alertCount={alerts.count}
-                            onSettings={() => navigate('/settings')}
-                            onLogout={handleLogout}
                             onOpenPalette={() => setPaletteOpen(true)}
                             onImportSuccess={fetchAll}
                             sync={sync}

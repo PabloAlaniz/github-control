@@ -88,11 +88,11 @@ function ItemRow({ item, active, selected, onToggle, showRepo }) {
                 return <CheckIcon size={14} className={cn('mt-0.5 flex-shrink-0', tone)} aria-label={label} title={label} />;
             })()}
             {item.comments > 0 && (
-                <span className="flex flex-shrink-0 items-center gap-1 text-xs text-gray-400" title={`${item.comments} comments`}>
+                <span className="hidden flex-shrink-0 items-center gap-1 text-xs text-gray-400 sm:flex" title={`${item.comments} comments`}>
                     <MessageSquare size={12} />{item.comments}
                 </span>
             )}
-            <span className="w-24 flex-shrink-0 text-right text-xs text-gray-400" title={item.updatedAt}>{formatTimeAgo(item.updatedAt)}</span>
+            <span className="hidden w-24 flex-shrink-0 text-right text-xs text-gray-400 sm:block" title={item.updatedAt}>{formatTimeAgo(item.updatedAt)}</span>
         </li>
     );
 }
@@ -358,12 +358,12 @@ export function InboxPage() {
                     />
                 }
                 stats={
-                    <header className="flex items-center gap-4">
+                    <header className="flex flex-wrap items-center gap-x-4 gap-y-2">
                         <Button variant="ghost" onClick={() => navigate('/')} className="gap-2">
                             <ArrowLeft size={16} />
                             Back
                         </Button>
-                        <div className="flex-1">
+                        <div className="min-w-48 flex-1">
                             <Text variant="h2">Inbox</Text>
                             <Text variant="muted">
                                 Open pull requests and issues across your repos

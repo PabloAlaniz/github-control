@@ -28,6 +28,7 @@ Where GitHub Control is heading. Nothing here is a promise; priorities follow wh
 - OpenSSF Scorecard as an optional signal for public repos
 - MCP server: the dashboard as tools for coding agents
 - Alerts for failing CI, services down, serious security alerts, stale repos and low health, sent to Slack, Discord, Telegram, ntfy, email or a webhook, with daily or weekly digests
+- One navigation for every page, and a layout that works on a phone
 - Code search across all tracked repos
 - Alert rules of your own in the policy (coverage, CI reliability, unreleased commits, settings drift, Scorecard, end-of-life runtimes, custom checks)
 - Check and review state of each pull request in the inbox, and a "ready to merge" section
@@ -40,7 +41,6 @@ Where GitHub Control is heading. Nothing here is a promise; priorities follow wh
 ## Later
 
 - GitHub App / OAuth sign-in, multiple users.
-- Better mobile layout.
 - Dependency inventory from lockfiles (resolved and transitive versions) and more ecosystems.
 
 ## Known limitations

@@ -32,7 +32,7 @@ export function DemoBanner() {
     return (
         <div
             role="status"
-            className="fixed bottom-4 left-1/2 z-40 flex max-w-[calc(100vw-2rem)] -translate-x-1/2 items-center gap-2 rounded-full border border-amber-200 bg-amber-50 px-4 py-2 text-sm text-amber-800 shadow-lg"
+            className="fixed bottom-4 left-1/2 z-40 flex w-max max-w-[calc(100vw-2rem)] -translate-x-1/2 items-center gap-2 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-2 text-sm text-amber-800 shadow-lg sm:rounded-full"
         >
             <FlaskConical size={14} className="flex-shrink-0" />
             {notice ? (
