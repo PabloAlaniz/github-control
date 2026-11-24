@@ -174,6 +174,51 @@ const CI_PROFILE: Record<string, { success: number; duration: number; flaky: num
 
 // ── Signals ─────────────────────────────────────────
 
+/** Packages that come along with the declared ones, per ecosystem: what a lockfile adds. */
+const TRANSITIVE: Record<string, [string, string[]][]> = {
+  npm: [
+    ['scheduler', ['0.26.0', '0.23.2']], ['loose-envify', ['1.4.0']], ['js-tokens', ['4.0.0']], ['nanoid', ['3.3.11', '3.3.7']],
+    ['picocolors', ['1.1.1']], ['source-map-js', ['1.2.1']], ['postcss', ['8.5.4', '8.4.38']], ['debug', ['4.4.1', '4.3.4', '2.6.9']],
+    ['ms', ['2.1.3', '2.0.0']], ['semver', ['7.7.2', '6.3.1']], ['lodash', ['4.17.21', '4.17.20']], ['minimatch', ['9.0.5', '3.1.2']],
+    ['brace-expansion', ['2.0.2', '1.1.11']], ['esbuild', ['0.25.5', '0.21.5']], ['rollup', ['4.43.0']], ['@types/node', ['22.15.30', '20.14.2']],
+  ],
+  pypi: [
+    ['anyio', ['4.9.0', '3.7.1']], ['idna', ['3.10']], ['certifi', ['2025.4.26', '2023.7.22']], ['sniffio', ['1.3.1']],
+    ['typing-extensions', ['4.14.0', '4.9.0']], ['urllib3', ['2.4.0', '1.26.18']], ['starlette', ['0.36.3']], ['h11', ['0.16.0', '0.14.0']],
+  ],
+  go: [['golang.org/x/sys', ['v0.33.0']], ['golang.org/x/crypto', ['v0.38.0']], ['go.uber.org/multierr', ['v1.11.0']], ['github.com/jackc/pgpassfile', ['v1.0.0']]],
+  cargo: [['syn', ['2.0.101']], ['proc-macro2', ['1.0.95']], ['quote', ['1.0.40']], ['libc', ['0.2.172']], ['mio', ['1.0.4']], ['bytes', ['1.10.1']]],
+};
+
+/** A lockfile for the repo: each declared dependency at a resolved version, plus what it drags in. */
+function lockfile(repo: Row, tidy: number) {
+  const declared = dependencies(repo.name);
+  const files: Record<string, string> = { npm: 'package-lock.json', pypi: 'poetry.lock', go: 'go.sum', cargo: 'Cargo.lock' };
+  // The least tidy repos never committed one.
+  if (declared.items.length === 0 || tidy < 0.25) return { lockfiles: [], total: 0, ecosystems: {}, truncated: false, items: [] };
+  const rand = random(`${repo.name}:lock`);
+  const rows = new Map<string, [string, string, string]>();
+  const add = (ecosystem: string, name: string, version: string) => rows.set(`${ecosystem}\n${name}\n${version}`, [ecosystem, name, version]);
+
+  for (const item of declared.items) {
+    const base = /\d+(\.\d+){0,2}/.exec(item.version)?.[0] ?? '1.0.0';
+    const parts = base.split('.');
+    while (parts.length < 3) parts.push(String(Math.floor(rand() * 9)));
+    add(item.ecosystem, item.ecosystem === 'pypi' ? item.name.toLowerCase() : item.name, (item.ecosystem === 'go' ? 'v' : '') + parts.join('.'));
+  }
+  for (const ecosystem of Object.keys(declared.ecosystems)) {
+    for (const [name, versions] of TRANSITIVE[ecosystem] ?? []) {
+      // Tidy repos are on the latest; the others carry an older copy, sometimes both.
+      const old = versions.length > 1 && rand() > tidy;
+      add(ecosystem, name, old ? versions[1 + Math.floor(rand() * (versions.length - 1))] : versions[0]);
+      if (old && rand() < 0.3) add(ecosystem, name, versions[0]);
+    }
+  }
+  const items = [...rows.values()].sort((a, b) => a[0].localeCompare(b[0]) || a[1].localeCompare(b[1]) || a[2].localeCompare(b[2]));
+  const ecosystems: Record<string, number> = {};
+  for (const [ecosystem] of items) ecosystems[ecosystem] = (ecosystems[ecosystem] ?? 0) + 1;
+  return { lockfiles: Object.keys(ecosystems).map((ecosystem) => files[ecosystem]), total: items.length, ecosystems, truncated: false, items };
+}
 /** The files a repo this tidy would have. */
 function repoPaths(tidy: number): string[] {
   const paths = ['README.md', '.gitignore'];
@@ -531,6 +576,7 @@ for (const repo of file.data.repos as Row[]) {
     inbox: inbox(repo, now),
     policy: policyChecks(repo, tidy),
     scorecard: scorecard(repo, tidy, now),
+    lockfile: lockfile(repo, tidy),
   };
   for (const [kind, data] of Object.entries(byKind)) {
     signals.push({ id: signals.length + 1, full_name: repo.full_name, kind, data, checked_at: checkedAt });

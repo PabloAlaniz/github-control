@@ -114,11 +114,16 @@ describe('demo mode: server', () => {
     const { send } = start({ DEMO: 'true' });
 
     const { signals } = await (await send('GET', '/api/repos/acme/billing-worker/signals')).json();
-    expect(Object.keys(signals).sort()).toEqual(['branches', 'ci', 'config', 'dependencies', 'inbox', 'policy', 'release', 'scorecard', 'security', 'standards']);
+    expect(Object.keys(signals).sort()).toEqual(['branches', 'ci', 'config', 'dependencies', 'inbox', 'lockfile', 'policy', 'release', 'scorecard', 'security', 'standards']);
 
     const inventory = await (await send('GET', '/api/dependencies')).json();
     expect(inventory.packages.length).toBeGreaterThan(10);
     expect(inventory.runtimes.some((runtime: any) => runtime.eol)).toBe(true);
+
+    expect(inventory.locked.repos).toBeGreaterThan(5);
+    const located = await (await send('GET', '/api/dependencies/locate?name=lodash')).json();
+    expect(located.exact).toBe(true);
+    expect(located.locations.every((location: any) => location.direct === false)).toBe(true);
 
     const uptime = await (await send('GET', '/api/services/uptime')).json();
     expect(uptime.services.storefront.checks).toBeGreaterThan(100);

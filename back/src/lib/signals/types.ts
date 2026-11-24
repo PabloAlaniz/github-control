@@ -51,6 +51,9 @@ export function isUnavailable(err: any): boolean {
   return [403, 404, 409, 410, 451].includes(err?.status);
 }
 
+/** Largest file read whole (lockfiles can run to several megabytes). */
+const MAX_FILE_BYTES = 10_000_000;
+
 function decodeBase64(content: string): string {
   const binary = atob(content.replace(/\s/g, ''));
   const bytes = Uint8Array.from(binary, ch => ch.charCodeAt(0));
@@ -90,8 +93,14 @@ export function createSignalContext(
     async readFile(path: string) {
       try {
         const { data } = await octokit.repos.getContent({ owner, repo, path });
-        const content = (data as { content?: string }).content;
-        return typeof content === 'string' ? decodeBase64(content) : null;
+        const file = data as { content?: string; encoding?: string; sha?: string; size?: number };
+        if (typeof file.content === 'string' && file.content !== '') return decodeBase64(file.content);
+        // Files over 1 MB come without content: read them as a blob, up to a size worth parsing.
+        if (file.sha && typeof file.size === 'number' && file.size > 0 && file.size <= MAX_FILE_BYTES) {
+          const { data: blob } = await octokit.git.getBlob({ owner, repo, file_sha: file.sha });
+          return blob.encoding === 'base64' ? decodeBase64(blob.content) : blob.content;
+        }
+        return typeof file.content === 'string' && file.size === 0 ? '' : null;
       } catch (err: any) {
         if (isUnavailable(err)) return null;
         throw err;

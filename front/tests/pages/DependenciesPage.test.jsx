@@ -121,4 +121,78 @@ describe('DependenciesPage', () => {
         fireEvent.click(screen.getByText('Back'));
         expect(navigate).toHaveBeenCalledWith('/');
     });
+
+    describe('lockfiles', () => {
+        const locked = {
+            ...payload, locked: { repos: 2, packages: 1840 },
+            packages: payload.packages.map((pkg, i) => (i === 0
+                ? { ...pkg, usages: pkg.usages.map((usage, j) => ({ ...usage, resolved: j === 0 ? ['17.0.2'] : ['18.3.1', '18.2.0'] })) }
+                : pkg)),
+        };
+        const located = {
+            query: 'lodash', exact: true, repos: 2,
+            locations: [
+                { repo: 'me/a', ecosystem: 'npm', name: 'lodash', versions: ['4.17.20', '4.17.21'], direct: false },
+                { repo: 'me/b', ecosystem: 'npm', name: 'lodash', versions: ['4.17.21'], direct: true },
+            ],
+        };
+        const mock = (locate = () => respond(located)) => api.apiFetch.mockImplementation((path) => (
+            path.startsWith('/api/dependencies/locate') ? locate(path) : respond(locked)
+        ));
+
+        it('shows how many packages are pinned and the resolved version of each use', async () => {
+            mock();
+            render(<DependenciesPage />);
+
+            expect(await screen.findByText('1,840')).toBeInTheDocument();
+            fireEvent.click(screen.getByRole('button', { name: /react/ }));
+            expect(screen.getByText('→ 17.0.2')).toBeInTheDocument();
+            expect(screen.getByText('→ 18.3.1, 18.2.0')).toBeInTheDocument();
+        });
+
+        it('finds a package anywhere, telling declared from transitive', async () => {
+            mock();
+            render(<DependenciesPage />);
+            const finder = await screen.findByRole('search', { name: 'Find a package' });
+
+            expect(within(finder).getByRole('button', { name: /Find/ })).toBeDisabled();
+            fireEvent.change(within(finder).getByLabelText('Package name'), { target: { value: ' lodash ' } });
+            fireEvent.submit(finder);
+
+            expect(await screen.findByText('“lodash” is in 2 repos.')).toBeInTheDocument();
+            expect(api.apiFetch).toHaveBeenCalledWith('/api/dependencies/locate?name=lodash');
+            expect(screen.getByText('4.17.20, 4.17.21').closest('tr')).toHaveTextContent('me/a');
+            expect(screen.getByText('4.17.20, 4.17.21').closest('tr')).toHaveTextContent('transitive');
+            expect(screen.getByText('declared')).toBeInTheDocument();
+        });
+
+        it('says when a package is nowhere, or when only similar names exist', async () => {
+            mock(() => respond({ query: 'left-pad', exact: false, repos: 0, locations: [] }));
+            render(<DependenciesPage />);
+            const finder = await screen.findByRole('search', { name: 'Find a package' });
+            fireEvent.change(within(finder).getByLabelText('Package name'), { target: { value: 'left-pad' } });
+            fireEvent.submit(finder);
+            expect(await screen.findByText('“left-pad” is not in any lockfile.')).toBeInTheDocument();
+
+            mock(() => respond({ ...located, query: 'loda', exact: false }));
+            fireEvent.change(within(finder).getByLabelText('Package name'), { target: { value: 'loda' } });
+            fireEvent.submit(finder);
+            expect(await screen.findByText(/No package is called exactly “loda”/)).toBeInTheDocument();
+        });
+
+        it('shows why a lookup failed, and no finder when no repo has a lockfile', async () => {
+            mock(() => respond({ error: 'boom' }, false));
+            const { unmount } = render(<DependenciesPage />);
+            const finder = await screen.findByRole('search', { name: 'Find a package' });
+            fireEvent.change(within(finder).getByLabelText('Package name'), { target: { value: 'lodash' } });
+            fireEvent.submit(finder);
+            expect(await screen.findByRole('alert')).toHaveTextContent('boom');
+            unmount();
+
+            api.apiFetch.mockImplementation(() => respond(payload));
+            render(<DependenciesPage />);
+            await screen.findByText('Runtimes');
+            expect(screen.queryByRole('search', { name: 'Find a package' })).not.toBeInTheDocument();
+        });
+    });
 });

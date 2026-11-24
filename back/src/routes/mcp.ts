@@ -169,6 +169,16 @@ export const TOOLS: Tool[] = [
     },
   },
   {
+    name: 'find_package',
+    description: 'Find where a package is across all repositories, including as a transitive dependency, with the versions each repository pins in its lockfiles. Use it when a package turns out to be vulnerable or deprecated.',
+    readOnly: true,
+    inputSchema: { type: 'object', properties: { name: { type: 'string', description: 'Package name, e.g. "lodash"' } }, required: ['name'] },
+    async run(args, api) {
+      if (typeof args.name !== 'string' || args.name.trim().length < 2) throw new ToolError('"name" must be a package name');
+      return ask(api, 'GET', `/api/dependencies/locate?name=${encodeURIComponent(args.name.trim())}`);
+    },
+  },
+  {
     name: 'list_services',
     description: 'The deployed services behind the repositories with their current state and 30-day uptime.',
     readOnly: true,

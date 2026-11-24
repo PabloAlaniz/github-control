@@ -31,7 +31,7 @@ Open http://localhost:13337. From a clone, without Docker: `DEMO=true npm start`
   - *branch hygiene*: merged-but-not-deleted and stale branches and idle pull requests, with a guarded cleanup;
   - *CI reliability*: success rate, duration and flaky commits per workflow;
   - *settings drift* against a baseline you define, fixable per repo or in bulk.
-- **Dependency inventory**: which repos use each package and at what version, diverging major versions, and runtimes past their end of life.
+- **Dependency inventory**: which repos use each package and at what version, declared and resolved from lockfiles, diverging major versions, runtimes past their end of life, and a finder that tells you every repo a package is in, even as a transitive dependency.
 - **Organize your way**: groups with colors, priorities (high / medium / low / paused), status, notes, next action and blockers, with bulk actions.
 - **Traffic history**: GitHub only keeps 14 days of views, clones, referrers and popular paths; every sync saves them, so your history keeps growing.
 - **History**: a daily snapshot per repo (LOC, files, stars, issues, health) with charts and date-to-date comparison.
@@ -319,6 +319,7 @@ claude mcp add --transport http github-control https://your-server.example/api/m
 | `list_alerts` | Open (or resolved) alerts |
 | `get_inbox` | Open pull requests and issues; filter by type, repo or requested reviewer |
 | `list_dependencies` | Packages and versions across repos, diverging majors, end-of-life runtimes |
+| `find_package` | Every repo a package is in, transitive dependencies included, with the pinned versions |
 | `list_services` | Services with their state and uptime |
 | `search_code` | Search the code of the tracked repos on GitHub |
 | `get_policy`, `plan_policy` | The policy in force, and a dry run of a new one |
@@ -428,7 +429,7 @@ curl -X POST -H "Authorization: Bearer $API_KEY" http://localhost:13337/api/sync
 | Metrics | `GET /api/metrics/{aggregate,latest,compare}`, `/api/metrics/repo/:owner/:repo`, `/api/metrics/snapshot/:date` |
 | Traffic | `GET /api/traffic/summary`, `/api/traffic/repo/:owner/:repo`, `POST /api/traffic/repo/:owner/:repo/sync` |
 | Signals | `GET /api/repos/:owner/:repo/signals`, `POST .../signals/sync?kinds=`, `POST .../branches/delete`, `POST .../config/apply` |
-| Dependencies | `GET /api/dependencies` |
+| Dependencies | `GET /api/dependencies`, `GET /api/dependencies/locate?name=` |
 | Webhooks | `POST /api/webhooks/github` (signed by GitHub, no API key), `GET /api/webhooks` |
 | Public (no sign-in, opt-in) | `GET /api/badges/:owner/:repo/:metric.svg`, `.../card.svg`, `/api/badges/summary.svg`, `GET /api/status`, `/api/status/badge.svg` |
 | Search | `GET /api/search/code?q=&repo=&language=` |

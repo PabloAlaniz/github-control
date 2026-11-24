@@ -22016,6 +22016,149 @@
    },
    {
     "id": 11,
+    "full_name": "acme/storefront-web",
+    "kind": "lockfile",
+    "data": {
+     "lockfiles": [
+      "package-lock.json"
+     ],
+     "total": 25,
+     "ecosystems": {
+      "npm": 25
+     },
+     "truncated": false,
+     "items": [
+      [
+       "npm",
+       "@tanstack/react-query",
+       "5.80.0"
+      ],
+      [
+       "npm",
+       "@types/node",
+       "22.15.30"
+      ],
+      [
+       "npm",
+       "brace-expansion",
+       "2.0.2"
+      ],
+      [
+       "npm",
+       "debug",
+       "4.4.1"
+      ],
+      [
+       "npm",
+       "esbuild",
+       "0.25.5"
+      ],
+      [
+       "npm",
+       "eslint",
+       "9.28.0"
+      ],
+      [
+       "npm",
+       "js-tokens",
+       "4.0.0"
+      ],
+      [
+       "npm",
+       "lodash",
+       "4.17.20"
+      ],
+      [
+       "npm",
+       "loose-envify",
+       "1.4.0"
+      ],
+      [
+       "npm",
+       "minimatch",
+       "9.0.5"
+      ],
+      [
+       "npm",
+       "ms",
+       "2.1.3"
+      ],
+      [
+       "npm",
+       "nanoid",
+       "3.3.11"
+      ],
+      [
+       "npm",
+       "next",
+       "15.3.0"
+      ],
+      [
+       "npm",
+       "picocolors",
+       "1.1.1"
+      ],
+      [
+       "npm",
+       "postcss",
+       "8.5.4"
+      ],
+      [
+       "npm",
+       "react",
+       "19.1.0"
+      ],
+      [
+       "npm",
+       "react-dom",
+       "19.1.0"
+      ],
+      [
+       "npm",
+       "rollup",
+       "4.43.0"
+      ],
+      [
+       "npm",
+       "scheduler",
+       "0.26.0"
+      ],
+      [
+       "npm",
+       "semver",
+       "7.7.2"
+      ],
+      [
+       "npm",
+       "source-map-js",
+       "1.2.1"
+      ],
+      [
+       "npm",
+       "tailwindcss",
+       "4.1.8"
+      ],
+      [
+       "npm",
+       "typescript",
+       "5.8.3"
+      ],
+      [
+       "npm",
+       "vitest",
+       "3.2.0"
+      ],
+      [
+       "npm",
+       "zod",
+       "4.0.5"
+      ]
+     ]
+    },
+    "checked_at": "2026-11-20T10:00:00.000Z"
+   },
+   {
+    "id": 12,
     "full_name": "acme/checkout-api",
     "kind": "standards",
     "data": {
@@ -22076,7 +22219,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 12,
+    "id": 13,
     "full_name": "acme/checkout-api",
     "kind": "dependencies",
     "data": {
@@ -22126,7 +22269,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 13,
+    "id": 14,
     "full_name": "acme/checkout-api",
     "kind": "security",
     "data": {
@@ -22162,7 +22305,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 14,
+    "id": 15,
     "full_name": "acme/checkout-api",
     "kind": "release",
     "data": {
@@ -22179,7 +22322,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 15,
+    "id": 16,
     "full_name": "acme/checkout-api",
     "kind": "branches",
     "data": {
@@ -22231,7 +22374,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 16,
+    "id": 17,
     "full_name": "acme/checkout-api",
     "kind": "ci",
     "data": {
@@ -22340,7 +22483,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 17,
+    "id": 18,
     "full_name": "acme/checkout-api",
     "kind": "config",
     "data": {
@@ -22400,7 +22543,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 18,
+    "id": 19,
     "full_name": "acme/checkout-api",
     "kind": "inbox",
     "data": {
@@ -22488,7 +22631,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 19,
+    "id": 20,
     "full_name": "acme/checkout-api",
     "kind": "policy",
     "data": {
@@ -22515,7 +22658,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 20,
+    "id": 21,
     "full_name": "acme/checkout-api",
     "kind": "scorecard",
     "data": {
@@ -22526,7 +22669,60 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 21,
+    "id": 22,
+    "full_name": "acme/checkout-api",
+    "kind": "lockfile",
+    "data": {
+     "lockfiles": [
+      "go.sum"
+     ],
+     "total": 7,
+     "ecosystems": {
+      "go": 7
+     },
+     "truncated": false,
+     "items": [
+      [
+       "go",
+       "github.com/go-chi/chi/v5",
+       "v5.2.1"
+      ],
+      [
+       "go",
+       "github.com/jackc/pgpassfile",
+       "v1.0.0"
+      ],
+      [
+       "go",
+       "github.com/jackc/pgx/v5",
+       "v5.7.5"
+      ],
+      [
+       "go",
+       "go.uber.org/multierr",
+       "v1.11.0"
+      ],
+      [
+       "go",
+       "go.uber.org/zap",
+       "v1.27.0"
+      ],
+      [
+       "go",
+       "golang.org/x/crypto",
+       "v0.38.0"
+      ],
+      [
+       "go",
+       "golang.org/x/sys",
+       "v0.33.0"
+      ]
+     ]
+    },
+    "checked_at": "2026-11-20T10:00:00.000Z"
+   },
+   {
+    "id": 23,
     "full_name": "acme/design-system",
     "kind": "standards",
     "data": {
@@ -22587,7 +22783,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 22,
+    "id": 24,
     "full_name": "acme/design-system",
     "kind": "dependencies",
     "data": {
@@ -22678,7 +22874,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 23,
+    "id": 25,
     "full_name": "acme/design-system",
     "kind": "security",
     "data": {
@@ -22714,7 +22910,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 24,
+    "id": 26,
     "full_name": "acme/design-system",
     "kind": "release",
     "data": {
@@ -22731,7 +22927,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 25,
+    "id": 27,
     "full_name": "acme/design-system",
     "kind": "branches",
     "data": {
@@ -22763,7 +22959,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 26,
+    "id": 28,
     "full_name": "acme/design-system",
     "kind": "ci",
     "data": {
@@ -22863,7 +23059,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 27,
+    "id": 29,
     "full_name": "acme/design-system",
     "kind": "config",
     "data": {
@@ -22923,7 +23119,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 28,
+    "id": 30,
     "full_name": "acme/design-system",
     "kind": "inbox",
     "data": {
@@ -23015,7 +23211,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 29,
+    "id": 31,
     "full_name": "acme/design-system",
     "kind": "policy",
     "data": {
@@ -23042,7 +23238,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 30,
+    "id": 32,
     "full_name": "acme/design-system",
     "kind": "scorecard",
     "data": {
@@ -23138,7 +23334,145 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 31,
+    "id": 33,
+    "full_name": "acme/design-system",
+    "kind": "lockfile",
+    "data": {
+     "lockfiles": [
+      "package-lock.json"
+     ],
+     "total": 24,
+     "ecosystems": {
+      "npm": 24
+     },
+     "truncated": false,
+     "items": [
+      [
+       "npm",
+       "@types/node",
+       "22.15.30"
+      ],
+      [
+       "npm",
+       "brace-expansion",
+       "2.0.2"
+      ],
+      [
+       "npm",
+       "clsx",
+       "2.1.1"
+      ],
+      [
+       "npm",
+       "debug",
+       "4.4.1"
+      ],
+      [
+       "npm",
+       "esbuild",
+       "0.25.5"
+      ],
+      [
+       "npm",
+       "eslint",
+       "9.28.0"
+      ],
+      [
+       "npm",
+       "js-tokens",
+       "4.0.0"
+      ],
+      [
+       "npm",
+       "lodash",
+       "4.17.21"
+      ],
+      [
+       "npm",
+       "loose-envify",
+       "1.4.0"
+      ],
+      [
+       "npm",
+       "minimatch",
+       "9.0.5"
+      ],
+      [
+       "npm",
+       "ms",
+       "2.1.3"
+      ],
+      [
+       "npm",
+       "nanoid",
+       "3.3.11"
+      ],
+      [
+       "npm",
+       "picocolors",
+       "1.1.1"
+      ],
+      [
+       "npm",
+       "postcss",
+       "8.5.4"
+      ],
+      [
+       "npm",
+       "react",
+       "18.3.1"
+      ],
+      [
+       "npm",
+       "react-dom",
+       "18.3.1"
+      ],
+      [
+       "npm",
+       "rollup",
+       "4.43.0"
+      ],
+      [
+       "npm",
+       "scheduler",
+       "0.26.0"
+      ],
+      [
+       "npm",
+       "semver",
+       "7.7.2"
+      ],
+      [
+       "npm",
+       "source-map-js",
+       "1.2.1"
+      ],
+      [
+       "npm",
+       "storybook",
+       "9.0.4"
+      ],
+      [
+       "npm",
+       "tailwindcss",
+       "4.1.8"
+      ],
+      [
+       "npm",
+       "typescript",
+       "5.8.3"
+      ],
+      [
+       "npm",
+       "vitest",
+       "3.2.0"
+      ]
+     ]
+    },
+    "checked_at": "2026-11-20T10:00:00.000Z"
+   },
+   {
+    "id": 34,
     "full_name": "acme/billing-worker",
     "kind": "standards",
     "data": {
@@ -23199,7 +23533,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 32,
+    "id": 35,
     "full_name": "acme/billing-worker",
     "kind": "dependencies",
     "data": {
@@ -23266,7 +23600,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 33,
+    "id": 36,
     "full_name": "acme/billing-worker",
     "kind": "security",
     "data": {
@@ -23340,7 +23674,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 34,
+    "id": 37,
     "full_name": "acme/billing-worker",
     "kind": "release",
     "data": {
@@ -23357,7 +23691,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 35,
+    "id": 38,
     "full_name": "acme/billing-worker",
     "kind": "branches",
     "data": {
@@ -23447,7 +23781,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 36,
+    "id": 39,
     "full_name": "acme/billing-worker",
     "kind": "ci",
     "data": {
@@ -23547,7 +23881,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 37,
+    "id": 40,
     "full_name": "acme/billing-worker",
     "kind": "config",
     "data": {
@@ -23607,7 +23941,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 38,
+    "id": 41,
     "full_name": "acme/billing-worker",
     "kind": "inbox",
     "data": {
@@ -23771,7 +24105,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 39,
+    "id": 42,
     "full_name": "acme/billing-worker",
     "kind": "policy",
     "data": {
@@ -23798,7 +24132,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 40,
+    "id": 43,
     "full_name": "acme/billing-worker",
     "kind": "scorecard",
     "data": {
@@ -23809,7 +24143,90 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 41,
+    "id": 44,
+    "full_name": "acme/billing-worker",
+    "kind": "lockfile",
+    "data": {
+     "lockfiles": [
+      "poetry.lock"
+     ],
+     "total": 13,
+     "ecosystems": {
+      "pypi": 13
+     },
+     "truncated": false,
+     "items": [
+      [
+       "pypi",
+       "anyio",
+       "4.9.0"
+      ],
+      [
+       "pypi",
+       "celery",
+       "5.3.6"
+      ],
+      [
+       "pypi",
+       "certifi",
+       "2025.4.26"
+      ],
+      [
+       "pypi",
+       "fastapi",
+       "0.110.0"
+      ],
+      [
+       "pypi",
+       "h11",
+       "0.14.0"
+      ],
+      [
+       "pypi",
+       "httpx",
+       "0.27.0"
+      ],
+      [
+       "pypi",
+       "idna",
+       "3.10"
+      ],
+      [
+       "pypi",
+       "pydantic",
+       "1.10.15"
+      ],
+      [
+       "pypi",
+       "sniffio",
+       "1.3.1"
+      ],
+      [
+       "pypi",
+       "sqlalchemy",
+       "1.4.52"
+      ],
+      [
+       "pypi",
+       "starlette",
+       "0.36.3"
+      ],
+      [
+       "pypi",
+       "typing-extensions",
+       "4.9.0"
+      ],
+      [
+       "pypi",
+       "urllib3",
+       "2.4.0"
+      ]
+     ]
+    },
+    "checked_at": "2026-11-20T10:00:00.000Z"
+   },
+   {
+    "id": 45,
     "full_name": "acme/mobile-app",
     "kind": "standards",
     "data": {
@@ -23870,7 +24287,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 42,
+    "id": 46,
     "full_name": "acme/mobile-app",
     "kind": "dependencies",
     "data": {
@@ -23883,7 +24300,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 43,
+    "id": 47,
     "full_name": "acme/mobile-app",
     "kind": "security",
     "data": {
@@ -23933,7 +24350,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 44,
+    "id": 48,
     "full_name": "acme/mobile-app",
     "kind": "release",
     "data": {
@@ -23950,7 +24367,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 45,
+    "id": 49,
     "full_name": "acme/mobile-app",
     "kind": "branches",
     "data": {
@@ -24030,7 +24447,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 46,
+    "id": 50,
     "full_name": "acme/mobile-app",
     "kind": "ci",
     "data": {
@@ -24130,7 +24547,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 47,
+    "id": 51,
     "full_name": "acme/mobile-app",
     "kind": "config",
     "data": {
@@ -24190,7 +24607,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 48,
+    "id": 52,
     "full_name": "acme/mobile-app",
     "kind": "inbox",
     "data": {
@@ -24258,7 +24675,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 49,
+    "id": 53,
     "full_name": "acme/mobile-app",
     "kind": "policy",
     "data": {
@@ -24285,7 +24702,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 50,
+    "id": 54,
     "full_name": "acme/mobile-app",
     "kind": "scorecard",
     "data": {
@@ -24296,7 +24713,20 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 51,
+    "id": 55,
+    "full_name": "acme/mobile-app",
+    "kind": "lockfile",
+    "data": {
+     "lockfiles": [],
+     "total": 0,
+     "ecosystems": {},
+     "truncated": false,
+     "items": []
+    },
+    "checked_at": "2026-11-20T10:00:00.000Z"
+   },
+   {
+    "id": 56,
     "full_name": "acme/data-pipeline",
     "kind": "standards",
     "data": {
@@ -24357,7 +24787,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 52,
+    "id": 57,
     "full_name": "acme/data-pipeline",
     "kind": "dependencies",
     "data": {
@@ -24424,7 +24854,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 53,
+    "id": 58,
     "full_name": "acme/data-pipeline",
     "kind": "security",
     "data": {
@@ -24460,7 +24890,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 54,
+    "id": 59,
     "full_name": "acme/data-pipeline",
     "kind": "release",
     "data": {
@@ -24477,7 +24907,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 55,
+    "id": 60,
     "full_name": "acme/data-pipeline",
     "kind": "branches",
     "data": {
@@ -24571,7 +25001,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 56,
+    "id": 61,
     "full_name": "acme/data-pipeline",
     "kind": "ci",
     "data": {
@@ -24671,7 +25101,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 57,
+    "id": 62,
     "full_name": "acme/data-pipeline",
     "kind": "config",
     "data": {
@@ -24731,7 +25161,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 58,
+    "id": 63,
     "full_name": "acme/data-pipeline",
     "kind": "inbox",
     "data": {
@@ -24790,7 +25220,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 59,
+    "id": 64,
     "full_name": "acme/data-pipeline",
     "kind": "policy",
     "data": {
@@ -24817,7 +25247,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 60,
+    "id": 65,
     "full_name": "acme/data-pipeline",
     "kind": "scorecard",
     "data": {
@@ -24828,7 +25258,95 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 61,
+    "id": 66,
+    "full_name": "acme/data-pipeline",
+    "kind": "lockfile",
+    "data": {
+     "lockfiles": [
+      "poetry.lock"
+     ],
+     "total": 14,
+     "ecosystems": {
+      "pypi": 14
+     },
+     "truncated": false,
+     "items": [
+      [
+       "pypi",
+       "anyio",
+       "3.7.1"
+      ],
+      [
+       "pypi",
+       "apache-airflow",
+       "2.10.5"
+      ],
+      [
+       "pypi",
+       "certifi",
+       "2025.4.26"
+      ],
+      [
+       "pypi",
+       "h11",
+       "0.14.0"
+      ],
+      [
+       "pypi",
+       "httpx",
+       "0.28.1"
+      ],
+      [
+       "pypi",
+       "idna",
+       "3.10"
+      ],
+      [
+       "pypi",
+       "pandas",
+       "2.2.3"
+      ],
+      [
+       "pypi",
+       "pydantic",
+       "2.11.5"
+      ],
+      [
+       "pypi",
+       "sniffio",
+       "1.3.1"
+      ],
+      [
+       "pypi",
+       "sqlalchemy",
+       "2.0.41"
+      ],
+      [
+       "pypi",
+       "starlette",
+       "0.36.3"
+      ],
+      [
+       "pypi",
+       "typing-extensions",
+       "4.14.0"
+      ],
+      [
+       "pypi",
+       "urllib3",
+       "1.26.18"
+      ],
+      [
+       "pypi",
+       "urllib3",
+       "2.4.0"
+      ]
+     ]
+    },
+    "checked_at": "2026-11-20T10:00:00.000Z"
+   },
+   {
+    "id": 67,
     "full_name": "acme/infra-terraform",
     "kind": "standards",
     "data": {
@@ -24889,7 +25407,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 62,
+    "id": 68,
     "full_name": "acme/infra-terraform",
     "kind": "dependencies",
     "data": {
@@ -24902,7 +25420,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 63,
+    "id": 69,
     "full_name": "acme/infra-terraform",
     "kind": "security",
     "data": {
@@ -24938,7 +25456,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 64,
+    "id": 70,
     "full_name": "acme/infra-terraform",
     "kind": "release",
     "data": {
@@ -24947,7 +25465,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 65,
+    "id": 71,
     "full_name": "acme/infra-terraform",
     "kind": "branches",
     "data": {
@@ -25051,7 +25569,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 66,
+    "id": 72,
     "full_name": "acme/infra-terraform",
     "kind": "ci",
     "data": {
@@ -25060,7 +25578,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 67,
+    "id": 73,
     "full_name": "acme/infra-terraform",
     "kind": "config",
     "data": {
@@ -25120,7 +25638,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 68,
+    "id": 74,
     "full_name": "acme/infra-terraform",
     "kind": "inbox",
     "data": {
@@ -25133,7 +25651,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 69,
+    "id": 75,
     "full_name": "acme/infra-terraform",
     "kind": "policy",
     "data": {
@@ -25160,7 +25678,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 70,
+    "id": 76,
     "full_name": "acme/infra-terraform",
     "kind": "scorecard",
     "data": {
@@ -25171,7 +25689,20 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 71,
+    "id": 77,
+    "full_name": "acme/infra-terraform",
+    "kind": "lockfile",
+    "data": {
+     "lockfiles": [],
+     "total": 0,
+     "ecosystems": {},
+     "truncated": false,
+     "items": []
+    },
+    "checked_at": "2026-11-20T10:00:00.000Z"
+   },
+   {
+    "id": 78,
     "full_name": "acme/docs-site",
     "kind": "standards",
     "data": {
@@ -25232,7 +25763,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 72,
+    "id": 79,
     "full_name": "acme/docs-site",
     "kind": "dependencies",
     "data": {
@@ -25299,7 +25830,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 73,
+    "id": 80,
     "full_name": "acme/docs-site",
     "kind": "security",
     "data": {
@@ -25335,7 +25866,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 74,
+    "id": 81,
     "full_name": "acme/docs-site",
     "kind": "release",
     "data": {
@@ -25352,7 +25883,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 75,
+    "id": 82,
     "full_name": "acme/docs-site",
     "kind": "branches",
     "data": {
@@ -25414,7 +25945,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 76,
+    "id": 83,
     "full_name": "acme/docs-site",
     "kind": "ci",
     "data": {
@@ -25523,7 +26054,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 77,
+    "id": 84,
     "full_name": "acme/docs-site",
     "kind": "config",
     "data": {
@@ -25583,7 +26114,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 78,
+    "id": 85,
     "full_name": "acme/docs-site",
     "kind": "inbox",
     "data": {
@@ -25647,7 +26178,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 79,
+    "id": 86,
     "full_name": "acme/docs-site",
     "kind": "policy",
     "data": {
@@ -25674,7 +26205,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 80,
+    "id": 87,
     "full_name": "acme/docs-site",
     "kind": "scorecard",
     "data": {
@@ -25770,7 +26301,145 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 81,
+    "id": 88,
+    "full_name": "acme/docs-site",
+    "kind": "lockfile",
+    "data": {
+     "lockfiles": [
+      "package-lock.json"
+     ],
+     "total": 24,
+     "ecosystems": {
+      "npm": 24
+     },
+     "truncated": false,
+     "items": [
+      [
+       "npm",
+       "@types/node",
+       "22.15.30"
+      ],
+      [
+       "npm",
+       "brace-expansion",
+       "2.0.2"
+      ],
+      [
+       "npm",
+       "debug",
+       "2.6.9"
+      ],
+      [
+       "npm",
+       "esbuild",
+       "0.25.5"
+      ],
+      [
+       "npm",
+       "eslint",
+       "9.28.0"
+      ],
+      [
+       "npm",
+       "js-tokens",
+       "4.0.0"
+      ],
+      [
+       "npm",
+       "lodash",
+       "4.17.20"
+      ],
+      [
+       "npm",
+       "lodash",
+       "4.17.21"
+      ],
+      [
+       "npm",
+       "loose-envify",
+       "1.4.0"
+      ],
+      [
+       "npm",
+       "minimatch",
+       "3.1.2"
+      ],
+      [
+       "npm",
+       "ms",
+       "2.0.0"
+      ],
+      [
+       "npm",
+       "ms",
+       "2.1.3"
+      ],
+      [
+       "npm",
+       "nanoid",
+       "3.3.11"
+      ],
+      [
+       "npm",
+       "next",
+       "15.3.0"
+      ],
+      [
+       "npm",
+       "picocolors",
+       "1.1.1"
+      ],
+      [
+       "npm",
+       "postcss",
+       "8.5.4"
+      ],
+      [
+       "npm",
+       "react",
+       "19.1.0"
+      ],
+      [
+       "npm",
+       "react-dom",
+       "19.1.0"
+      ],
+      [
+       "npm",
+       "rollup",
+       "4.43.0"
+      ],
+      [
+       "npm",
+       "scheduler",
+       "0.26.0"
+      ],
+      [
+       "npm",
+       "semver",
+       "6.3.1"
+      ],
+      [
+       "npm",
+       "semver",
+       "7.7.2"
+      ],
+      [
+       "npm",
+       "source-map-js",
+       "1.2.1"
+      ],
+      [
+       "npm",
+       "typescript",
+       "5.8.3"
+      ]
+     ]
+    },
+    "checked_at": "2026-11-20T10:00:00.000Z"
+   },
+   {
+    "id": 89,
     "full_name": "acme/cli-tools",
     "kind": "standards",
     "data": {
@@ -25831,7 +26500,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 82,
+    "id": 90,
     "full_name": "acme/cli-tools",
     "kind": "dependencies",
     "data": {
@@ -25881,7 +26550,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 83,
+    "id": 91,
     "full_name": "acme/cli-tools",
     "kind": "security",
     "data": {
@@ -25917,7 +26586,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 84,
+    "id": 92,
     "full_name": "acme/cli-tools",
     "kind": "release",
     "data": {
@@ -25934,7 +26603,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 85,
+    "id": 93,
     "full_name": "acme/cli-tools",
     "kind": "branches",
     "data": {
@@ -25976,7 +26645,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 86,
+    "id": 94,
     "full_name": "acme/cli-tools",
     "kind": "ci",
     "data": {
@@ -26076,7 +26745,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 87,
+    "id": 95,
     "full_name": "acme/cli-tools",
     "kind": "config",
     "data": {
@@ -26136,7 +26805,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 88,
+    "id": 96,
     "full_name": "acme/cli-tools",
     "kind": "inbox",
     "data": {
@@ -26178,7 +26847,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 89,
+    "id": 97,
     "full_name": "acme/cli-tools",
     "kind": "policy",
     "data": {
@@ -26205,7 +26874,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 90,
+    "id": 98,
     "full_name": "acme/cli-tools",
     "kind": "scorecard",
     "data": {
@@ -26301,7 +26970,75 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 91,
+    "id": 99,
+    "full_name": "acme/cli-tools",
+    "kind": "lockfile",
+    "data": {
+     "lockfiles": [
+      "Cargo.lock"
+     ],
+     "total": 10,
+     "ecosystems": {
+      "cargo": 10
+     },
+     "truncated": false,
+     "items": [
+      [
+       "cargo",
+       "bytes",
+       "1.10.1"
+      ],
+      [
+       "cargo",
+       "clap",
+       "4.5.6"
+      ],
+      [
+       "cargo",
+       "libc",
+       "0.2.172"
+      ],
+      [
+       "cargo",
+       "mio",
+       "1.0.4"
+      ],
+      [
+       "cargo",
+       "proc-macro2",
+       "1.0.95"
+      ],
+      [
+       "cargo",
+       "quote",
+       "1.0.40"
+      ],
+      [
+       "cargo",
+       "reqwest",
+       "0.12.3"
+      ],
+      [
+       "cargo",
+       "serde",
+       "1.0.2"
+      ],
+      [
+       "cargo",
+       "syn",
+       "2.0.101"
+      ],
+      [
+       "cargo",
+       "tokio",
+       "1.45.7"
+      ]
+     ]
+    },
+    "checked_at": "2026-11-20T10:00:00.000Z"
+   },
+   {
+    "id": 100,
     "full_name": "acme/analytics-dashboard",
     "kind": "standards",
     "data": {
@@ -26362,7 +27099,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 92,
+    "id": 101,
     "full_name": "acme/analytics-dashboard",
     "kind": "dependencies",
     "data": {
@@ -26461,7 +27198,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 93,
+    "id": 102,
     "full_name": "acme/analytics-dashboard",
     "kind": "security",
     "data": {
@@ -26535,7 +27272,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 94,
+    "id": 103,
     "full_name": "acme/analytics-dashboard",
     "kind": "release",
     "data": {
@@ -26544,7 +27281,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 95,
+    "id": 104,
     "full_name": "acme/analytics-dashboard",
     "kind": "branches",
     "data": {
@@ -26646,7 +27383,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 96,
+    "id": 105,
     "full_name": "acme/analytics-dashboard",
     "kind": "ci",
     "data": {
@@ -26746,7 +27483,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 97,
+    "id": 106,
     "full_name": "acme/analytics-dashboard",
     "kind": "config",
     "data": {
@@ -26806,7 +27543,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 98,
+    "id": 107,
     "full_name": "acme/analytics-dashboard",
     "kind": "inbox",
     "data": {
@@ -26918,7 +27655,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 99,
+    "id": 108,
     "full_name": "acme/analytics-dashboard",
     "kind": "policy",
     "data": {
@@ -26945,7 +27682,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 100,
+    "id": 109,
     "full_name": "acme/analytics-dashboard",
     "kind": "scorecard",
     "data": {
@@ -26956,7 +27693,175 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 101,
+    "id": 110,
+    "full_name": "acme/analytics-dashboard",
+    "kind": "lockfile",
+    "data": {
+     "lockfiles": [
+      "package-lock.json"
+     ],
+     "total": 30,
+     "ecosystems": {
+      "npm": 30
+     },
+     "truncated": false,
+     "items": [
+      [
+       "npm",
+       "@tanstack/react-query",
+       "4.36.1"
+      ],
+      [
+       "npm",
+       "@types/node",
+       "22.15.30"
+      ],
+      [
+       "npm",
+       "brace-expansion",
+       "1.1.11"
+      ],
+      [
+       "npm",
+       "brace-expansion",
+       "2.0.2"
+      ],
+      [
+       "npm",
+       "debug",
+       "2.6.9"
+      ],
+      [
+       "npm",
+       "esbuild",
+       "0.25.5"
+      ],
+      [
+       "npm",
+       "eslint",
+       "8.57.0"
+      ],
+      [
+       "npm",
+       "js-tokens",
+       "4.0.0"
+      ],
+      [
+       "npm",
+       "lodash",
+       "4.17.20"
+      ],
+      [
+       "npm",
+       "lodash",
+       "4.17.21"
+      ],
+      [
+       "npm",
+       "loose-envify",
+       "1.4.0"
+      ],
+      [
+       "npm",
+       "minimatch",
+       "3.1.2"
+      ],
+      [
+       "npm",
+       "ms",
+       "2.0.0"
+      ],
+      [
+       "npm",
+       "nanoid",
+       "3.3.11"
+      ],
+      [
+       "npm",
+       "nanoid",
+       "3.3.7"
+      ],
+      [
+       "npm",
+       "picocolors",
+       "1.1.1"
+      ],
+      [
+       "npm",
+       "postcss",
+       "8.4.38"
+      ],
+      [
+       "npm",
+       "postcss",
+       "8.5.4"
+      ],
+      [
+       "npm",
+       "react",
+       "18.2.0"
+      ],
+      [
+       "npm",
+       "react-dom",
+       "18.2.0"
+      ],
+      [
+       "npm",
+       "recharts",
+       "2.15.3"
+      ],
+      [
+       "npm",
+       "rollup",
+       "4.43.0"
+      ],
+      [
+       "npm",
+       "scheduler",
+       "0.23.2"
+      ],
+      [
+       "npm",
+       "scheduler",
+       "0.26.0"
+      ],
+      [
+       "npm",
+       "semver",
+       "6.3.1"
+      ],
+      [
+       "npm",
+       "source-map-js",
+       "1.2.1"
+      ],
+      [
+       "npm",
+       "tailwindcss",
+       "3.4.17"
+      ],
+      [
+       "npm",
+       "typescript",
+       "5.4.5"
+      ],
+      [
+       "npm",
+       "vitest",
+       "1.6.0"
+      ],
+      [
+       "npm",
+       "zod",
+       "3.25.0"
+      ]
+     ]
+    },
+    "checked_at": "2026-11-20T10:00:00.000Z"
+   },
+   {
+    "id": 111,
     "full_name": "acme/email-templates",
     "kind": "standards",
     "data": {
@@ -27017,7 +27922,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 102,
+    "id": 112,
     "full_name": "acme/email-templates",
     "kind": "dependencies",
     "data": {
@@ -27030,7 +27935,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 103,
+    "id": 113,
     "full_name": "acme/email-templates",
     "kind": "security",
     "data": {
@@ -27066,7 +27971,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 104,
+    "id": 114,
     "full_name": "acme/email-templates",
     "kind": "release",
     "data": {
@@ -27075,7 +27980,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 105,
+    "id": 115,
     "full_name": "acme/email-templates",
     "kind": "branches",
     "data": {
@@ -27201,7 +28106,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 106,
+    "id": 116,
     "full_name": "acme/email-templates",
     "kind": "ci",
     "data": {
@@ -27210,7 +28115,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 107,
+    "id": 117,
     "full_name": "acme/email-templates",
     "kind": "config",
     "data": {
@@ -27270,7 +28175,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 108,
+    "id": 118,
     "full_name": "acme/email-templates",
     "kind": "inbox",
     "data": {
@@ -27283,7 +28188,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 109,
+    "id": 119,
     "full_name": "acme/email-templates",
     "kind": "policy",
     "data": {
@@ -27310,7 +28215,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 110,
+    "id": 120,
     "full_name": "acme/email-templates",
     "kind": "scorecard",
     "data": {
@@ -27321,7 +28226,20 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 111,
+    "id": 121,
+    "full_name": "acme/email-templates",
+    "kind": "lockfile",
+    "data": {
+     "lockfiles": [],
+     "total": 0,
+     "ecosystems": {},
+     "truncated": false,
+     "items": []
+    },
+    "checked_at": "2026-11-20T10:00:00.000Z"
+   },
+   {
+    "id": 122,
     "full_name": "acme/legacy-monolith",
     "kind": "standards",
     "data": {
@@ -27382,7 +28300,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 112,
+    "id": 123,
     "full_name": "acme/legacy-monolith",
     "kind": "dependencies",
     "data": {
@@ -27395,7 +28313,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 113,
+    "id": 124,
     "full_name": "acme/legacy-monolith",
     "kind": "security",
     "data": {
@@ -27493,7 +28411,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 114,
+    "id": 125,
     "full_name": "acme/legacy-monolith",
     "kind": "release",
     "data": {
@@ -27510,7 +28428,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 115,
+    "id": 126,
     "full_name": "acme/legacy-monolith",
     "kind": "branches",
     "data": {
@@ -27654,7 +28572,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 116,
+    "id": 127,
     "full_name": "acme/legacy-monolith",
     "kind": "ci",
     "data": {
@@ -27754,7 +28672,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 117,
+    "id": 128,
     "full_name": "acme/legacy-monolith",
     "kind": "config",
     "data": {
@@ -27814,7 +28732,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 118,
+    "id": 129,
     "full_name": "acme/legacy-monolith",
     "kind": "inbox",
     "data": {
@@ -27871,7 +28789,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 119,
+    "id": 130,
     "full_name": "acme/legacy-monolith",
     "kind": "policy",
     "data": {
@@ -27898,7 +28816,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 120,
+    "id": 131,
     "full_name": "acme/legacy-monolith",
     "kind": "scorecard",
     "data": {
@@ -27909,7 +28827,20 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 121,
+    "id": 132,
+    "full_name": "acme/legacy-monolith",
+    "kind": "lockfile",
+    "data": {
+     "lockfiles": [],
+     "total": 0,
+     "ecosystems": {},
+     "truncated": false,
+     "items": []
+    },
+    "checked_at": "2026-11-20T10:00:00.000Z"
+   },
+   {
+    "id": 133,
     "full_name": "acme/hackathon-2024",
     "kind": "standards",
     "data": {
@@ -27970,7 +28901,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 122,
+    "id": 134,
     "full_name": "acme/hackathon-2024",
     "kind": "dependencies",
     "data": {
@@ -28013,7 +28944,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 123,
+    "id": 135,
     "full_name": "acme/hackathon-2024",
     "kind": "security",
     "data": {
@@ -28049,7 +28980,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 124,
+    "id": 136,
     "full_name": "acme/hackathon-2024",
     "kind": "release",
     "data": {
@@ -28058,7 +28989,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 125,
+    "id": 137,
     "full_name": "acme/hackathon-2024",
     "kind": "branches",
     "data": {
@@ -28198,7 +29129,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 126,
+    "id": 138,
     "full_name": "acme/hackathon-2024",
     "kind": "ci",
     "data": {
@@ -28207,7 +29138,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 127,
+    "id": 139,
     "full_name": "acme/hackathon-2024",
     "kind": "config",
     "data": {
@@ -28267,7 +29198,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 128,
+    "id": 140,
     "full_name": "acme/hackathon-2024",
     "kind": "inbox",
     "data": {
@@ -28280,7 +29211,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 129,
+    "id": 141,
     "full_name": "acme/hackathon-2024",
     "kind": "policy",
     "data": {
@@ -28307,7 +29238,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 130,
+    "id": 142,
     "full_name": "acme/hackathon-2024",
     "kind": "scorecard",
     "data": {
@@ -28318,7 +29249,20 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 131,
+    "id": 143,
+    "full_name": "acme/hackathon-2024",
+    "kind": "lockfile",
+    "data": {
+     "lockfiles": [],
+     "total": 0,
+     "ecosystems": {},
+     "truncated": false,
+     "items": []
+    },
+    "checked_at": "2026-11-20T10:00:00.000Z"
+   },
+   {
+    "id": 144,
     "full_name": "acme/sdk-python",
     "kind": "standards",
     "data": {
@@ -28379,7 +29323,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 132,
+    "id": 145,
     "full_name": "acme/sdk-python",
     "kind": "dependencies",
     "data": {
@@ -28422,7 +29366,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 133,
+    "id": 146,
     "full_name": "acme/sdk-python",
     "kind": "security",
     "data": {
@@ -28458,7 +29402,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 134,
+    "id": 147,
     "full_name": "acme/sdk-python",
     "kind": "release",
     "data": {
@@ -28475,7 +29419,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 135,
+    "id": 148,
     "full_name": "acme/sdk-python",
     "kind": "branches",
     "data": {
@@ -28507,7 +29451,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 136,
+    "id": 149,
     "full_name": "acme/sdk-python",
     "kind": "ci",
     "data": {
@@ -28607,7 +29551,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 137,
+    "id": 150,
     "full_name": "acme/sdk-python",
     "kind": "config",
     "data": {
@@ -28667,7 +29611,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 138,
+    "id": 151,
     "full_name": "acme/sdk-python",
     "kind": "inbox",
     "data": {
@@ -28733,7 +29677,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 139,
+    "id": 152,
     "full_name": "acme/sdk-python",
     "kind": "policy",
     "data": {
@@ -28760,7 +29704,7 @@
     "checked_at": "2026-11-20T10:00:00.000Z"
    },
    {
-    "id": 140,
+    "id": 153,
     "full_name": "acme/sdk-python",
     "kind": "scorecard",
     "data": {
@@ -28851,6 +29795,74 @@
        "score": 8,
        "reason": "no problems found"
       }
+     ]
+    },
+    "checked_at": "2026-11-20T10:00:00.000Z"
+   },
+   {
+    "id": 154,
+    "full_name": "acme/sdk-python",
+    "kind": "lockfile",
+    "data": {
+     "lockfiles": [
+      "poetry.lock"
+     ],
+     "total": 10,
+     "ecosystems": {
+      "pypi": 10
+     },
+     "truncated": false,
+     "items": [
+      [
+       "pypi",
+       "anyio",
+       "4.9.0"
+      ],
+      [
+       "pypi",
+       "certifi",
+       "2025.4.26"
+      ],
+      [
+       "pypi",
+       "h11",
+       "0.16.0"
+      ],
+      [
+       "pypi",
+       "httpx",
+       "0.28.8"
+      ],
+      [
+       "pypi",
+       "idna",
+       "3.10"
+      ],
+      [
+       "pypi",
+       "pydantic",
+       "2.11.3"
+      ],
+      [
+       "pypi",
+       "sniffio",
+       "1.3.1"
+      ],
+      [
+       "pypi",
+       "starlette",
+       "0.36.3"
+      ],
+      [
+       "pypi",
+       "typing-extensions",
+       "4.14.0"
+      ],
+      [
+       "pypi",
+       "urllib3",
+       "2.4.0"
+      ]
      ]
     },
     "checked_at": "2026-11-20T10:00:00.000Z"

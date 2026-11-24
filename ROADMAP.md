@@ -30,6 +30,7 @@ Where GitHub Control is heading. Nothing here is a promise; priorities follow wh
 - Alerts for failing CI, services down, serious security alerts, stale repos and low health, sent to Slack, Discord, Telegram, ntfy, email or a webhook, with daily or weekly digests
 - One navigation for every page, and a layout that works on a phone
 - Real-time updates from GitHub webhooks, verified by signature
+- Dependencies resolved from lockfiles, and a finder for any package across repos, transitive ones included
 - Code search across all tracked repos
 - Alert rules of your own in the policy (coverage, CI reliability, unreleased commits, settings drift, Scorecard, end-of-life runtimes, custom checks)
 - Check and review state of each pull request in the inbox, and a "ready to merge" section
@@ -42,13 +43,13 @@ Where GitHub Control is heading. Nothing here is a promise; priorities follow wh
 ## Later
 
 - GitHub App / OAuth sign-in, multiple users.
-- Dependency inventory from lockfiles (resolved and transitive versions) and more ecosystems.
+- Dependency inventory for more ecosystems (Ruby, Java, .NET), and known vulnerabilities per pinned version.
 
 ## Known limitations
 
 - The JSON and CSV stores rewrite a whole collection file on each change and support one running instance.
 - On Cloudflare Workers the full sync must be run by an external script.
-- The dependency inventory reads direct dependencies declared in npm, PyPI, Go and Cargo manifests; it does not read lockfiles. End-of-life dates for Node and Python are a table in the code that has to be updated by hand.
+- The dependency inventory covers npm, PyPI, Go and Cargo: manifests for what is declared, and lockfiles (`package-lock.json`, `pnpm-lock.yaml`, `yarn.lock`, `poetry.lock`, `uv.lock`, `Cargo.lock`, `go.sum`) for what is pinned, up to 6 lockfiles of at most 10 MB and 5000 packages per repo. `go.sum` lists every module version Go recorded, which can be more than the build uses. End-of-life dates for Node and Python are a table in the code that has to be updated by hand.
 - Signals look at one page of results: the latest 100 workflow runs, 100 branches, 100 alerts per source and the 100 most recently updated open pull requests and issues.
 - The inbox is as fresh as the last sync or Refresh, including the check and review state it shows; checks are verified again when merging.
 - Code search goes through GitHub's code search: default branches only, about 10 searches a minute, the first 50 files, and at most 15 repo owners per search.

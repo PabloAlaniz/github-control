@@ -138,7 +138,9 @@ The repo settings baseline is one of these settings: `domain/repo-baseline.ts` h
 
 A signal is data about one repo that is fetched from GitHub and cached: one record per repo and kind in the `repo_signals` collection, with the processed result as JSON. Each kind has a collector in `lib/signals/` (a function from a `SignalContext` to plain data) registered in `SIGNAL_COLLECTORS`; adding a kind is adding an entry there and the UI for it. The context memoizes the repo metadata and file tree, so the collectors of one sync share those calls.
 
-Current kinds: `standards`, `dependencies`, `security`, `release`, `branches`, `ci`, `config`, `inbox`, `policy`, `scorecard`.
+Current kinds: `standards`, `dependencies`, `security`, `release`, `branches`, `ci`, `config`, `inbox`, `policy`, `scorecard`, `lockfile`.
+
+The `lockfile` signal can hold thousands of entries per repo, so its `items` are compact `[ecosystem, name, version]` rows rather than objects. `services/dependency.service.ts` joins them with the declared dependencies to show resolved versions, and scans them to locate a package across repos.
 
 `services/signal.service.ts` runs the collectors and stores the results; kinds fail independently, so a missing permission on one does not lose the others. By convention a signal keeps its long detail under `items`: `GET /api/repos` attaches only the summary of each signal to a repo, and `GET /api/repos/:owner/:repo/signals` returns everything. Cross-repo questions (`services/dependency.service.ts`) are answered in application code from the stored signals, so they work the same on every storage.
 
