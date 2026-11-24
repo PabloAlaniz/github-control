@@ -32,3 +32,7 @@ To run the self-hosted server locally: `npm start` (data goes to `back/data/`). 
 ## Reporting security issues
 
 Please do not open a public issue for a vulnerability. See [`SECURITY.md`](SECURITY.md).
+
+## Releasing
+
+Bump the version in the three `package.json` files (root, `front`, `back`), `package-lock.json` and the MCP server info in `back/src/routes/mcp.ts`, in a pull request. When it is merged, the **Release** workflow sees a version with no tag, creates the tag `vX.Y.Z` and a GitHub release with generated notes, and publishes the Docker image (`X.Y.Z`, `X.Y` and `latest`). Pushing a `vX.Y.Z` tag by hand still publishes the image.

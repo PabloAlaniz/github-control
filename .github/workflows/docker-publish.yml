@@ -1,5 +1,6 @@
 # Builds the self-hosted image for amd64 and arm64 and publishes it to the
-# GitHub Container Registry. Runs for release tags (v1.2.3) and by hand.
+# GitHub Container Registry. Runs for release tags (v1.2.3), when the Release
+# workflow calls it with a version, and by hand.
 #
 # Tags published for v1.2.3: 1.2.3, 1.2 and latest. A manual run publishes
 # only `edge`, so it never moves `latest`.
@@ -10,6 +11,12 @@ on:
   push:
     tags: ['v*.*.*']
   workflow_dispatch:
+  workflow_call:
+    inputs:
+      version:
+        description: Version to publish, without the leading v (1.2.3)
+        type: string
+        required: true
 
 permissions:
   contents: read
@@ -39,8 +46,10 @@ jobs:
         with:
           images: ghcr.io/${{ github.repository }}
           tags: |
-            type=semver,pattern={{version}}
-            type=semver,pattern={{major}}.{{minor}}
+            type=semver,pattern={{version}},enable=${{ inputs.version == '' }}
+            type=semver,pattern={{major}}.{{minor}},enable=${{ inputs.version == '' }}
+            type=semver,pattern={{version}},value=${{ inputs.version }},enable=${{ inputs.version != '' }}
+            type=semver,pattern={{major}}.{{minor}},value=${{ inputs.version }},enable=${{ inputs.version != '' }}
             type=raw,value=edge,enable=${{ github.event_name == 'workflow_dispatch' }}
 
       - uses: docker/build-push-action@v7
