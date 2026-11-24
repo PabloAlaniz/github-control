@@ -1,6 +1,6 @@
 {
   "name": "github-control",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Self-hosted dashboard to see, organize and keep healthy all your GitHub repositories",
   "private": true,
   "workspaces": [
