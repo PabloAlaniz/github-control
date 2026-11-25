@@ -24,7 +24,7 @@
   "devDependencies": {
     "@octokit/rest": "^22.0.1",
     "@playwright/test": "^1.65.1",
-    "concurrently": "^8.2.2",
+    "concurrently": "^10.0.7",
     "p-limit": "^7.3.3",
     "pg": "^8.18.0"
   },
