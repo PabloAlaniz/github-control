@@ -13,7 +13,7 @@
 import { Hono } from 'hono';
 import type { HttpEnv } from '../http/context';
 
-const SERVER_INFO = { name: 'github-control', version: '0.3.0' }; // x-release-please-version
+const SERVER_INFO = { name: 'github-control', version: '0.3.1' }; // x-release-please-version
 /** Protocol revisions this server speaks, newest first. */
 const PROTOCOL_VERSIONS = ['2025-06-18', '2025-03-26', '2024-11-05'];
 
