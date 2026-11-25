@@ -22,7 +22,7 @@
  *   npx tsx back/scripts/unified-sync.ts --run-coverage --coverage-timeout 180000
  */
 
-import { execSync } from 'node:child_process';
+import { execFileSync } from 'node:child_process';
 import {
   existsSync,
   readFileSync,
@@ -231,16 +231,18 @@ function runRustPhase(cacheDir: string, _config: ConfigFile, args: ParsedArgs): 
     mkdirSync(cacheDir, { recursive: true });
   }
 
-  const cmdParts = [
-    'cargo', 'run', '--release',
+  // Arguments are passed as an array without a shell, so paths with spaces or
+  // shell metacharacters can't break the command or inject new ones.
+  const cargoArgs = [
+    'run', '--release',
     '--manifest-path', join(rustDir, 'Cargo.toml'),
     '--', '--cache-dir', cacheDir,
   ];
-  if (args.limit) cmdParts.push('--limit', String(args.limit));
-  if (args.profile) cmdParts.push('--profile');
+  if (args.limit) cargoArgs.push('--limit', String(args.limit));
+  if (args.profile) cargoArgs.push('--profile');
 
   try {
-    execSync(cmdParts.join(' '), {
+    execFileSync('cargo', cargoArgs, {
       stdio: 'inherit',
       env: { ...process.env },
       cwd: join(__dirname, '..'),
