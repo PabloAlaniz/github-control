@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.1](https://github.com/PabloAlaniz/github-control/compare/v0.3.0...v0.3.1) (2026-11-25)
+
+
+### Bug Fixes
+
+* **security:** resolve open CodeQL code scanning alerts ([#22](https://github.com/PabloAlaniz/github-control/issues/22)) ([e8427c8](https://github.com/PabloAlaniz/github-control/commit/e8427c8607d253a39a7ebcd7141bbc1596e18d57))
+
 ## [0.3.0](https://github.com/PabloAlaniz/github-control/compare/v0.1.0...v0.3.0) (2026-11-24)
 
 The first release since 0.1.0: version 0.2.0 was never tagged, so its changes ship here too.
